@@ -3037,7 +3037,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 	for (const file of resultados) {
   await guardarEnSheet_({
     usuarioNombre: usuario?.nombre || "",
-    usuarioId: usuario?.id || usuario?.tipo || "",
+    usuarioId: usuario?.idUsuario || "",
     folio: currentItem.FOLIO || "",
     IDRG: obtenerIDRG_(currentItem) || "",
     sucursal: currentItem.SUCURSAL || "",
