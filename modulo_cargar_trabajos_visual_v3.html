@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Módulo Producción | Cargar Trabajos</title>
+  <style>
+    :root {
+      --azul-principal: #1695d6;
+      --azul-oscuro: #0d6fa3;
+      --verde-principal: #18a957;
+      --verde-oscuro: #128245;
+      --fondo: #f4f7fb;
+      --panel: #ffffff;
+      --texto: #1f2937;
+      --texto-suave: #6b7280;
+      --borde: #d8e2ee;
+      --sombra: 0 10px 30px rgba(15, 23, 42, 0.10);
+      --rojo: #dc2626;
+      --amarillo: #f59e0b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+    }
+
+    .module {
+      padding: 26px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .page-title h2 {
+      margin: 0;
+      font-size: 28px;
+      color: var(--texto);
+    }
+
+    .page-title p {
+      margin: 8px 0 0;
+      color: var(--texto-suave);
+      font-size: 15px;
+    }
+
+    .tag {
+      background: linear-gradient(90deg, rgba(22,149,214,0.14), rgba(24,169,87,0.14));
+      color: var(--azul-oscuro);
+      border: 1px solid rgba(22,149,214,0.18);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--borde);
+      border-radius: 22px;
+      box-shadow: var(--sombra);
+    }
+
+    .panel-body { padding: 24px; }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .panel-header h3 { margin: 0; font-size: 22px; }
+    .panel-header p { margin: 6px 0 0; color: var(--texto-suave); font-size: 14px; line-height: 1.4; }
+
+    .filters {
+      display: grid;
+      grid-template-columns: minmax(240px, 380px) 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+      align-items: end;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: bold;
+      color: #334155;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--borde);
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 15px;
+      color: var(--texto);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--azul-principal);
+      box-shadow: 0 0 0 4px rgba(22,149,214,0.12);
+    }
+
+    .helper {
+      font-size: 12px;
+      color: var(--texto-suave);
+      line-height: 1.4;
+    }
+
+    .summary-box {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .mini-card {
+      border: 1px solid var(--borde);
+      background: #fbfdff;
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .mini-card span {
+      display: block;
+      font-size: 12px;
+      color: var(--texto-suave);
+      margin-bottom: 6px;
+    }
+
+    .mini-card strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .table-wrap {
+      border: 1px solid var(--borde);
+      border-radius: 18px;
+      overflow: auto;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1250px;
+      background: #fff;
+    }
+
+    thead { background: #f0f5fb; }
+
+    th, td {
+      text-align: left;
+      padding: 13px 14px;
+      font-size: 13px;
+      border-bottom: 1px solid #edf2f7;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th { color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: .3px; }
+
+    .idgr {
+      font-weight: bold;
+      color: var(--azul-oscuro);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: bold;
+      background: rgba(22,149,214,0.10);
+      color: var(--azul-oscuro);
+    }
+
+    .pill.urgent {
+      background: rgba(245,158,11,0.16);
+      color: #92400e;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--azul-principal), var(--verde-principal));
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(22,149,214,0.2);
+    }
+
+    .btn-secondary {
+      background: #eef3f8;
+      color: var(--texto);
+    }
+
+    .btn-small {
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+
+    .empty-state {
+      border: 1px dashed #cbd5e1;
+      border-radius: 18px;
+      padding: 28px;
+      text-align: center;
+      color: var(--texto-suave);
+      background: #fbfdff;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.48);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      width: min(760px, 100%);
+      max-height: 92vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 25px 70px rgba(15, 23, 42, 0.28);
+      border: 1px solid rgba(255,255,255,.4);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 22px 24px 16px;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .modal-title h3 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .modal-title p {
+      margin: 7px 0 0;
+      font-size: 13px;
+      color: var(--texto-suave);
+    }
+
+    .close-btn {
+      border: none;
+      background: #eef3f8;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 22px;
+      color: #475569;
+      flex-shrink: 0;
+    }
+
+    .modal-body { padding: 22px 24px; }
+
+    .item-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .info-cell {
+      background: #f8fbff;
+      border: 1px solid #e5edf6;
+      border-radius: 14px;
+      padding: 11px 12px;
+      min-width: 0;
+    }
+
+    .info-cell span {
+      display: block;
+      font-size: 11px;
+      color: var(--texto-suave);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+    }
+
+    .info-cell strong {
+      display: block;
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dropzone {
+      border: 2px dashed #c5d3e3;
+      border-radius: 20px;
+      padding: 26px;
+      text-align: center;
+      background: #fbfdff;
+      cursor: pointer;
+      transition: border-color .2s ease, background .2s ease;
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--azul-principal);
+      background: rgba(22,149,214,0.05);
+    }
+
+    .dropzone strong { display: block; font-size: 16px; margin-bottom: 6px; }
+    .dropzone span { display: block; font-size: 13px; color: var(--texto-suave); }
+
+    .file-input { display: none; }
+
+    .file-list {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .file-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      padding: 11px 12px;
+      background: #fff;
+    }
+
+    .file-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .file-size {
+      font-size: 12px;
+      color: var(--texto-suave);
+      white-space: nowrap;
+    }
+
+    .remove-file {
+      border: none;
+      background: rgba(220,38,38,0.10);
+      color: var(--rojo);
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 0 24px 24px;
+      flex-wrap: wrap;
+    }
+
+    .notice {
+      margin-top: 14px;
+      border: 1px solid rgba(22,149,214,0.18);
+      background: rgba(22,149,214,0.06);
+      color: #075985;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 900px) {
+      .filters { grid-template-columns: 1fr; }
+      .summary-box { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .item-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 620px) {
+      .module { padding: 16px; }
+      .panel-body { padding: 18px; }
+      .summary-box { grid-template-columns: 1fr; }
+      .item-grid { grid-template-columns: 1fr; }
+      .file-row { grid-template-columns: 1fr; }
+      .modal-actions { justify-content: stretch; }
+      .modal-actions .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="module">
+    <div class="topbar">
+      <div class="page-title">
+        <h2>Producción</h2>
+        <p>Carga de archivos por item, vinculada a folio e IDGR.</p>
+      </div>
+      <div class="tag">Carga preparada para archivos grandes</div>
+    </div>
+
+    <section class="card">
+      <div class="panel-body">
+        <div class="panel-header">
+          <div>
+            <h3>Cargar trabajos</h3>
+            <p>Selecciona un folio para consultar sus items. Después sube archivos desde el botón de cada renglón.</p>
+          </div>
+        </div>
+
+        <div class="filters">
+          <div class="field">
+            <label for="folioSelect">Folio</label>
+            <select id="folioSelect">
+              <option value="">Selecciona un folio...</option>
+            </select>
+            <div class="helper">Este catálogo se alimentará del CSV/Excel conectado.</div>
+          </div>
+          <div class="notice">
+            En esta prueba visual los datos son de ejemplo. La conexión real leerá el archivo actualizado en Drive y filtrará la tabla por folio.
+          </div>
+        </div>
+
+        <div class="summary-box" id="summaryBox" style="display:none;">
+          <div class="mini-card">
+            <span>Folio seleccionado</span>
+            <strong id="summaryFolio">-</strong>
+          </div>
+          <div class="mini-card">
+            <span>Items encontrados</span>
+            <strong id="summaryItems">0</strong>
+          </div>
+          <div class="mini-card">
+            <span>Total piezas</span>
+            <strong id="summaryPiezas">0</strong>
+          </div>
+          <div class="mini-card">
+            <span>Urgentes</span>
+            <strong id="summaryUrgentes">0</strong>
+          </div>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+          Selecciona un folio para mostrar los items relacionados.
+        </div>
+
+        <div class="table-wrap" id="tableWrap" style="display:none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Acción</th>
+                <th>IDGR</th>
+                <th>FOLIO</th>
+                <th>SUCURSAL</th>
+                <th>TIPO_CLIENTE</th>
+                <th>NOM_PRODUCTO</th>
+                <th>ANCHO</th>
+                <th>LARGO</th>
+                <th>TOTALM2</th>
+                <th>PIEZAS</th>
+                <th>RESPONSABLE</th>
+                <th>URGENTE</th>
+                <th>FECHA</th>
+                <th>HORA</th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="uploadModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3>Subir archivos del item</h3>
+          <p id="modalSubtitle">Referencia del item seleccionado</p>
+        </div>
+        <button class="close-btn" onclick="closeModal()" title="Cerrar">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="item-grid" id="itemResume"></div>
+
+        <div class="field" style="margin-bottom:16px;">
+          <label for="tipoImpresion">Tipo Impresión/Maquila</label>
+          <select id="tipoImpresion">
+            <option value="">Selecciona tipo...</option>
+          </select>
+          <div class="helper">Este catálogo se tomará de la hoja Talleres, columna Carpetas.</div>
+        </div>
+
+        <label>Archivos</label>
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+          <strong>Selecciona o arrastra archivos aquí</strong>
+          <span>Permite múltiples archivos. La carga real será diseñada como resumible para soportar archivos grandes.</span>
+          <input class="file-input" id="fileInput" type="file" multiple />
+        </div>
+
+        <div class="file-list" id="fileList"></div>
+
+        <div class="notice" id="fileNotice" style="display:none;"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" id="btnSubir" onclick="mockUpload()">Subir archivos</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const foliosDemo = ["A-10231", "A-10232", "A-10233"];
+
+    const tiposDemo = [
+      "Lona",
+      "Vinil",
+      "Sublimación",
+      "Tabloide",
+      "Corte / Suaje",
+      "Acabados"
+    ];
+
+    const itemsDemo = [
+      {
+        IDGR: "874501",
+        FOLIO: "A-10231",
+        SUCURSAL: "Tuxtla Centro",
+        TIPO_CLIENTE: "Maquilador",
+        NOM_PRODUCTO: "Lona front 13 oz",
+        ANCHO: "1.20",
+        LARGO: "2.00",
+        TOTALM2: "2.40",
+        PIEZAS: "2",
+        RESPONSABLE: "Mario",
+        URGENTE: "SI",
+        FECHA: "23/04/2026",
+        HORA: "10:15"
+      },
+      {
+        IDGR: "874502",
+        FOLIO: "A-10231",
+        SUCURSAL: "Tuxtla Centro",
+        TIPO_CLIENTE: "Maquilador",
+        NOM_PRODUCTO: "Vinil adhesivo brillante",
+        ANCHO: "0.80",
+        LARGO: "1.50",
+        TOTALM2: "1.20",
+        PIEZAS: "1",
+        RESPONSABLE: "Diana",
+        URGENTE: "NO",
+        FECHA: "23/04/2026",
+        HORA: "10:22"
+      },
+      {
+        IDGR: "874503",
+        FOLIO: "A-10231",
+        SUCURSAL: "Amapolas",
+        TIPO_CLIENTE: "Mostrador",
+        NOM_PRODUCTO: "Tabloide couché",
+        ANCHO: "0.30",
+        LARGO: "0.45",
+        TOTALM2: "0.14",
+        PIEZAS: "20",
+        RESPONSABLE: "Luis",
+        URGENTE: "NO",
+        FECHA: "23/04/2026",
+        HORA: "10:35"
+      },
+      {
+        IDGR: "875010",
+        FOLIO: "A-10232",
+        SUCURSAL: "Xoxo",
+        TIPO_CLIENTE: "Foráneo",
+        NOM_PRODUCTO: "Lona mesh",
+        ANCHO: "3.00",
+        LARGO: "5.00",
+        TOTALM2: "15.00",
+        PIEZAS: "1",
+        RESPONSABLE: "Karen",
+        URGENTE: "SI",
+        FECHA: "23/04/2026",
+        HORA: "11:05"
+      },
+      {
+        IDGR: "875700",
+        FOLIO: "A-10233",
+        SUCURSAL: "Tecnológico",
+        TIPO_CLIENTE: "Distribuidor",
+        NOM_PRODUCTO: "Vinil microperforado",
+        ANCHO: "1.00",
+        LARGO: "2.20",
+        TOTALM2: "2.20",
+        PIEZAS: "3",
+        RESPONSABLE: "Pedro",
+        URGENTE: "NO",
+        FECHA: "23/04/2026",
+        HORA: "12:40"
+      }
+    ];
+
+    let currentItem = null;
+    let selectedFiles = [];
+
+    const folioSelect = document.getElementById("folioSelect");
+    const tipoImpresion = document.getElementById("tipoImpresion");
+    const itemsBody = document.getElementById("itemsBody");
+    const tableWrap = document.getElementById("tableWrap");
+    const emptyState = document.getElementById("emptyState");
+    const summaryBox = document.getElementById("summaryBox");
+    const fileInput = document.getElementById("fileInput");
+    const fileList = document.getElementById("fileList");
+    const fileNotice = document.getElementById("fileNotice");
+    const dropzone = document.getElementById("dropzone");
+
+    function init() {
+      foliosDemo.forEach(folio => {
+        const option = document.createElement("option");
+        option.value = folio;
+        option.textContent = folio;
+        folioSelect.appendChild(option);
+      });
+
+      tiposDemo.forEach(tipo => {
+        const option = document.createElement("option");
+        option.value = tipo;
+        option.textContent = tipo;
+        tipoImpresion.appendChild(option);
+      });
+    }
+
+    folioSelect.addEventListener("change", () => {
+      renderItems(folioSelect.value);
+    });
+
+    function renderItems(folio) {
+      itemsBody.innerHTML = "";
+
+      if (!folio) {
+        tableWrap.style.display = "none";
+        summaryBox.style.display = "none";
+        emptyState.style.display = "block";
+        emptyState.textContent = "Selecciona un folio para mostrar los items relacionados.";
+        return;
+      }
+
+      const rows = itemsDemo.filter(item => item.FOLIO === folio);
+
+      if (!rows.length) {
+        tableWrap.style.display = "none";
+        summaryBox.style.display = "none";
+        emptyState.style.display = "block";
+        emptyState.textContent = "No se encontraron items para este folio.";
+        return;
+      }
+
+      rows.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><button class="btn btn-primary btn-small" onclick="openModal(${index})">Subir archivos</button></td>
+          <td class="idgr">${escapeHtml(item.IDGR)}</td>
+          <td>${escapeHtml(item.FOLIO)}</td>
+          <td>${escapeHtml(item.SUCURSAL)}</td>
+          <td><span class="pill">${escapeHtml(item.TIPO_CLIENTE)}</span></td>
+          <td>${escapeHtml(item.NOM_PRODUCTO)}</td>
+          <td>${escapeHtml(item.ANCHO)}</td>
+          <td>${escapeHtml(item.LARGO)}</td>
+          <td>${escapeHtml(item.TOTALM2)}</td>
+          <td>${escapeHtml(item.PIEZAS)}</td>
+          <td>${escapeHtml(item.RESPONSABLE)}</td>
+          <td><span class="pill ${item.URGENTE === "SI" ? "urgent" : ""}">${escapeHtml(item.URGENTE)}</span></td>
+          <td>${escapeHtml(item.FECHA)}</td>
+          <td>${escapeHtml(item.HORA)}</td>
+        `;
+        tr.dataset.item = JSON.stringify(item);
+        itemsBody.appendChild(tr);
+      });
+
+      const totalPiezas = rows.reduce((acc, item) => acc + Number(item.PIEZAS || 0), 0);
+      const urgentes = rows.filter(item => item.URGENTE === "SI").length;
+
+      document.getElementById("summaryFolio").textContent = folio;
+      document.getElementById("summaryItems").textContent = rows.length;
+      document.getElementById("summaryPiezas").textContent = totalPiezas;
+      document.getElementById("summaryUrgentes").textContent = urgentes;
+
+      tableWrap.style.display = "block";
+      summaryBox.style.display = "grid";
+      emptyState.style.display = "none";
+    }
+
+    function openModal(index) {
+      const folio = folioSelect.value;
+      const rows = itemsDemo.filter(item => item.FOLIO === folio);
+      currentItem = rows[index];
+      selectedFiles = [];
+      fileInput.value = "";
+      tipoImpresion.value = "";
+      renderFileList();
+      renderItemResume(currentItem);
+      document.getElementById("uploadModal").classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("uploadModal").classList.remove("open");
+    }
+
+    function renderItemResume(item) {
+      document.getElementById("modalSubtitle").textContent = `Folio ${item.FOLIO} · IDGR ${item.IDGR}`;
+
+      const fields = [
+        ["IDGR", item.IDGR],
+        ["Folio", item.FOLIO],
+        ["Sucursal", item.SUCURSAL],
+        ["Producto", item.NOM_PRODUCTO],
+        ["Medidas", `${item.ANCHO} x ${item.LARGO}`],
+        ["Piezas", item.PIEZAS],
+        ["Responsable", item.RESPONSABLE],
+        ["Urgente", item.URGENTE],
+        ["Fecha/Hora", `${item.FECHA} ${item.HORA}`]
+      ];
+
+      document.getElementById("itemResume").innerHTML = fields.map(([label, value]) => `
+        <div class="info-cell">
+          <span>${escapeHtml(label)}</span>
+          <strong title="${escapeHtml(value)}">${escapeHtml(value)}</strong>
+        </div>
+      `).join("");
+    }
+
+    fileInput.addEventListener("change", (event) => {
+      selectedFiles = Array.from(event.target.files || []);
+      renderFileList();
+    });
+
+    dropzone.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+
+    dropzone.addEventListener("dragleave", () => {
+      dropzone.classList.remove("dragover");
+    });
+
+    dropzone.addEventListener("drop", (event) => {
+      event.preventDefault();
+      dropzone.classList.remove("dragover");
+      selectedFiles = Array.from(event.dataTransfer.files || []);
+      renderFileList();
+    });
+
+    function renderFileList() {
+      fileList.innerHTML = "";
+      fileNotice.style.display = "none";
+
+      if (!selectedFiles.length) {
+        document.getElementById("btnSubir").disabled = false;
+        return;
+      }
+
+      const total = selectedFiles.reduce((acc, file) => acc + file.size, 0);
+
+      selectedFiles.forEach((file, index) => {
+        const row = document.createElement("div");
+        row.className = "file-row";
+        row.innerHTML = `
+          <div class="file-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
+          <div class="file-size">${formatBytes(file.size)}</div>
+          <button class="remove-file" onclick="removeFile(${index})">Quitar</button>
+        `;
+        fileList.appendChild(row);
+      });
+
+      fileNotice.style.display = "block";
+      fileNotice.innerHTML = `Archivos seleccionados: <strong>${selectedFiles.length}</strong> · Peso total: <strong>${formatBytes(total)}</strong>. En producción se cargará directo a Drive con flujo resumible.`;
+    }
+
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      renderFileList();
+    }
+
+    function mockUpload() {
+      if (!currentItem) {
+        alert("No hay item seleccionado.");
+        return;
+      }
+
+      if (!tipoImpresion.value) {
+        alert("Selecciona el Tipo Impresión/Maquila.");
+        return;
+      }
+
+      if (!selectedFiles.length) {
+        alert("Selecciona al menos un archivo.");
+        return;
+      }
+
+      alert(
+        "Prueba visual correcta:\n\n" +
+        "Folio: " + currentItem.FOLIO + "\n" +
+        "IDGR: " + currentItem.IDGR + "\n" +
+        "Tipo: " + tipoImpresion.value + "\n" +
+        "Archivos: " + selectedFiles.length
+      );
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes) return "0 B";
+      const units = ["B", "KB", "MB", "GB", "TB"];
+      const index = Math.floor(Math.log(bytes) / Math.log(1024));
+      return (bytes / Math.pow(1024, index)).toFixed(index === 0 ? 0 : 2) + " " + units[index];
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    init();
+  </script>
+</body>
+</html>
