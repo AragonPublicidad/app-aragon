@@ -665,6 +665,54 @@
       box-shadow: 0 0 0 4px rgba(22,149,214,0.12);
     }
 
+
+    /* ===== Buscador de folios producción ===== */
+    .folio-autocomplete {
+      position: relative;
+      width: 100%;
+    }
+
+    .folio-suggestions {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+      max-height: 240px;
+      overflow-y: auto;
+      z-index: 2500;
+      display: none;
+      padding: 6px;
+    }
+
+    .folio-suggestions.open {
+      display: block;
+    }
+
+    .folio-suggestion {
+      padding: 10px 12px;
+      border-radius: 11px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--texto);
+    }
+
+    .folio-suggestion:hover,
+    .folio-suggestion.active {
+      background: rgba(22,149,214,0.09);
+      color: var(--azul-oscuro);
+      font-weight: bold;
+    }
+
+    .folio-suggestion-empty {
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--texto-suave);
+    }
+
     .helper {
       font-size: 12px;
       color: var(--texto-suave);
@@ -1733,10 +1781,11 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
         <div class="filters">
           <div class="field">
             <label for="folioSelect">Folio</label>
-            <select id="folioSelect">
-              <option value="">Selecciona un folio...</option>
-            </select>
-            <div class="helper">Este catálogo se alimentará del CSV/Excel conectado.</div>
+            <div class="folio-autocomplete">
+              <input id="folioSelect" type="text" placeholder="Escribe para buscar folio..." autocomplete="off" />
+              <div id="folioSuggestions" class="folio-suggestions"></div>
+            </div>
+            <div class="helper">Escribe cualquier parte del folio para buscar coincidencias.</div>
           </div>
           <div class="notice">
             En esta prueba visual los datos son de ejemplo. La conexión real leerá el archivo actualizado en Drive y filtrará la tabla por folio.
@@ -2530,6 +2579,90 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
     let produccionItemsActuales = [];
 
+    let foliosProduccionCatalogo = [];
+    let folioSugerenciaActiva = -1;
+
+    function normalizarTextoBusqueda_(valor) {
+      return String(valor || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+    }
+
+    function cerrarSugerenciasFolio_() {
+      const sugerencias = document.getElementById("folioSuggestions");
+      if (sugerencias) {
+        sugerencias.classList.remove("open");
+        sugerencias.innerHTML = "";
+      }
+      folioSugerenciaActiva = -1;
+    }
+
+    function pintarSugerenciasFolio_(texto) {
+      const sugerencias = document.getElementById("folioSuggestions");
+      if (!sugerencias) return;
+
+      const busqueda = normalizarTextoBusqueda_(texto);
+      const resultados = foliosProduccionCatalogo
+        .filter(function(folio) {
+          return !busqueda || normalizarTextoBusqueda_(folio).indexOf(busqueda) !== -1;
+        })
+        .slice(0, 80);
+
+      sugerencias.innerHTML = "";
+      folioSugerenciaActiva = -1;
+
+      if (!resultados.length) {
+        const vacio = document.createElement("div");
+        vacio.className = "folio-suggestion-empty";
+        vacio.textContent = "No se encontraron coincidencias.";
+        sugerencias.appendChild(vacio);
+        sugerencias.classList.add("open");
+        return;
+      }
+
+      resultados.forEach(function(folio) {
+        const item = document.createElement("div");
+        item.className = "folio-suggestion";
+        item.textContent = folio;
+        item.dataset.value = folio;
+        item.addEventListener("mousedown", function(event) {
+          event.preventDefault();
+          seleccionarFolio_(folio);
+        });
+        sugerencias.appendChild(item);
+      });
+
+      sugerencias.classList.add("open");
+    }
+
+    function seleccionarFolio_(folio) {
+      if (!folioSelect) return;
+      folioSelect.value = folio || "";
+      cerrarSugerenciasFolio_();
+      renderItems(folioSelect.value);
+    }
+
+    function moverSugerenciaFolio_(direccion) {
+      const sugerencias = document.getElementById("folioSuggestions");
+      if (!sugerencias || !sugerencias.classList.contains("open")) return;
+
+      const opciones = Array.from(sugerencias.querySelectorAll(".folio-suggestion"));
+      if (!opciones.length) return;
+
+      folioSugerenciaActiva += direccion;
+      if (folioSugerenciaActiva < 0) folioSugerenciaActiva = opciones.length - 1;
+      if (folioSugerenciaActiva >= opciones.length) folioSugerenciaActiva = 0;
+
+      opciones.forEach(function(opcion) {
+        opcion.classList.remove("active");
+      });
+
+      opciones[folioSugerenciaActiva].classList.add("active");
+      opciones[folioSugerenciaActiva].scrollIntoView({ block: "nearest" });
+    }
+
     function limpiarOpciones(select, textoInicial) {
       if (!select) return;
       select.innerHTML = "";
@@ -2580,15 +2713,25 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
     }
 
     window.foliosProduccionCallback = function(respuesta) {
-      limpiarOpciones(folioSelect, "Selecciona un folio...");
+      foliosProduccionCatalogo = [];
+      if (folioSelect) {
+        folioSelect.value = "";
+        folioSelect.placeholder = "Escribe para buscar folio...";
+      }
+      cerrarSugerenciasFolio_();
 
       if (!respuesta || !respuesta.ok) {
         mostrarEstadoProduccion((respuesta && respuesta.message) ? respuesta.message : "No se pudieron cargar los folios.");
         return;
       }
 
-      agregarOpciones(folioSelect, respuesta.data || []);
-      mostrarEstadoProduccion("Selecciona un folio para mostrar los items relacionados.");
+      foliosProduccionCatalogo = (respuesta.data || []).map(function(folio) {
+        return String(folio || "").trim();
+      }).filter(function(folio) {
+        return !!folio;
+      });
+
+      mostrarEstadoProduccion("Escribe cualquier parte del folio para buscar coincidencias.");
     };
 
     window.tiposImpresionCallback = function(respuesta) {
@@ -2641,7 +2784,10 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
     const dropzone = document.getElementById("dropzone");
 
     function init() {
-      limpiarOpciones(folioSelect, "Cargando folios...");
+      if (folioSelect) {
+        folioSelect.value = "";
+        folioSelect.placeholder = "Cargando folios...";
+      }
       limpiarOpciones(tipoImpresion, "Cargando tipos...");
       mostrarEstadoProduccion("Cargando catálogos de producción...");
 
@@ -2649,8 +2795,55 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       solicitarJSONPProduccion("getTiposImpresion", {}, "tiposImpresionCallback");
     }
 
-    folioSelect.addEventListener("change", () => {
-      renderItems(folioSelect.value);
+    if (folioSelect) {
+      folioSelect.addEventListener("input", function() {
+        const texto = folioSelect.value || "";
+        pintarSugerenciasFolio_(texto);
+        if (!texto.trim()) {
+          renderItems("");
+        }
+      });
+
+      folioSelect.addEventListener("focus", function() {
+        pintarSugerenciasFolio_(folioSelect.value || "");
+      });
+
+      folioSelect.addEventListener("keydown", function(event) {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          moverSugerenciaFolio_(1);
+          return;
+        }
+
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          moverSugerenciaFolio_(-1);
+          return;
+        }
+
+        if (event.key === "Enter") {
+          event.preventDefault();
+          const sugerencias = document.getElementById("folioSuggestions");
+          const opciones = sugerencias ? Array.from(sugerencias.querySelectorAll(".folio-suggestion")) : [];
+          const activa = folioSugerenciaActiva >= 0 ? opciones[folioSugerenciaActiva] : null;
+          const valor = activa ? activa.dataset.value : folioSelect.value;
+          if (valor) {
+            seleccionarFolio_(valor);
+          }
+          return;
+        }
+
+        if (event.key === "Escape") {
+          cerrarSugerenciasFolio_();
+        }
+      });
+    }
+
+    document.addEventListener("click", function(event) {
+      const contenedor = event.target.closest ? event.target.closest(".folio-autocomplete") : null;
+      if (!contenedor) {
+        cerrarSugerenciasFolio_();
+      }
     });
 
     function renderItems(folio) {
