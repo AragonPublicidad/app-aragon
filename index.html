@@ -2982,12 +2982,21 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
         ["Fecha/Hora", `${item.FECHA} ${item.HORA}`]
       ];
 
-      document.getElementById("itemResume").innerHTML = fields.map(([label, value]) => `
-        <div class="info-cell">
-          <span>${escapeHtml(label)}</span>
-          <strong title="${escapeHtml(value)}">${escapeHtml(value)}</strong>
-        </div>
-      `).join("");
+      const resumenHTML = fields.map(([label, value]) => `
+  <div class="info-cell">
+    <span>${escapeHtml(label)}</span>
+    <strong title="${escapeHtml(value)}">${escapeHtml(value)}</strong>
+  </div>
+`).join("");
+
+document.getElementById("itemResume").innerHTML = `
+  ${resumenHTML}
+  <div class="info-cell">
+    <span>ARCHIVOS ENVIADOS</span>
+    <strong id="contadorArchivosEnviados">...</strong>
+  </div>
+`;
+cargarContadorArchivosEnviados_(obtenerIDRG_(item));
     }
 
     fileInput.addEventListener("change", (event) => {
@@ -3045,6 +3054,40 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 function cerrarDetalleArchivos() {
   const modal = document.getElementById("detalleArchivosModal");
   if (modal) modal.classList.remove("open");
+}
+	  function cargarContadorArchivosEnviados_(idrg) {
+  const contador = document.getElementById("contadorArchivosEnviados");
+
+  if (!contador) return;
+
+  contador.textContent = "...";
+
+  if (!idrg) {
+    contador.textContent = "0";
+    return;
+  }
+
+  window.contadorArchivosEnviadosCallback = function(respuesta) {
+    if (!respuesta || respuesta.ok !== true) {
+      contador.textContent = "0";
+      return;
+    }
+
+    contador.textContent = String(respuesta.total || 0);
+  };
+
+  const script = document.createElement("script");
+  script.src = WEB_APP_URL
+    + "?action=contarArchivosActivosPorIDRG"
+    + "&idrg=" + encodeURIComponent(idrg)
+    + "&callback=contadorArchivosEnviadosCallback"
+    + "&_ts=" + Date.now();
+
+  script.onerror = function() {
+    contador.textContent = "0";
+  };
+
+  document.body.appendChild(script);
 }
 
 function abrirDetalleArchivosPorIDRG(index) {
