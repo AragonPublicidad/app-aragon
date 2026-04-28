@@ -1537,6 +1537,20 @@ body {
   #vistaProduccion .filters { grid-template-columns: 1fr !important; }
 }
 
+.folio-detalle-btn {
+  border: none;
+  background: transparent;
+  color: var(--azul-oscuro);
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.folio-detalle-btn:hover {
+  color: var(--verde-oscuro);
+}
+	  
 </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -1885,7 +1899,39 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
   </div>
 
   
+
+<div class="modal-backdrop" id="detalleArchivosModal">
+  <div class="modal" style="max-width: 900px;">
+    
+    <div class="modal-header">
+      <div class="modal-title">
+        <h3>Detalle de Archivos</h3>
+        <p id="detalleSubtitle">Archivos del folio</p>
       </div>
+      <button class="close-btn" onclick="cerrarDetalleArchivos()" title="Cerrar">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div style="overflow-x:auto;">
+        <table class="tabla-detalle">
+          <thead>
+            <tr>
+              <th>Fecha Carga</th>
+              <th>Folio</th>
+              <th>Sucursal</th>
+              <th>Nombre Archivo</th>
+              <th>Archivo</th>
+              <th>Sucursal Entrega</th>
+            </tr>
+          </thead>
+          <tbody id="detalleArchivosBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+	  
       <div id="vistaPendiente" class="vista-modulo vista-oculta">
         <div class="card panel-body">
           <div class="panel-header"><div><h3>Módulo en preparación</h3><p>Esta vista aún no está integrada en el tablero.</p></div></div>
@@ -2871,10 +2917,14 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       rows.forEach((item, index) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td><button class="btn btn-primary btn-small" onclick="openModal(${index})">Subir archivos</button></td>
-          <td class="idgr">${escapeHtml(obtenerIDRG_(item))}</td>
-          <td>${escapeHtml(item.FOLIO)}</td>
-          <td>${escapeHtml(item.SUCURSAL)}</td>
+      <td><button class="btn btn-primary btn-small" onclick="openModal(${index})">Subir archivos</button></td>
+<td class="idgr">${escapeHtml(obtenerIDRG_(item))}</td>
+<td>
+  <button class="folio-detalle-btn" onclick="abrirDetalleArchivosPorIDRG(${index})">
+    ${escapeHtml(item.FOLIO)}
+  </button>
+</td>
+<td>${escapeHtml(item.SUCURSAL)}</td>
           <td><span class="pill">${escapeHtml(item.TIPO_CLIENTE)}</span></td>
           <td>${escapeHtml(item.NOM_PRODUCTO)}</td>
           <td>${escapeHtml(item.ANCHO)}</td>
@@ -2991,6 +3041,92 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       selectedFiles.splice(index, 1);
       renderFileList();
     }
+
+function cerrarDetalleArchivos() {
+  const modal = document.getElementById("detalleArchivosModal");
+  if (modal) modal.classList.remove("open");
+}
+
+function abrirDetalleArchivosPorIDRG(index) {
+  const item = produccionItemsActuales[index];
+
+  if (!item) {
+    alert("No se encontró el item seleccionado.");
+    return;
+  }
+
+  const idrg = obtenerIDRG_(item);
+
+  if (!idrg) {
+    alert("Este renglón no tiene IDRG.");
+    return;
+  }
+
+  const body = document.getElementById("detalleArchivosBody");
+  const subtitle = document.getElementById("detalleSubtitle");
+  const modal = document.getElementById("detalleArchivosModal");
+
+  if (subtitle) {
+    subtitle.textContent = "Archivos vinculados al IDRG: " + idrg;
+  }
+
+  if (body) {
+    body.innerHTML = '<tr><td colspan="6">Cargando archivos...</td></tr>';
+  }
+
+  if (modal) {
+    modal.classList.add("open");
+  }
+
+  window.detalleArchivosCallback = function(respuesta) {
+    if (!body) return;
+
+    if (!respuesta || respuesta.ok !== true) {
+      body.innerHTML = '<tr><td colspan="6">No se pudo cargar el detalle.</td></tr>';
+      return;
+    }
+
+    const archivos = respuesta.data || [];
+
+    if (archivos.length === 0) {
+      body.innerHTML = '<tr><td colspan="6">Este IDRG todavía no tiene archivos indexados.</td></tr>';
+      return;
+    }
+
+    body.innerHTML = archivos.map(function(archivo) {
+      return `
+        <tr>
+          <td>${escapeHtml(archivo.fechaCarga || "")}</td>
+          <td>${escapeHtml(archivo.folio || "")}</td>
+          <td>${escapeHtml(archivo.sucursal || "")}</td>
+          <td title="${escapeHtml(archivo.nombreArchivo || "")}">${escapeHtml(archivo.nombreArchivo || "")}</td>
+          <td>
+            ${archivo.urlArchivo
+              ? `<a href="${escapeHtml(archivo.urlArchivo)}" target="_blank">Ver archivo</a>`
+              : ""}
+          </td>
+          <td>${escapeHtml(archivo.sucursalEntrega || archivo.sucursal || "")}</td>
+        </tr>
+      `;
+    }).join("");
+  };
+
+  const script = document.createElement("script");
+  script.src = WEB_APP_URL
+    + "?action=devolverDetalleArchivosPorIDRG"
+    + "&idrg=" + encodeURIComponent(idrg)
+    + "&callback=detalleArchivosCallback"
+    + "&_ts=" + Date.now();
+
+  script.onerror = function() {
+    if (body) {
+      body.innerHTML = '<tr><td colspan="6">No se pudo conectar con Apps Script.</td></tr>';
+    }
+  };
+
+  document.body.appendChild(script);
+}
+	  
 async function validarArchivosAntesDeSubir_() {
   if (!currentItem) {
     throw new Error("No hay item seleccionado.");
