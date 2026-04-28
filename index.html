@@ -3000,14 +3000,31 @@ async function validarArchivosAntesDeSubir_() {
     throw new Error("No hay archivos seleccionados.");
   }
 
-  var payload = {
-    folio: currentItem.FOLIO || "",
-    idrg: obtenerIDRG_(currentItem) || "",
-    totalM2: currentItem.TOTALM2 || "",
-    nombresArchivos: selectedFiles.map(function(file) {
-      return file.name;
-    })
-  };
+  var archivosValidacion = [];
+
+for (var i = 0; i < selectedFiles.length; i++) {
+  var file = selectedFiles[i];
+  var infoImagen = await leerDimensionesImagen_(file);
+
+  archivosValidacion.push({
+    nombreArchivo: file.name,
+    mime: file.type || "",
+    anchoPx: infoImagen.anchoPx,
+    altoPx: infoImagen.altoPx,
+    dpiX: infoImagen.dpiX,
+    dpiY: infoImagen.dpiY
+  });
+}
+
+var payload = {
+  folio: currentItem.FOLIO || "",
+  idrg: obtenerIDRG_(currentItem) || "",
+  totalM2: currentItem.TOTALM2 || "",
+  archivos: archivosValidacion,
+  nombresArchivos: selectedFiles.map(function(file) {
+    return file.name;
+  })
+};
 
   var url = WEB_APP_URL
     + "?action=validarCargaArchivosProduccion"
