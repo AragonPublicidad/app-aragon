@@ -3014,7 +3014,19 @@ async function validarArchivosAntesDeSubir_() {
     + "&data=" + encodeURIComponent(JSON.stringify(payload))
     + "&callback=callbackValidacionCarga";
 
-  var respuesta = await jsonpRequest_(url);
+  var respuesta = await new Promise(function(resolve, reject) {
+  window.callbackValidacionCarga = function(payload) {
+    resolve(payload);
+  };
+
+  var script = document.createElement("script");
+  script.src = url + "&_ts=" + Date.now();
+  script.onerror = function() {
+    reject(new Error("No se pudo conectar con Apps Script."));
+  };
+
+  document.body.appendChild(script);
+});
 
   if (!respuesta || respuesta.ok !== true) {
     var mensaje = respuesta && respuesta.message
