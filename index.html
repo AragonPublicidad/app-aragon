@@ -1565,6 +1565,20 @@ body {
   opacity: 0.65;
   cursor: wait;
 }
+
+	  .btn-delete {
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.16);
+  color: #b91c1c;
+  border-radius: 9px;
+  padding: 6px 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-delete:hover {
+  background: rgba(220, 38, 38, 0.14);
+}
 	  
 </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -1937,6 +1951,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
               <th>Nombre Archivo</th>
               <th>Archivo</th>
               <th>Sucursal Entrega</th>
+			  <th>Eliminar</th>
             </tr>
           </thead>
           <tbody id="detalleArchivosBody"></tbody>
@@ -3104,6 +3119,46 @@ function cerrarDetalleArchivos() {
 
   document.body.appendChild(script);
 }
+	  function eliminarArchivoUI(idCarga, btn) {
+
+  if (!idCarga) {
+    alert("No se encontró el ID del archivo.");
+    return;
+  }
+
+  const confirmar = confirm("¿Seguro que quieres eliminar este archivo?");
+
+  if (!confirmar) return;
+
+  btn.disabled = true;
+
+  window.eliminarArchivoCallback = function(respuesta) {
+
+    if (!respuesta || respuesta.ok !== true) {
+      alert((respuesta && respuesta.message) || "No se pudo eliminar.");
+      btn.disabled = false;
+      return;
+    }
+
+    // 🔥 eliminar fila visualmente
+    const fila = btn.closest("tr");
+    if (fila) fila.remove();
+  };
+
+  const script = document.createElement("script");
+  script.src = WEB_APP_URL
+    + "?action=eliminarArchivoCarga"
+    + "&idCarga=" + encodeURIComponent(idCarga)
+    + "&callback=eliminarArchivoCallback"
+    + "&_ts=" + Date.now();
+
+  script.onerror = function() {
+    btn.disabled = false;
+    alert("Error de conexión.");
+  };
+
+  document.body.appendChild(script);
+}
 
 	  function obtenerOpcionesSucursalEntrega_(valorActual) {
   const sucursales = opcionesUnicas((catalogos.configuracion || []).map(item => item.sucursal));
@@ -3182,7 +3237,7 @@ function abrirDetalleArchivosPorIDRG(index) {
   }
 
   if (body) {
-    body.innerHTML = '<tr><td colspan="6">Cargando archivos...</td></tr>';
+    body.innerHTML = '<tr><td colspan="7">Cargando archivos...</td></tr>';
   }
 
   if (modal) {
@@ -3193,14 +3248,14 @@ function abrirDetalleArchivosPorIDRG(index) {
     if (!body) return;
 
     if (!respuesta || respuesta.ok !== true) {
-      body.innerHTML = '<tr><td colspan="6">No se pudo cargar el detalle.</td></tr>';
+      body.innerHTML = '<tr><td colspan="7">No se pudo cargar el detalle.</td></tr>';
       return;
     }
 
     const archivos = respuesta.data || [];
 
     if (archivos.length === 0) {
-      body.innerHTML = '<tr><td colspan="6">Este IDRG todavía no tiene archivos indexados.</td></tr>';
+      body.innerHTML = '<tr><td colspan="7">Este IDRG todavía no tiene archivos indexados.</td></tr>';
       return;
     }
 
@@ -3224,6 +3279,13 @@ function abrirDetalleArchivosPorIDRG(index) {
   >
     ${obtenerOpcionesSucursalEntrega_(archivo.sucursalEntrega || archivo.sucursal || "")}
   </select>
+</td>
+<td>
+  <button class="btn-delete"
+    onclick="eliminarArchivoUI('${escapeHtml(archivo.idCarga || "")}', this)"
+    title="Eliminar archivo">
+    🗑
+  </button>
 </td>
         </tr>
       `;
