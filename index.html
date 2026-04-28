@@ -3009,7 +3009,7 @@ async function validarArchivosAntesDeSubir_() {
     })
   };
 
-  var url = GAS_WEB_APP_URL
+  var url = WEB_APP_URL
     + "?accion=validarCargaArchivosProduccion"
     + "&data=" + encodeURIComponent(JSON.stringify(payload))
     + "&callback=callbackValidacionCarga";
