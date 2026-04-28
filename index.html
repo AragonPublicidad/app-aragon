@@ -2991,7 +2991,62 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       selectedFiles.splice(index, 1);
       renderFileList();
     }
+async function validarArchivosAntesDeSubir_() {
+  if (!currentItem) {
+    throw new Error("No hay item seleccionado.");
+  }
 
+  if (!selectedFiles || selectedFiles.length === 0) {
+    throw new Error("No hay archivos seleccionados.");
+  }
+
+  var payload = {
+    folio: currentItem.FOLIO || "",
+    idrg: obtenerIDRG_(currentItem) || "",
+    totalM2: currentItem.TOTALM2 || "",
+    nombresArchivos: selectedFiles.map(function(file) {
+      return file.name;
+    })
+  };
+
+  var url = GAS_WEB_APP_URL
+    + "?accion=validarCargaArchivosProduccion"
+    + "&data=" + encodeURIComponent(JSON.stringify(payload))
+    + "&callback=callbackValidacionCarga";
+
+  var respuesta = await jsonpRequest_(url);
+
+  if (!respuesta || respuesta.ok !== true) {
+    var mensaje = respuesta && respuesta.message
+      ? respuesta.message
+      : "No se pudo validar la carga.";
+
+    if (respuesta && respuesta.archivoError) {
+      mensaje += "\n\nArchivo con error:\n" + respuesta.archivoError;
+    }
+
+    if (respuesta && respuesta.folioSeleccionado) {
+      mensaje += "\n\nFolio seleccionado: " + respuesta.folioSeleccionado;
+    }
+
+    if (respuesta && respuesta.folioArchivo) {
+      mensaje += "\nFolio archivo: " + respuesta.folioArchivo;
+    }
+
+    if (respuesta && respuesta.message === "Se superan los m² pagados.") {
+      mensaje += "\n\nM² pagados: " + respuesta.totalM2Item;
+      mensaje += "\nMáximo permitido con tolerancia: " + respuesta.maximoPermitido;
+      mensaje += "\nM² ya cargados: " + respuesta.m2YaCargados;
+      mensaje += "\nM² por agregar: " + respuesta.m2PorAgregar;
+      mensaje += "\nTotal final: " + respuesta.totalFinal;
+      mensaje += "\nExcedente: " + respuesta.excedente;
+    }
+
+    throw new Error(mensaje);
+  }
+
+  return respuesta;
+}
     async function mockUpload() {
       if (!currentItem) {
         alert("No hay item seleccionado.");
