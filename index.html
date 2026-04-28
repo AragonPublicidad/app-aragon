@@ -3018,11 +3018,26 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
         }
 
         if (fileNotice) {
-          fileNotice.style.display = "block";
-          fileNotice.innerHTML = "Solicitando autorización de Google Drive...";
-        }
+  fileNotice.style.display = "block";
+  fileNotice.innerHTML = "Validando archivos antes de subir...";
+}
 
-        const resultados = await subirArchivosDirectoDrive_(selectedFiles, function(index, archivo, porcentaje) {
+if (btnSubir) {
+  btnSubir.textContent = "Validando archivos...";
+}
+
+await validarArchivosAntesDeSubir_();
+
+if (fileNotice) {
+  fileNotice.style.display = "block";
+  fileNotice.innerHTML = "Solicitando autorización de Google Drive...";
+}
+
+if (btnSubir) {
+  btnSubir.textContent = "Conectando con Drive...";
+}
+
+const resultados = await subirArchivosDirectoDrive_(selectedFiles, function(index, archivo, porcentaje) {
           if (btnSubir) {
             btnSubir.textContent = "Subiendo " + porcentaje + "%";
           }
