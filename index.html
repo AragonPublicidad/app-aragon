@@ -3136,11 +3136,15 @@ const resultados = await subirArchivosDirectoDrive_(selectedFiles, function(inde
     horaItem: currentItem.HORA || "",
     tipoImpresion: tipoImpresion.value || "",
     nombreArchivo: file.name || "",
-    fileId: file.id || "",
-    url: file.webViewLink || "",
-    mime: file.mimeType || "",
-    size: file.size || "",
-    estatus:"Activo",
+fileId: file.id || "",
+url: file.webViewLink || "",
+mime: file.mimeType || "",
+size: file.size || "",
+anchoPx: file.anchoPx || "",
+altoPx: file.altoPx || "",
+dpiX: file.dpiX || "",
+dpiY: file.dpiY || "",
+estatus:"Activo",
   });
 }
 
@@ -3371,17 +3375,65 @@ function subirArchivoGrandeDrive_(archivo, onProgress) {
   Esta función queda disponible para el botón de subir del módulo.
   No cambia la carga de folios ni de items.
 */
+function leerDimensionesImagen_(archivo) {
+  return new Promise(function(resolve) {
+    if (!archivo || !String(archivo.type || "").toLowerCase().startsWith("image/")) {
+      resolve({
+        anchoPx: "",
+        altoPx: "",
+        dpiX: "",
+        dpiY: ""
+      });
+      return;
+    }
+
+    var img = new Image();
+    var url = URL.createObjectURL(archivo);
+
+    img.onload = function() {
+      URL.revokeObjectURL(url);
+
+      resolve({
+        anchoPx: img.naturalWidth || "",
+        altoPx: img.naturalHeight || "",
+        dpiX: 72,
+        dpiY: 72
+      });
+    };
+
+    img.onerror = function() {
+      URL.revokeObjectURL(url);
+
+      resolve({
+        anchoPx: "",
+        altoPx: "",
+        dpiX: "",
+        dpiY: ""
+      });
+    };
+
+    img.src = url;
+  });
+}
+	
 async function subirArchivosDirectoDrive_(archivos, onProgressArchivo) {
   var resultados = [];
 
   for (var i = 0; i < archivos.length; i++) {
     var archivo = archivos[i];
 
+    var infoImagen = await leerDimensionesImagen_(archivo);
+
     var resultado = await subirArchivoGrandeDrive_(archivo, function(porcentaje) {
       if (typeof onProgressArchivo === "function") {
         onProgressArchivo(i, archivo, porcentaje);
       }
     });
+
+    resultado.anchoPx = infoImagen.anchoPx;
+    resultado.altoPx = infoImagen.altoPx;
+    resultado.dpiX = infoImagen.dpiX;
+    resultado.dpiY = infoImagen.dpiY;
 
     resultados.push(resultado);
   }
