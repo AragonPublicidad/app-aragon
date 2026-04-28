@@ -1550,6 +1550,21 @@ body {
 .folio-detalle-btn:hover {
   color: var(--verde-oscuro);
 }
+
+.select-sucursal-entrega {
+  min-width: 160px;
+  padding: 7px 9px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 12px;
+  color: var(--texto);
+}
+
+.select-sucursal-entrega:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
 	  
 </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -3090,6 +3105,59 @@ function cerrarDetalleArchivos() {
   document.body.appendChild(script);
 }
 
+	  function obtenerOpcionesSucursalEntrega_(valorActual) {
+  const sucursales = opcionesUnicas((catalogos.configuracion || []).map(item => item.sucursal));
+  const actual = String(valorActual || "").trim();
+
+  if (actual && !sucursales.includes(actual)) {
+    sucursales.unshift(actual);
+  }
+
+  return sucursales.map(function(sucursal) {
+    return `
+      <option value="${escapeHtml(sucursal)}" ${sucursal === actual ? "selected" : ""}>
+        ${escapeHtml(sucursal)}
+      </option>
+    `;
+  }).join("");
+}
+
+function guardarSucursalEntregaArchivo_(idCarga, sucursalEntrega, select) {
+  if (!idCarga || !sucursalEntrega) return;
+
+  const valorAnterior = select.getAttribute("data-valor-anterior") || "";
+
+  select.disabled = true;
+
+  window.actualizarSucursalEntregaCallback = function(respuesta) {
+    select.disabled = false;
+
+    if (!respuesta || respuesta.ok !== true) {
+      alert((respuesta && respuesta.message) || "No se pudo actualizar la Sucursal Entrega.");
+      select.value = valorAnterior;
+      return;
+    }
+
+    select.setAttribute("data-valor-anterior", sucursalEntrega);
+  };
+
+  const script = document.createElement("script");
+  script.src = WEB_APP_URL
+    + "?action=actualizarSucursalEntregaArchivo"
+    + "&idCarga=" + encodeURIComponent(idCarga)
+    + "&sucursalEntrega=" + encodeURIComponent(sucursalEntrega)
+    + "&callback=actualizarSucursalEntregaCallback"
+    + "&_ts=" + Date.now();
+
+  script.onerror = function() {
+    select.disabled = false;
+    alert("No se pudo conectar con Apps Script.");
+    select.value = valorAnterior;
+  };
+
+  document.body.appendChild(script);
+}
+	  
 function abrirDetalleArchivosPorIDRG(index) {
   const item = produccionItemsActuales[index];
 
@@ -3148,7 +3216,15 @@ function abrirDetalleArchivosPorIDRG(index) {
               ? `<a href="${escapeHtml(archivo.urlArchivo)}" target="_blank">Ver archivo</a>`
               : ""}
           </td>
-          <td>${escapeHtml(archivo.sucursalEntrega || archivo.sucursal || "")}</td>
+          <td>
+  <select
+    class="select-sucursal-entrega"
+    data-valor-anterior="${escapeHtml(archivo.sucursalEntrega || archivo.sucursal || "")}"
+    onchange="guardarSucursalEntregaArchivo_('${escapeHtml(archivo.idCarga || "")}', this.value, this)"
+  >
+    ${obtenerOpcionesSucursalEntrega_(archivo.sucursalEntrega || archivo.sucursal || "")}
+  </select>
+</td>
         </tr>
       `;
     }).join("");
