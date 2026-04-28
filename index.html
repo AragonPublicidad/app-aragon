@@ -3474,8 +3474,8 @@ function leerDimensionesImagen_(archivo) {
       var unit = bytes[offset + 16];
 
       if (unit === 1) {
-        dpiX = Math.round(ppmX * 0.254);
-        dpiY = Math.round(ppmY * 0.254);
+        dpiX = Math.round(ppmX * 0.0254);
+        dpiY = Math.round(ppmY * 0.0254);
       }
 
       break;
