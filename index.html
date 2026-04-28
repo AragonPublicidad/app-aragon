@@ -3395,42 +3395,160 @@ function subirArchivoGrandeDrive_(archivo, onProgress) {
 function leerDimensionesImagen_(archivo) {
   return new Promise(function(resolve) {
     if (!archivo || !String(archivo.type || "").toLowerCase().startsWith("image/")) {
-      resolve({
-        anchoPx: "",
-        altoPx: "",
-        dpiX: "",
-        dpiY: ""
-      });
+      resolve({ anchoPx: "", altoPx: "", dpiX: "", dpiY: "" });
       return;
     }
 
-    var img = new Image();
-    var url = URL.createObjectURL(archivo);
+    var reader = new FileReader();
 
-    img.onload = function() {
-      URL.revokeObjectURL(url);
+    reader.onload = function(e) {
+      try {
+        var buffer = e.target.result;
+        var view = new DataView(buffer);
+        var bytes = new Uint8Array(buffer);
+        var dpiInfo = extraerDPIImagen_(view, bytes);
 
-      resolve({
-        anchoPx: img.naturalWidth || "",
-        altoPx: img.naturalHeight || "",
-        dpiX: 72,
-        dpiY: 72
-      });
+        resolve({
+          anchoPx: dpiInfo.anchoPx || "",
+          altoPx: dpiInfo.altoPx || "",
+          dpiX: dpiInfo.dpiX || "",
+          dpiY: dpiInfo.dpiY || ""
+        });
+      } catch (err) {
+        resolve({ anchoPx: "", altoPx: "", dpiX: "", dpiY: "" });
+      }
     };
 
-    img.onerror = function() {
-      URL.revokeObjectURL(url);
-
-      resolve({
-        anchoPx: "",
-        altoPx: "",
-        dpiX: "",
-        dpiY: ""
-      });
+    reader.onerror = function() {
+      resolve({ anchoPx: "", altoPx: "", dpiX: "", dpiY: "" });
     };
 
-    img.src = url;
+    reader.readAsArrayBuffer(archivo);
   });
+}
+
+	function extraerDPIImagen_(view, bytes) {
+  // JPG/JPEG
+  if (bytes[0] === 0xFF && bytes[1] === 0xD8) {
+    return extraerDPI_JPEG_(view);
+  }
+
+  // PNG
+  if (
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4E &&
+    bytes[3] === 0x47
+  ) {
+    return extraerDPI_PNG_(view, bytes);
+  }
+
+  return {
+    anchoPx: "",
+    altoPx: "",
+    dpiX: "",
+    dpiY: ""
+  };
+}
+	function extraerDPI_PNG_(view, bytes) {
+  var anchoPx = view.getUint32(16);
+  var altoPx = view.getUint32(20);
+
+  var dpiX = "";
+  var dpiY = "";
+
+  var offset = 8;
+
+  while (offset < bytes.length) {
+    var length = view.getUint32(offset);
+    var type = String.fromCharCode(
+      bytes[offset + 4],
+      bytes[offset + 5],
+      bytes[offset + 6],
+      bytes[offset + 7]
+    );
+
+    if (type === "pHYs") {
+      var ppmX = view.getUint32(offset + 8);
+      var ppmY = view.getUint32(offset + 12);
+      var unit = bytes[offset + 16];
+
+      if (unit === 1) {
+        dpiX = Math.round(ppmX * 0.0254);
+        dpiY = Math.round(ppmY * 0.0254);
+      }
+
+      break;
+    }
+
+    offset += 12 + length;
+  }
+
+  return {
+    anchoPx: anchoPx,
+    altoPx: altoPx,
+    dpiX: dpiX,
+    dpiY: dpiY
+  };
+}
+
+	function extraerDPI_JPEG_(view) {
+  var offset = 2;
+  var anchoPx = "";
+  var altoPx = "";
+  var dpiX = "";
+  var dpiY = "";
+
+  while (offset < view.byteLength) {
+    if (view.getUint8(offset) !== 0xFF) {
+      offset++;
+      continue;
+    }
+
+    var marker = view.getUint8(offset + 1);
+    var length = view.getUint16(offset + 2);
+
+    // APP0 JFIF: DPI
+    if (marker === 0xE0) {
+      var id = "";
+      for (var i = 0; i < 5; i++) {
+        id += String.fromCharCode(view.getUint8(offset + 4 + i));
+      }
+
+      if (id === "JFIF\0") {
+        var units = view.getUint8(offset + 11);
+        var xDensity = view.getUint16(offset + 12);
+        var yDensity = view.getUint16(offset + 14);
+
+        if (units === 1) {
+          dpiX = xDensity;
+          dpiY = yDensity;
+        } else if (units === 2) {
+          dpiX = Math.round(xDensity * 2.54);
+          dpiY = Math.round(yDensity * 2.54);
+        }
+      }
+    }
+
+    // SOF0 / SOF2: dimensiones en px
+    if (marker === 0xC0 || marker === 0xC2) {
+      altoPx = view.getUint16(offset + 5);
+      anchoPx = view.getUint16(offset + 7);
+    }
+
+    if (anchoPx && altoPx && dpiX && dpiY) {
+      break;
+    }
+
+    offset += 2 + length;
+  }
+
+  return {
+    anchoPx: anchoPx,
+    altoPx: altoPx,
+    dpiX: dpiX,
+    dpiY: dpiY
+  };
 }
 	
 async function subirArchivosDirectoDrive_(archivos, onProgressArchivo) {
