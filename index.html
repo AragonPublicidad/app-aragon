@@ -2676,43 +2676,53 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       folioSugerenciaActiva = -1;
     }
 
-    function pintarSugerenciasFolio_(texto) {
-      const sugerencias = document.getElementById("folioSuggestions");
-      if (!sugerencias) return;
+   function pintarSugerenciasFolio_(texto) {
+  const sugerencias = document.getElementById("folioSuggestions");
+  if (!sugerencias) return;
 
-      const busqueda = normalizarTextoBusqueda_(texto);
-      const resultados = foliosProduccionCatalogo
-        .filter(function(folio) {
-          return !busqueda || normalizarTextoBusqueda_(folio).indexOf(busqueda) !== -1;
-        })
-        .slice(0, 80);
+  const busqueda = normalizarTextoBusqueda_(texto);
 
-      sugerencias.innerHTML = "";
-      folioSugerenciaActiva = -1;
+  sugerencias.innerHTML = "";
+  folioSugerenciaActiva = -1;
 
-      if (!resultados.length) {
-        const vacio = document.createElement("div");
-        vacio.className = "folio-suggestion-empty";
-        vacio.textContent = "No se encontraron coincidencias.";
-        sugerencias.appendChild(vacio);
-        sugerencias.classList.add("open");
-        return;
-      }
+  if (busqueda.length < 2) {
+    const aviso = document.createElement("div");
+    aviso.className = "folio-suggestion-empty";
+    aviso.textContent = "Escribe al menos 2 caracteres del folio.";
+    sugerencias.appendChild(aviso);
+    sugerencias.classList.add("open");
+    return;
+  }
 
-      resultados.forEach(function(folio) {
-        const item = document.createElement("div");
-        item.className = "folio-suggestion";
-        item.textContent = folio;
-        item.dataset.value = folio;
-        item.addEventListener("mousedown", function(event) {
-          event.preventDefault();
-          seleccionarFolio_(folio);
-        });
-        sugerencias.appendChild(item);
-      });
+  const resultados = foliosProduccionCatalogo
+    .filter(function(folio) {
+      return normalizarTextoBusqueda_(folio).indexOf(busqueda) !== -1;
+    })
+    .slice(0, 300);
 
-      sugerencias.classList.add("open");
-    }
+  if (!resultados.length) {
+    const vacio = document.createElement("div");
+    vacio.className = "folio-suggestion-empty";
+    vacio.textContent = "No se encontraron coincidencias. Si escribiste el folio completo, presiona Enter.";
+    sugerencias.appendChild(vacio);
+    sugerencias.classList.add("open");
+    return;
+  }
+
+  resultados.forEach(function(folio) {
+    const item = document.createElement("div");
+    item.className = "folio-suggestion";
+    item.textContent = folio;
+    item.dataset.value = folio;
+    item.addEventListener("mousedown", function(event) {
+      event.preventDefault();
+      seleccionarFolio_(folio);
+    });
+    sugerencias.appendChild(item);
+  });
+
+  sugerencias.classList.add("open");
+}
 
     function seleccionarFolio_(folio) {
       if (!folioSelect) return;
