@@ -1799,7 +1799,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
               </thead>
               <tbody id="tablaUsuariosBody">
                 <tr>
-                  <td colspan="6">Cargando usuarios...</td>
+                  <td colspan="8">Cargando usuarios...</td>
                 </tr>
               </tbody>
             </table>
@@ -2409,7 +2409,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
     function renderUsuarios(usuarios) {
       if (!usuarios || usuarios.length === 0) {
-        tablaUsuariosBody.innerHTML = '<tr><td colspan="6">No hay usuarios que coincidan con el filtro.</td></tr>';
+        tablaUsuariosBody.innerHTML = '<tr><td colspan="8">No hay usuarios que coincidan con el filtro.</td></tr>';
         return;
       }
 
@@ -2436,14 +2436,14 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
           llenarFiltrosUsuarios();
           aplicarFiltrosUsuarios();
         } else {
-          tablaUsuariosBody.innerHTML = '<tr><td colspan="6">No se pudieron cargar los usuarios.</td></tr>';
+          tablaUsuariosBody.innerHTML = '<tr><td colspan="8">No se pudieron cargar los usuarios.</td></tr>';
         }
       };
 
       const script = document.createElement('script');
       script.src = WEB_APP_URL + '?action=getUsers&callback=usuariosCallback&_ts=' + Date.now();
       script.onerror = function() {
-        tablaUsuariosBody.innerHTML = '<tr><td colspan="6">No se pudieron cargar los usuarios.</td></tr>';
+        tablaUsuariosBody.innerHTML = '<tr><td colspan="8">No se pudieron cargar los usuarios.</td></tr>';
       };
       document.body.appendChild(script);
     }
@@ -3523,6 +3523,43 @@ function guardarSucursalEntregaArchivo_(idCarga, sucursalEntrega, select) {
   document.body.appendChild(script);
 }
 
+	  function guardarTipoImpresionMaquilaArchivo_(idCarga, tipoImpresionMaquila, select) {
+  if (!idCarga || !tipoImpresionMaquila) return;
+
+  const valorAnterior = select.getAttribute("data-valor-anterior") || "";
+
+  select.disabled = true;
+
+  window.actualizarTipoImpresionMaquilaCallback = function(respuesta) {
+    select.disabled = false;
+
+    if (!respuesta || respuesta.ok !== true) {
+      alert((respuesta && respuesta.message) || "No se pudo actualizar Tipo Impresión/Maquila.");
+      select.value = valorAnterior;
+      return;
+    }
+
+    select.setAttribute("data-valor-anterior", tipoImpresionMaquila);
+  };
+
+  const script = document.createElement("script");
+  script.src = WEB_APP_URL
+    + "?action=actualizarTipoImpresionMaquilaArchivo"
+    + "&idCarga=" + encodeURIComponent(idCarga)
+    + "&tipoImpresionMaquila=" + encodeURIComponent(tipoImpresionMaquila)
+    + "&callback=actualizarTipoImpresionMaquilaCallback"
+    + "&_ts=" + Date.now();
+
+  script.onerror = function() {
+    select.disabled = false;
+    alert("No se pudo conectar con Apps Script.");
+    select.value = valorAnterior;
+  };
+
+  document.body.appendChild(script);
+}
+	  
+
 	  function obtenerOpcionesTipoImpresion_(valorActual) {
   const selectBase = document.getElementById("tipoImpresion");
 
@@ -3569,7 +3606,7 @@ function abrirDetalleArchivosPorIDRG(index) {
   }
 
   if (body) {
-    body.innerHTML = '<tr><td colspan="7">Cargando archivos...</td></tr>';
+    body.innerHTML = '<tr><td colspan="8">Cargando archivos...</td></tr>';
   }
 
   if (modal) {
@@ -3580,14 +3617,14 @@ function abrirDetalleArchivosPorIDRG(index) {
     if (!body) return;
 
     if (!respuesta || respuesta.ok !== true) {
-      body.innerHTML = '<tr><td colspan="7">No se pudo cargar el detalle.</td></tr>';
+      body.innerHTML = '<tr><td colspan="8">No se pudo cargar el detalle.</td></tr>';
       return;
     }
 
     const archivos = respuesta.data || [];
 
     if (archivos.length === 0) {
-      body.innerHTML = '<tr><td colspan="7">Este IDRG todavía no tiene archivos indexados.</td></tr>';
+      body.innerHTML = '<tr><td colspan="8">Este IDRG todavía no tiene archivos indexados.</td></tr>';
       return;
     }
 
@@ -3643,7 +3680,7 @@ function abrirDetalleArchivosPorIDRG(index) {
 
   script.onerror = function() {
     if (body) {
-      body.innerHTML = '<tr><td colspan="6">No se pudo conectar con Apps Script.</td></tr>';
+      body.innerHTML = '<tr><td colspan="8">No se pudo conectar con Apps Script.</td></tr>';
     }
   };
 
