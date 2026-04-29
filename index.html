@@ -1894,7 +1894,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
         <div class="summary-box" id="summaryBox" style="display:none;">
           <div class="mini-card">
-            <span>Folio seleccionado</span>
+           <span>Nombre del Cliente</span>
             <strong id="summaryFolio">-</strong>
           </div>
           <div class="mini-card">
@@ -3256,8 +3256,10 @@ function activarNavegacionInterna() {
       const totalPiezas = rows.reduce((acc, item) => acc + (Number(String(item.PIEZAS || "0").replace(",", ".")) || 0), 0);
       const urgentes = rows.filter(item => String(item.URGENTE || "").trim().toUpperCase() === "SI").length;
 
-      document.getElementById("summaryFolio").textContent = folio;
-      document.getElementById("summaryItems").textContent = rows.length;
+      const nombreClienteFolio = rows.length ? String(rows[0].NOM_CLIENTE || "").trim() : "";
+
+	  document.getElementById("summaryFolio").textContent = nombreClienteFolio || folio;
+	  document.getElementById("summaryItems").textContent = rows.length;
       document.getElementById("summaryPiezas").textContent = totalPiezas;
       document.getElementById("summaryUrgentes").textContent = urgentes;
 
