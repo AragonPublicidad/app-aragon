@@ -2721,13 +2721,19 @@ function activarNavegacionInterna() {
     item.addEventListener('click', function(e) {
       e.preventDefault();
 
+      // Quitar activo
       document.querySelectorAll('.menu-item:not(.logout-item)').forEach(function(opcion) {
         opcion.classList.remove('active');
       });
 
+      // Activar seleccionado
       item.classList.add('active');
 
-      const vista = item.getAttribute('data-vista') || 'pendiente';
+      // 🔥 CLAVE: obtener vista correctamente
+      var vista = item.getAttribute('data-vista');
+
+      console.log("Vista clic:", vista); // para debug
+
       mostrarVistaTablero(vista);
     });
   });
