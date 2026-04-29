@@ -37,12 +37,12 @@
           <span class="menu-icon">📦</span>
           <span class="menu-label">Producción</span>
         </a>
-		  
+
 		<a href="#" class="menu-item" data-vista="clientesCredito" data-modulo="Clientes Crédito">
 		  <span class="menu-icon">💳</span>
 		  <span class="menu-label">Clientes Crédito</span>
 		</a>
-		  
+
         <a href="#" class="menu-item" data-vista="pendiente" data-modulo="Entregas">
           <span class="menu-icon">🚚</span>
           <span class="menu-label">Entregas</span>
@@ -126,7 +126,6 @@
               </select>
             </div>
 
-
             <div class="field full">
               <label>Vistas permitidas</label>
               <div class="multiselect" id="multiVistas"></div>
@@ -152,10 +151,10 @@
 
             <div class="field">
               <label for="contrasena">Contraseña</label>
-              
+
 <div style="position:relative;">
 <input id="contrasena" type="password" placeholder="********" required style="padding-right:40px;">
-<span id="togglePass" 
+<span id="togglePass"
 style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:16px;">
 👁
 </span>
@@ -168,7 +167,6 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
               <div class="multiselect" id="multiAgrupamiento"></div>
               <div class="helper">Este campo no es obligatorio.</div>
             </div>
-
 
             <input type="hidden" id="idUsuarioEdicion">
 
@@ -188,7 +186,6 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
             <div id="mensaje" style="grid-column: 1 / -1; display:none; padding:12px 14px; border-radius:14px; font-size:14px; font-weight:bold;"></div>
           </form>
-
 
           <div class="card" style="margin-top:18px; padding:18px;">
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
@@ -234,8 +231,6 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       </section>
       </div>
 
-
-		  
       <div id="vistaPendiente" class="vista-modulo vista-oculta">
 
 </div>
@@ -314,7 +309,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
             <div class="helper">Escribe cualquier parte del folio para buscar coincidencias.</div>
           </div>
           <div class="notice">
-            Elige bien los archivos a agregar, recuerda que se vinculara al renglón donde lo cargues y así se enviara a producción, que llegue al taller correcto depende de ti. 
+            Elige bien los archivos a agregar, recuerda que se vinculara al renglón donde lo cargues y así se enviara a producción, que llegue al taller correcto depende de ti.
           </div>
         </div>
 
@@ -366,9 +361,8 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
         </div>
       </div>
     </section>
-  
-        </main>
 
+        </main>
 
   <div class="modal-backdrop" id="uploadModal">
     <div class="modal">
@@ -410,11 +404,9 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
     </div>
   </div>
 
-  
-
 <div class="modal-backdrop" id="detalleArchivosModal">
   <div class="modal" style="max-width: 900px;">
-    
+
     <div class="modal-header">
       <div class="modal-title">
         <h3>Detalle de Archivos</h3>
@@ -445,8 +437,6 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
   </div>
 </div>
 
-
-        
       </div>
     </main>
 
@@ -667,7 +657,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       multiAgrupamiento.clear();
       multiVistas.clear();
       renderSucursales([]);
-      
+
     tablaUsuariosBody.addEventListener('click', function(e) {
       const btnDelete = e.target.closest('.btn-eliminar');
       if (!btnDelete) return;
@@ -697,7 +687,6 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
     function validarTelefono(telefono) {
       return /^\d{10}$/.test(telefono);
     }
-
 
     function normalizarTextoBusqueda(valor) {
       return String(valor || '')
@@ -736,7 +725,6 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       multiSucursal.setValues(sucursales);
       document.getElementById('statSucursales').textContent = sucursales.length;
     }
-
 
     function obtenerVistasDesdeMenu() {
       return Array.from(document.querySelectorAll('.menu-item .menu-label'))
@@ -991,7 +979,6 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       }
     });
 
-    
     tablaUsuariosBody.addEventListener('click', function(e) {
       const btnDelete = e.target.closest('.btn-eliminar');
       if (!btnDelete) return;
@@ -1013,8 +1000,6 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
         cargarUsuarios();
       }, 1000);
     });
-
-
 
     function normalizarPermiso(valor) {
       return String(valor || '')
@@ -1289,24 +1274,19 @@ function activarGuardarClientesCredito() {
     document.body.appendChild(script);
   });
 }
-	  
+
 function activarNavegacionInterna() {
   document.querySelectorAll('.menu-item:not(.logout-item)').forEach(function(item) {
     item.addEventListener('click', function(e) {
       e.preventDefault();
 
-      // Quitar activo
       document.querySelectorAll('.menu-item:not(.logout-item)').forEach(function(opcion) {
         opcion.classList.remove('active');
       });
 
-      // Activar seleccionado
       item.classList.add('active');
 
-      // 🔥 CLAVE: obtener vista correctamente
       var vista = item.getAttribute('data-vista');
-
-      console.log("Vista clic:", vista); // para debug
 
       mostrarVistaTablero(vista);
     });
@@ -1344,9 +1324,6 @@ function activarNavegacionInterna() {
 
     cargarCatalogos();
     cargarUsuarios();
-
-/* ===== Script módulo Producción embebido ===== */
-
     let produccionItemsActuales = [];
 
     let foliosProduccionCatalogo = [];
@@ -1466,8 +1443,6 @@ function activarNavegacionInterna() {
   const script = document.createElement("script");
 
   const usuarioSesion = JSON.parse(sessionStorage.getItem("usuario") || "{}");
-  console.log("USUARIO SESION:", usuarioSesion);
-  console.log("SUCURSAL ENVIADA:", usuarioSesion.sucursal);
 
   const query = new URLSearchParams(Object.assign({}, params || {}, {
     action: action,
@@ -1475,7 +1450,7 @@ function activarNavegacionInterna() {
     sucursal: usuarioSesion.sucursal || "",
     _ts: Date.now()
   }));
-      console.log("URL FINAL:", WEB_APP_URL + "?" + query.toString());
+
       script.src = WEB_APP_URL + "?" + query.toString();
       script.onerror = function() {
         console.error("No se pudo conectar con Apps Script:", action);
@@ -1759,7 +1734,7 @@ cargarContadorArchivosEnviados_(obtenerIDRG_(item));
       selectedFiles = Array.from(event.dataTransfer.files || []);
       renderFileList();
     });
-	  
+
 function obtenerM2DesdeNombreArchivo_(nombreArchivo) {
   const nombre = String(nombreArchivo || "").toUpperCase();
 
@@ -1872,7 +1847,6 @@ function cerrarDetalleArchivos() {
       return;
     }
 
-    // 🔥 eliminar fila visualmente
     const fila = btn.closest("tr");
     if (fila) fila.remove();
   };
@@ -1944,7 +1918,7 @@ function guardarSucursalEntregaArchivo_(idCarga, sucursalEntrega, select) {
 
   document.body.appendChild(script);
 }
-	  
+
 function abrirDetalleArchivosPorIDRG(index) {
   const item = produccionItemsActuales[index];
 
@@ -2039,7 +2013,7 @@ function abrirDetalleArchivosPorIDRG(index) {
 
   document.body.appendChild(script);
 }
-	  
+
 async function validarArchivosAntesDeSubir_() {
   if (!currentItem) {
     throw new Error("No hay item seleccionado.");
@@ -2267,9 +2241,7 @@ estatus:"Activo",
     }
 
     init();
-  
 
-// Mostrar / ocultar contraseña al mantener presionado
 const togglePass = document.getElementById("togglePass");
 const inputPass = document.getElementById("contrasena");
 
@@ -2288,7 +2260,6 @@ if(togglePass && inputPass){
 </script>
 
 <script>
-/* ===== Configuración subida directa a Google Drive ===== */
 const DRIVE_UPLOAD_CLIENT_ID = "545599381009-d8nsb9i4hj6rjqh1jhue00h8bfdimbm3.apps.googleusercontent.com";
 const DRIVE_UPLOAD_FOLDER_ID = "1ahtRm1WWqkSNb4Gi9bqHOzRtPR-gaq5Q";
 const DRIVE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/drive.file";
@@ -2304,7 +2275,7 @@ async function guardarEnSheet_(data) {
     });
 
     const urlFinal = WEBAPP_URL + "?" + params.toString();
-    console.log("URL INDEXACION:", urlFinal);
+
     await fetch(urlFinal, {
 
       method: "GET",
@@ -2320,9 +2291,7 @@ let driveUploadTokenClient = null;
 let driveUploadAccessToken = "";
 </script>
 
-
 <script>
-/* ===== Subida directa a Drive - archivos grandes ===== */
 function inicializarDriveUpload_() {
   if (driveUploadTokenClient || !window.google || !google.accounts || !google.accounts.oauth2) {
     return;
@@ -2438,11 +2407,6 @@ function subirArchivoGrandeDrive_(archivo, onProgress) {
     });
   });
 }
-
-/*
-  Esta función queda disponible para el botón de subir del módulo.
-  No cambia la carga de folios ni de items.
-*/
 function leerDimensionesImagen_(archivo) {
   return new Promise(function(resolve) {
     if (!archivo || !String(archivo.type || "").toLowerCase().startsWith("image/")) {
@@ -2479,12 +2443,11 @@ function leerDimensionesImagen_(archivo) {
 }
 
 	function extraerDPIImagen_(view, bytes) {
-  // JPG/JPEG
+
   if (bytes[0] === 0xFF && bytes[1] === 0xD8) {
     return extraerDPI_JPEG_(view);
   }
 
-  // PNG
   if (
     bytes[0] === 0x89 &&
     bytes[1] === 0x50 &&
@@ -2559,7 +2522,6 @@ function leerDimensionesImagen_(archivo) {
     var marker = view.getUint8(offset + 1);
     var length = view.getUint16(offset + 2);
 
-    // APP0 JFIF: DPI
     if (marker === 0xE0) {
       var id = "";
       for (var i = 0; i < 5; i++) {
@@ -2581,7 +2543,6 @@ function leerDimensionesImagen_(archivo) {
       }
     }
 
-    // SOF0 / SOF2: dimensiones en px
     if (marker === 0xC0 || marker === 0xC2) {
       altoPx = view.getUint16(offset + 5);
       anchoPx = view.getUint16(offset + 7);
@@ -2601,7 +2562,7 @@ function leerDimensionesImagen_(archivo) {
     dpiY: dpiY
   };
 }
-	
+
 async function subirArchivosDirectoDrive_(archivos, onProgressArchivo) {
   var resultados = [];
 
