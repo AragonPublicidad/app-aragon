@@ -2020,9 +2020,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 </div>
 
 
-        <div class="card panel-body">
-          <div class="panel-header"><div><h3>Módulo en preparación</h3><p>Esta vista aún no está integrada en el tablero.</p></div></div>
-        </div>
+        
       </div>
     </main>
 
@@ -2690,10 +2688,17 @@ function cargarUsuarioCC() {
 
 function cargarSucursalesCC() {
   const select = document.getElementById('ccSucursal');
+  const msg = document.getElementById('ccMensaje');
 
   if (!select) return;
 
   select.innerHTML = '<option value="">Cargando sucursales...</option>';
+
+  if (typeof google === 'undefined' || !google.script || !google.script.run) {
+    select.innerHTML = '<option value="">Error</option>';
+    if (msg) msg.textContent = 'Error: google.script.run no está disponible en este HTML.';
+    return;
+  }
 
   google.script.run
     .withSuccessHandler(function(data) {
@@ -2705,14 +2710,12 @@ function cargarSucursalesCC() {
         option.textContent = sucursal;
         select.appendChild(option);
       });
+
+      if (msg) msg.textContent = '';
     })
     .withFailureHandler(function(error) {
       select.innerHTML = '<option value="">Error al cargar sucursales</option>';
-
-      const msg = document.getElementById('ccMensaje');
-      if (msg) {
-        msg.textContent = 'Error al cargar sucursales: ' + (error.message || error);
-      }
+      if (msg) msg.textContent = 'Error al cargar sucursales: ' + (error.message || error);
     })
     .obtenerSucursalesClientesCredito();
 }
