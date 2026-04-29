@@ -2763,6 +2763,8 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
   const script = document.createElement("script");
 
   const usuarioSesion = JSON.parse(sessionStorage.getItem("usuario") || "{}");
+  console.log("USUARIO SESION:", usuarioSesion);
+  console.log("SUCURSAL ENVIADA:", usuarioSesion.sucursal);
 
   const query = new URLSearchParams(Object.assign({}, params || {}, {
     action: action,
