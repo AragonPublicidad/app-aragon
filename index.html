@@ -2772,7 +2772,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
     sucursal: usuarioSesion.sucursal || "",
     _ts: Date.now()
   }));
-
+      console.log("URL FINAL:", WEB_APP_URL + "?" + query.toString());
       script.src = WEB_APP_URL + "?" + query.toString();
       script.onerror = function() {
         console.error("No se pudo conectar con Apps Script:", action);
