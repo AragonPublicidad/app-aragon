@@ -3053,7 +3053,7 @@ cargarContadorArchivosEnviados_(obtenerIDRG_(item));
 function obtenerM2DesdeNombreArchivo_(nombreArchivo) {
   const nombre = String(nombreArchivo || "").toUpperCase();
 
-  const match = nombre.match(/(\d+(?:[.,]\d+)?)\s*[Xx]\s*(\d+(?:[.,]\d+)?)/);
+  const match = nombre.match(/(\d+(?:[.,]\d+)?|[.,]\d+)\s*[Xx]\s*(\d+(?:[.,]\d+)?|[.,]\d+)/);
 
   if (!match) return "";
 
