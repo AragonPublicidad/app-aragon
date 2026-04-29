@@ -3049,7 +3049,26 @@ cargarContadorArchivosEnviados_(obtenerIDRG_(item));
       selectedFiles = Array.from(event.dataTransfer.files || []);
       renderFileList();
     });
+	  
+function obtenerM2DesdeNombreArchivo_(nombreArchivo) {
+  const nombre = String(nombreArchivo || "").toUpperCase();
 
+  const match = nombre.match(/(\d+(?:[.,]\d+)?)\s*[Xx]\s*(\d+(?:[.,]\d+)?)/);
+
+  if (!match) return "";
+
+  const ancho = parseFloat(match[1].replace(",", "."));
+  const largo = parseFloat(match[2].replace(",", "."));
+
+  if (!ancho || !largo) return "";
+
+  const piezasMatch = nombre.match(/(\d+)\s*(PZA|PZ|PZAS|PIEZA|PIEZAS)/);
+  const piezas = piezasMatch ? parseInt(piezasMatch[1], 10) : 1;
+
+  const m2 = ancho * largo * piezas;
+
+  return m2.toFixed(2) + " m²";
+}
     function renderFileList() {
       fileList.innerHTML = "";
       fileNotice.style.display = "none";
@@ -3066,7 +3085,10 @@ cargarContadorArchivosEnviados_(obtenerIDRG_(item));
         row.className = "file-row";
         row.innerHTML = `
           <div class="file-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
-          <div class="file-size">${formatBytes(file.size)}</div>
+          <div class="file-size">
+  ${formatBytes(file.size)}
+  ${obtenerM2DesdeNombreArchivo_(file.name) ? " · " + obtenerM2DesdeNombreArchivo_(file.name) : ""}
+</div>
           <button class="remove-file" onclick="removeFile(${index})">Quitar</button>
         `;
         fileList.appendChild(row);
