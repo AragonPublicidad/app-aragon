@@ -2674,6 +2674,7 @@ function inicializarClientesCredito() {
   cargarUsuarioCC();
   cargarSucursalesCC();
   activarBuscadorClientesCredito();
+  activarGuardarClientesCredito();
 }
 
 function cargarUsuarioCC() {
@@ -2794,6 +2795,75 @@ function activarBuscadorClientesCredito() {
   });
 }
 
+function activarGuardarClientesCredito() {
+  const btn = document.getElementById('btnGuardarClientesCredito');
+  const nombreInput = document.getElementById('ccNombreCliente');
+  const sucursalSelect = document.getElementById('ccSucursal');
+  const usuarioInput = document.getElementById('ccUsuarioCarga');
+  const msg = document.getElementById('ccMensaje');
+
+  if (!btn || !nombreInput || !sucursalSelect || !usuarioInput) return;
+
+  if (btn.dataset.guardarActivo === '1') return;
+  btn.dataset.guardarActivo = '1';
+
+  btn.addEventListener('click', function() {
+    const usuarioSesion = obtenerUsuarioSesion();
+
+    const nombreCliente = nombreInput.value.trim();
+    const sucursal = sucursalSelect.value.trim();
+    const usuarioCarga = usuarioInput.value.trim();
+    const idUsuario = String(usuarioSesion.idUsuario || '').trim();
+
+    if (!nombreCliente) {
+      if (msg) msg.textContent = 'Selecciona o escribe el nombre del cliente.';
+      return;
+    }
+
+    if (!sucursal) {
+      if (msg) msg.textContent = 'Selecciona una sucursal.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+    if (msg) msg.textContent = 'Guardando cliente crédito...';
+
+    window.guardarClienteCreditoCallback = function(respuesta) {
+      btn.disabled = false;
+      btn.textContent = 'Guardar cliente';
+
+      if (!respuesta || respuesta.ok !== true) {
+        if (msg) msg.textContent = (respuesta && respuesta.message) || 'No se pudo guardar el cliente.';
+        return;
+      }
+
+      if (msg) msg.textContent = respuesta.message || 'Cliente crédito guardado correctamente.';
+
+      nombreInput.value = '';
+      sucursalSelect.value = '';
+    };
+
+    const script = document.createElement('script');
+    script.src = WEB_APP_URL
+      + '?action=guardarClienteCredito'
+      + '&nombreCliente=' + encodeURIComponent(nombreCliente)
+      + '&sucursal=' + encodeURIComponent(sucursal)
+      + '&usuarioCarga=' + encodeURIComponent(usuarioCarga)
+      + '&idUsuario=' + encodeURIComponent(idUsuario)
+      + '&callback=guardarClienteCreditoCallback'
+      + '&_ts=' + Date.now();
+
+    script.onerror = function() {
+      btn.disabled = false;
+      btn.textContent = 'Guardar cliente';
+      if (msg) msg.textContent = 'Error de conexión al guardar cliente.';
+    };
+
+    document.body.appendChild(script);
+  });
+}
+	  
 function activarNavegacionInterna() {
   document.querySelectorAll('.menu-item:not(.logout-item)').forEach(function(item) {
     item.addEventListener('click', function(e) {
