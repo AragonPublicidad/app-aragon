@@ -3007,6 +3007,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
         ["Producto", item.NOM_PRODUCTO],
         ["Medidas", `${item.ANCHO} x ${item.LARGO}`],
         ["Piezas", item.PIEZAS],
+		["UNIDAD", item.UNIDAD_MEDIDA],
         ["Responsable", item.RESPONSABLE],
         ["Urgente", item.URGENTE],
         ["Fecha/Hora", `${item.FECHA} ${item.HORA}`]
@@ -3358,7 +3359,9 @@ for (var i = 0; i < selectedFiles.length; i++) {
 var payload = {
   folio: currentItem.FOLIO || "",
   idrg: obtenerIDRG_(currentItem) || "",
+  unidadMedida: currentItem.UNIDAD_MEDIDA || "",
   totalM2: currentItem.TOTALM2 || "",
+  piezasItem: currentItem.PIEZAS || "",
   archivos: archivosValidacion,
   nombresArchivos: selectedFiles.map(function(file) {
     return file.name;
