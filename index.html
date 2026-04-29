@@ -3284,17 +3284,18 @@ function activarNavegacionInterna() {
       document.getElementById("modalSubtitle").textContent = `Folio ${item.FOLIO} · IDRG ${obtenerIDRG_(item)}`;
 
       const fields = [
-        ["IDRG", obtenerIDRG_(item)],
-        ["Folio", item.FOLIO],
-        ["Sucursal", item.SUCURSAL],
-        ["Producto", item.NOM_PRODUCTO],
-        ["Medidas", `${item.ANCHO} x ${item.LARGO}`],
-        ["Piezas", item.PIEZAS],
-		["UNIDAD", item.UNIDAD_MEDIDA],
-        ["Responsable", item.RESPONSABLE],
-        ["Urgente", item.URGENTE],
-        ["Fecha/Hora", `${item.FECHA} ${item.HORA}`]
-      ];
+  ["IDRG", obtenerIDRG_(item)],
+  ["Folio", item.FOLIO],
+  ["% Pagado", item.PORCENTAJE_PAGADO || "0.00%"],
+  ["Sucursal", item.SUCURSAL],
+  ["Producto", item.NOM_PRODUCTO],
+  ["Medidas", `${item.ANCHO} x ${item.LARGO}`],
+  ["Piezas", item.PIEZAS],
+  ["UNIDAD", item.UNIDAD_MEDIDA],
+  ["Responsable", item.RESPONSABLE],
+  ["Urgente", item.URGENTE],
+  ["Fecha/Hora", `${item.FECHA} ${item.HORA}`]
+];
 
       const resumenHTML = fields.map(([label, value]) => `
   <div class="info-cell">
