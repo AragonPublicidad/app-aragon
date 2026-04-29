@@ -2643,42 +2643,48 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       });
     }
 
-	function mostrarVistaTablero(vista) {
-	  const vistas = {
-	    usuarios: document.getElementById('vistaUsuarios'),
-	    produccion: document.getElementById('vistaProduccion'),
-	    clientesCredito: document.getElementById('vistaClientesCredito'),
-	    pendiente: document.getElementById('vistaPendiente')
-	  };
-	
-	  Object.keys(vistas).forEach(function(key) {
-	    if (vistas[key]) vistas[key].classList.add('vista-oculta');
-	  });
-	
-	  const destino = vistas[vista] || vistas.pendiente || vistas.usuarios;
-	  if (destino) destino.classList.remove('vista-oculta');
-	
-	  if (vista === 'clientesCredito') {
-	    inicializarClientesCredito();
-	  }
-	}
+function mostrarVistaTablero(vista) {
+  const vistas = {
+    usuarios: document.getElementById('vistaUsuarios'),
+    produccion: document.getElementById('vistaProduccion'),
+    clientesCredito: document.getElementById('vistaClientesCredito'),
+    pendiente: document.getElementById('vistaPendiente')
+  };
 
-	function inicializarClientesCredito() {
-  cargarSucursalesCC();
+  Object.keys(vistas).forEach(function(key) {
+    if (vistas[key]) {
+      vistas[key].classList.add('vista-oculta');
+    }
+  });
+
+  const destino = vistas[vista] || vistas.pendiente || vistas.usuarios;
+
+  if (destino) {
+    destino.classList.remove('vista-oculta');
+  }
+
+  if (vista === 'clientesCredito') {
+    inicializarClientesCredito();
+  }
+}
+
+function inicializarClientesCredito() {
   cargarUsuarioCC();
+  cargarSucursalesCC();
 }
 
 function cargarUsuarioCC() {
-  var usuario = localStorage.getItem("usuario") || "";
-  var campo = document.getElementById("ccUsuarioCarga");
+  const usuarioSesion = obtenerUsuarioSesion();
+  const nombreUsuario = String(usuarioSesion.nombre || usuarioSesion.usuario || '').trim();
+  const campo = document.getElementById('ccUsuarioCarga');
 
   if (campo) {
-    campo.value = usuario;
+    campo.value = nombreUsuario;
   }
 }
 
 function cargarSucursalesCC() {
-  var select = document.getElementById("ccSucursal");
+  const select = document.getElementById('ccSucursal');
 
   if (!select) return;
 
@@ -2688,33 +2694,40 @@ function cargarSucursalesCC() {
     .withSuccessHandler(function(data) {
       select.innerHTML = '<option value="">Selecciona una sucursal</option>';
 
-      data.forEach(function(s) {
-        var option = document.createElement("option");
-        option.value = s;
-        option.textContent = s;
+      (data || []).forEach(function(sucursal) {
+        const option = document.createElement('option');
+        option.value = sucursal;
+        option.textContent = sucursal;
         select.appendChild(option);
       });
     })
     .withFailureHandler(function(error) {
       select.innerHTML = '<option value="">Error al cargar sucursales</option>';
+
+      const msg = document.getElementById('ccMensaje');
+      if (msg) {
+        msg.textContent = 'Error al cargar sucursales: ' + (error.message || error);
+      }
     })
     .obtenerSucursalesClientesCredito_();
 }
-	  
-    function activarNavegacionInterna() {
-      document.querySelectorAll('.menu-item:not(.logout-item)').forEach(function(item) {
-        item.addEventListener('click', function(e) {
-          e.preventDefault();
 
-          document.querySelectorAll('.menu-item:not(.logout-item)').forEach(function(opcion) {
-            opcion.classList.remove('active');
-          });
+function activarNavegacionInterna() {
+  document.querySelectorAll('.menu-item:not(.logout-item)').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
 
-          item.classList.add('active');
-          mostrarVistaTablero(item.getAttribute('data-vista') || 'pendiente');
-        });
+      document.querySelectorAll('.menu-item:not(.logout-item)').forEach(function(opcion) {
+        opcion.classList.remove('active');
       });
-    }
+
+      item.classList.add('active');
+
+      const vista = item.getAttribute('data-vista') || 'pendiente';
+      mostrarVistaTablero(vista);
+    });
+  });
+}
 
     pintarUsuarioLogueado();
     aplicarPermisosMenu();
