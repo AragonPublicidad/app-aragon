@@ -2000,17 +2000,18 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
     <div class="modal-body">
       <div style="overflow-x:auto;">
         <table class="tabla-detalle">
-          <thead>
-            <tr>
-              <th>Fecha Carga</th>
-              <th>Folio</th>
-              <th>Sucursal</th>
-              <th>Nombre Archivo</th>
-              <th>Archivo</th>
-              <th>Sucursal Entrega</th>
-			  <th>Eliminar</th>
-            </tr>
-          </thead>
+		         <thead>
+		  <tr>
+		    <th>Fecha Carga</th>
+		    <th>Folio</th>
+		    <th>Sucursal</th>
+		    <th>Nombre Archivo</th>
+		    <th>Archivo</th>
+		    <th>Sucursal Entrega</th>
+		    <th>Tipo Impresión/Maquila</th>
+		    <th>Eliminar</th>
+		  </tr>
+		</thead>
           <tbody id="detalleArchivosBody"></tbody>
         </table>
       </div>
@@ -3521,6 +3522,28 @@ function guardarSucursalEntregaArchivo_(idCarga, sucursalEntrega, select) {
 
   document.body.appendChild(script);
 }
+
+	  function obtenerOpcionesTipoImpresion_(valorActual) {
+  const selectBase = document.getElementById("tipoImpresion");
+
+  if (!selectBase) return "";
+
+  const opciones = Array.from(selectBase.options)
+    .map(function(opt) {
+      return opt.value;
+    })
+    .filter(function(valor) {
+      return valor !== "";
+    });
+
+  return opciones.map(function(op) {
+    return `
+      <option value="${escapeHtml(op)}" ${op === valorActual ? "selected" : ""}>
+        ${escapeHtml(op)}
+      </option>
+    `;
+  }).join("");
+}
 	  
 function abrirDetalleArchivosPorIDRG(index) {
   const item = produccionItemsActuales[index];
@@ -3587,6 +3610,16 @@ function abrirDetalleArchivosPorIDRG(index) {
     onchange="guardarSucursalEntregaArchivo_('${escapeHtml(archivo.idCarga || "")}', this.value, this)"
   >
     ${obtenerOpcionesSucursalEntrega_(archivo.sucursalEntrega || archivo.sucursal || "")}
+  </select>
+</td>
+
+<td>
+  <select
+    class="select-tipo-impresion"
+    data-valor-anterior="${escapeHtml(archivo.tipoImpresionMaquila || "")}"
+    onchange="guardarTipoImpresionMaquilaArchivo_('${escapeHtml(archivo.idCarga || "")}', this.value, this)"
+  >
+    ${obtenerOpcionesTipoImpresion_(archivo.tipoImpresionMaquila || "")}
   </select>
 </td>
 <td>
