@@ -1807,7 +1807,58 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
         </div>
       </section>
       </div>
-      <div id="vistaProduccion" class="vista-modulo vista-oculta">
+
+
+		  
+      <div id="vistaPendiente" class="vista-modulo vista-oculta">
+
+</div>
+
+<div id="vistaClientesCredito" class="vista-modulo vista-oculta">
+  <div class="topbar">
+    <div class="page-title">
+      <h2>Clientes Crédito</h2>
+      <p>Alta de clientes crédito desde nombres únicos del CSV.</p>
+    </div>
+  </div>
+
+  <div class="card panel-body">
+    <div class="panel-header">
+      <div>
+        <h3>Nuevo cliente crédito</h3>
+        <p>Selecciona un cliente del CSV y asigna la sucursal correspondiente.</p>
+      </div>
+      <span class="tag">Clientes Crédito</span>
+    </div>
+
+    <form id="formClientesCredito">
+      <div class="field full">
+        <label for="ccNombreCliente">Nombre del Cliente</label>
+        <input type="text" id="ccNombreCliente" placeholder="Escribe al menos 2 letras para buscar..." autocomplete="off">
+        <div id="ccResultadosClientes" class="folio-suggestions"></div>
+      </div>
+
+      <div class="field">
+        <label for="ccSucursal">Sucursal</label>
+        <select id="ccSucursal"></select>
+      </div>
+
+      <div class="field">
+        <label>Usuario Carga</label>
+        <input type="text" id="ccUsuarioCarga" readonly>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" id="btnLimpiarClientesCredito">Limpiar</button>
+        <button type="button" class="btn btn-primary" id="btnGuardarClientesCredito">Guardar cliente</button>
+      </div>
+
+      <div id="ccMensaje" class="field full helper"></div>
+    </form>
+  </div>
+</div>
+
+<div id="vistaProduccion" class="vista-modulo vista-oculta">
         <main class="module module-embedded">
 
     <div class="topbar">
@@ -1968,54 +2019,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
   </div>
 </div>
 
-		  <div id="vistaClientesCredito" class="vista-modulo vista-oculta">
-  <div class="topbar">
-    <div class="page-title">
-      <h2>Clientes Crédito</h2>
-      <p>Alta de clientes crédito desde nombres únicos del CSV.</p>
-    </div>
-  </div>
 
-  <div class="card panel-body">
-    <div class="panel-header">
-      <div>
-        <h3>Nuevo cliente crédito</h3>
-        <p>Selecciona un cliente del CSV y asigna la sucursal correspondiente.</p>
-      </div>
-      <span class="tag">Clientes Crédito</span>
-    </div>
-
-    <form id="formClientesCredito">
-      <div class="field full">
-        <label for="ccNombreCliente">Nombre del Cliente</label>
-        <input type="text" id="ccNombreCliente" placeholder="Escribe al menos 2 letras para buscar..." autocomplete="off">
-        <div id="ccResultadosClientes" class="folio-suggestions"></div>
-        <div class="helper">El nombre se toma de la columna NOM_CLIENTE del CSV.</div>
-      </div>
-
-      <div class="field">
-        <label for="ccSucursal">Sucursal</label>
-        <select id="ccSucursal">
-          <option value="">Cargando sucursales...</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Usuario Carga</label>
-        <input type="text" id="ccUsuarioCarga" readonly>
-      </div>
-
-      <div class="actions">
-        <button type="button" class="btn btn-secondary" id="btnLimpiarClientesCredito">Limpiar</button>
-        <button type="button" class="btn btn-primary" id="btnGuardarClientesCredito">Guardar cliente</button>
-      </div>
-
-      <div id="ccMensaje" class="field full helper"></div>
-    </form>
-  </div>
-</div>
-		  
-      <div id="vistaPendiente" class="vista-modulo vista-oculta">
         <div class="card panel-body">
           <div class="panel-header"><div><h3>Módulo en preparación</h3><p>Esta vista aún no está integrada en el tablero.</p></div></div>
         </div>
