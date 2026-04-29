@@ -2694,30 +2694,37 @@ function cargarSucursalesCC() {
 
   select.innerHTML = '<option value="">Cargando sucursales...</option>';
 
-  if (typeof google === 'undefined' || !google.script || !google.script.run) {
-    select.innerHTML = '<option value="">Error</option>';
-    if (msg) msg.textContent = 'Error: google.script.run no está disponible en este HTML.';
-    return;
-  }
+  window.sucursalesClientesCreditoCallback = function(respuesta) {
+    select.innerHTML = '<option value="">Selecciona una sucursal</option>';
 
-  google.script.run
-    .withSuccessHandler(function(data) {
-      select.innerHTML = '<option value="">Selecciona una sucursal</option>';
-
-      (data || []).forEach(function(sucursal) {
-        const option = document.createElement('option');
-        option.value = sucursal;
-        option.textContent = sucursal;
-        select.appendChild(option);
-      });
-
-      if (msg) msg.textContent = '';
-    })
-    .withFailureHandler(function(error) {
+    if (!respuesta || respuesta.ok !== true) {
       select.innerHTML = '<option value="">Error al cargar sucursales</option>';
-      if (msg) msg.textContent = 'Error al cargar sucursales: ' + (error.message || error);
-    })
-    .obtenerSucursalesClientesCredito();
+      if (msg) msg.textContent = (respuesta && respuesta.message) || 'No se pudieron cargar las sucursales.';
+      return;
+    }
+
+    (respuesta.data || []).forEach(function(sucursal) {
+      const option = document.createElement('option');
+      option.value = sucursal;
+      option.textContent = sucursal;
+      select.appendChild(option);
+    });
+
+    if (msg) msg.textContent = '';
+  };
+
+  const script = document.createElement('script');
+  script.src = WEB_APP_URL
+    + '?action=getSucursalesClientesCredito'
+    + '&callback=sucursalesClientesCreditoCallback'
+    + '&_ts=' + Date.now();
+
+  script.onerror = function() {
+    select.innerHTML = '<option value="">Error al cargar sucursales</option>';
+    if (msg) msg.textContent = 'Error de conexión al cargar sucursales.';
+  };
+
+  document.body.appendChild(script);
 }
 
 function activarBuscadorClientesCredito() {
@@ -2737,37 +2744,53 @@ function activarBuscadorClientesCredito() {
 
     if (texto.length < 2) return;
 
-    google.script.run
-      .withSuccessHandler(function(data) {
-        contenedor.innerHTML = '';
+    window.nombresClientesCreditoCallback = function(respuesta) {
+      contenedor.innerHTML = '';
 
-        if (!data || data.length === 0) {
-          contenedor.innerHTML = '<div class="folio-suggestion-empty">Sin coincidencias</div>';
-          contenedor.classList.add('open');
-          return;
-        }
-
-        data.forEach(function(nombre) {
-          const div = document.createElement('div');
-          div.className = 'folio-suggestion';
-          div.textContent = nombre;
-
-          div.addEventListener('click', function() {
-            input.value = nombre;
-            contenedor.innerHTML = '';
-            contenedor.classList.remove('open');
-          });
-
-          contenedor.appendChild(div);
-        });
-
-        contenedor.classList.add('open');
-      })
-      .withFailureHandler(function(error) {
+      if (!respuesta || respuesta.ok !== true) {
         contenedor.innerHTML = '<div class="folio-suggestion-empty">Error al buscar clientes</div>';
         contenedor.classList.add('open');
-      })
-      .obtenerNombresClientesCSV(texto);
+        return;
+      }
+
+      const data = respuesta.data || [];
+
+      if (data.length === 0) {
+        contenedor.innerHTML = '<div class="folio-suggestion-empty">Sin coincidencias</div>';
+        contenedor.classList.add('open');
+        return;
+      }
+
+      data.forEach(function(nombre) {
+        const div = document.createElement('div');
+        div.className = 'folio-suggestion';
+        div.textContent = nombre;
+
+        div.addEventListener('click', function() {
+          input.value = nombre;
+          contenedor.innerHTML = '';
+          contenedor.classList.remove('open');
+        });
+
+        contenedor.appendChild(div);
+      });
+
+      contenedor.classList.add('open');
+    };
+
+    const script = document.createElement('script');
+    script.src = WEB_APP_URL
+      + '?action=getNombresClientesCredito'
+      + '&texto=' + encodeURIComponent(texto)
+      + '&callback=nombresClientesCreditoCallback'
+      + '&_ts=' + Date.now();
+
+    script.onerror = function() {
+      contenedor.innerHTML = '<div class="folio-suggestion-empty">Error de conexión</div>';
+      contenedor.classList.add('open');
+    };
+
+    document.body.appendChild(script);
   });
 }
 
