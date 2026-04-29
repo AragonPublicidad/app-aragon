@@ -1611,6 +1611,12 @@ body {
           <span class="menu-icon">📦</span>
           <span class="menu-label">Producción</span>
         </a>
+		  
+		<a href="#" class="menu-item" data-vista="clientesCredito" data-modulo="Clientes Crédito">
+		  <span class="menu-icon">💳</span>
+		  <span class="menu-label">Clientes Crédito</span>
+		</a>
+		  
         <a href="#" class="menu-item" data-vista="pendiente" data-modulo="Entregas">
           <span class="menu-icon">🚚</span>
           <span class="menu-label">Entregas</span>
@@ -1961,7 +1967,54 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
   </div>
 </div>
-	  
+
+		  <div id="vistaClientesCredito" class="vista-modulo vista-oculta">
+  <div class="topbar">
+    <div class="page-title">
+      <h2>Clientes Crédito</h2>
+      <p>Alta de clientes crédito desde nombres únicos del CSV.</p>
+    </div>
+  </div>
+
+  <div class="card panel-body">
+    <div class="panel-header">
+      <div>
+        <h3>Nuevo cliente crédito</h3>
+        <p>Selecciona un cliente del CSV y asigna la sucursal correspondiente.</p>
+      </div>
+      <span class="tag">Clientes Crédito</span>
+    </div>
+
+    <form id="formClientesCredito">
+      <div class="field full">
+        <label for="ccNombreCliente">Nombre del Cliente</label>
+        <input type="text" id="ccNombreCliente" placeholder="Escribe al menos 2 letras para buscar..." autocomplete="off">
+        <div id="ccResultadosClientes" class="folio-suggestions"></div>
+        <div class="helper">El nombre se toma de la columna NOM_CLIENTE del CSV.</div>
+      </div>
+
+      <div class="field">
+        <label for="ccSucursal">Sucursal</label>
+        <select id="ccSucursal">
+          <option value="">Cargando sucursales...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Usuario Carga</label>
+        <input type="text" id="ccUsuarioCarga" readonly>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" id="btnLimpiarClientesCredito">Limpiar</button>
+        <button type="button" class="btn btn-primary" id="btnGuardarClientesCredito">Guardar cliente</button>
+      </div>
+
+      <div id="ccMensaje" class="field full helper"></div>
+    </form>
+  </div>
+</div>
+		  
       <div id="vistaPendiente" class="vista-modulo vista-oculta">
         <div class="card panel-body">
           <div class="panel-header"><div><h3>Módulo en preparación</h3><p>Esta vista aún no está integrada en el tablero.</p></div></div>
@@ -2590,21 +2643,64 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       });
     }
 
-    function mostrarVistaTablero(vista) {
-      const vistas = {
-        usuarios: document.getElementById('vistaUsuarios'),
-        produccion: document.getElementById('vistaProduccion'),
-        pendiente: document.getElementById('vistaPendiente')
-      };
+	function mostrarVistaTablero(vista) {
+	  const vistas = {
+	    usuarios: document.getElementById('vistaUsuarios'),
+	    produccion: document.getElementById('vistaProduccion'),
+	    clientesCredito: document.getElementById('vistaClientesCredito'),
+	    pendiente: document.getElementById('vistaPendiente')
+	  };
+	
+	  Object.keys(vistas).forEach(function(key) {
+	    if (vistas[key]) vistas[key].classList.add('vista-oculta');
+	  });
+	
+	  const destino = vistas[vista] || vistas.pendiente || vistas.usuarios;
+	  if (destino) destino.classList.remove('vista-oculta');
+	
+	  if (vista === 'clientesCredito') {
+	    inicializarClientesCredito();
+	  }
+	}
 
-      Object.keys(vistas).forEach(function(key) {
-        if (vistas[key]) vistas[key].classList.add('vista-oculta');
+	function inicializarClientesCredito() {
+  cargarSucursalesCC();
+  cargarUsuarioCC();
+}
+
+function cargarUsuarioCC() {
+  var usuario = localStorage.getItem("usuario") || "";
+  var campo = document.getElementById("ccUsuarioCarga");
+
+  if (campo) {
+    campo.value = usuario;
+  }
+}
+
+function cargarSucursalesCC() {
+  var select = document.getElementById("ccSucursal");
+
+  if (!select) return;
+
+  select.innerHTML = '<option value="">Cargando sucursales...</option>';
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+      select.innerHTML = '<option value="">Selecciona una sucursal</option>';
+
+      data.forEach(function(s) {
+        var option = document.createElement("option");
+        option.value = s;
+        option.textContent = s;
+        select.appendChild(option);
       });
-
-      const destino = vistas[vista] || vistas.pendiente || vistas.usuarios;
-      if (destino) destino.classList.remove('vista-oculta');
-    }
-
+    })
+    .withFailureHandler(function(error) {
+      select.innerHTML = '<option value="">Error al cargar sucursales</option>';
+    })
+    .obtenerSucursalesClientesCredito_();
+}
+	  
     function activarNavegacionInterna() {
       document.querySelectorAll('.menu-item:not(.logout-item)').forEach(function(item) {
         item.addEventListener('click', function(e) {
