@@ -2675,6 +2675,7 @@ function mostrarVistaTablero(vista) {
 function inicializarClientesCredito() {
   cargarUsuarioCC();
   cargarSucursalesCC();
+  activarBuscadorClientesCredito();
 }
 
 function cargarUsuarioCC() {
@@ -2713,7 +2714,58 @@ function cargarSucursalesCC() {
         msg.textContent = 'Error al cargar sucursales: ' + (error.message || error);
       }
     })
-    .obtenerSucursalesClientesCredito_();
+    .obtenerSucursalesClientesCredito();
+}
+
+function activarBuscadorClientesCredito() {
+  const input = document.getElementById('ccNombreCliente');
+  const contenedor = document.getElementById('ccResultadosClientes');
+
+  if (!input || !contenedor) return;
+
+  if (input.dataset.buscadorActivo === '1') return;
+  input.dataset.buscadorActivo = '1';
+
+  input.addEventListener('input', function() {
+    const texto = input.value.trim();
+
+    contenedor.innerHTML = '';
+    contenedor.classList.remove('open');
+
+    if (texto.length < 2) return;
+
+    google.script.run
+      .withSuccessHandler(function(data) {
+        contenedor.innerHTML = '';
+
+        if (!data || data.length === 0) {
+          contenedor.innerHTML = '<div class="folio-suggestion-empty">Sin coincidencias</div>';
+          contenedor.classList.add('open');
+          return;
+        }
+
+        data.forEach(function(nombre) {
+          const div = document.createElement('div');
+          div.className = 'folio-suggestion';
+          div.textContent = nombre;
+
+          div.addEventListener('click', function() {
+            input.value = nombre;
+            contenedor.innerHTML = '';
+            contenedor.classList.remove('open');
+          });
+
+          contenedor.appendChild(div);
+        });
+
+        contenedor.classList.add('open');
+      })
+      .withFailureHandler(function(error) {
+        contenedor.innerHTML = '<div class="folio-suggestion-empty">Error al buscar clientes</div>';
+        contenedor.classList.add('open');
+      })
+      .obtenerNombresClientesCSV(texto);
+  });
 }
 
 function activarNavegacionInterna() {
