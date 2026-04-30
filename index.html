@@ -1914,7 +1914,9 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
               </thead>
               <tbody>
                 <tr>
-  <td style="text-align:center;">⬇️</td>
+  <td style="text-align:center;">
+  <button class="btn-proceso" onclick="toggleDescarga(this, 'https://ejemplo.com/archivo.pdf')">⬇️</button>
+</td>
   <td>archivo_ejemplo.pdf</td>
   <td>1</td>
  <td>24/04/2026 21:35:28</td>
@@ -2404,6 +2406,18 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
     fechaSpan.textContent = fechaHora;
   }
 }
+
+function toggleDescarga(btn, url) {
+  const estaActivo = btn.classList.contains('activo');
+
+  if (estaActivo) {
+    btn.classList.remove('activo');
+  } else {
+    btn.classList.add('activo');
+    window.open(url, '_blank');
+  }
+}
+	  
 
 // Estado de filtros
 const filtrosTaller = {
