@@ -2538,51 +2538,70 @@ function pintarTablaTalleres(data) {
   const tbody = contenedor.querySelector("tbody");
 
   if (!data || data.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8">No hay trabajos para mostrar.</td>
-      </tr>
-    `;
+    tbody.innerHTML = `<tr><td colspan="8">No hay trabajos para mostrar.</td></tr>`;
     return;
   }
 
+  const grupos = {};
+
   data.forEach(function(item) {
-    const tr = document.createElement("tr");
-    const fechaHora = `${item.fechaCarga || ""} ${item.horaCarga || ""}`.trim();
+    const tipo = item.tipoImpresionMaquila || "Sin tipo";
+    if (!grupos[tipo]) grupos[tipo] = [];
+    grupos[tipo].push(item);
+  });
 
-    tr.innerHTML = `
-      <td style="text-align:center;">
-        <button class="btn-proceso" onclick="toggleDescarga(this, '${item.urlArchivo || ""}')">⬇️</button>
-      </td>
-
-      <td>${item.nombreArchivo || ""}</td>
-      <td>${item.piezas || ""}</td>
-      <td>${fechaHora}</td>
-      <td>${item.tipoImpresionMaquila || ""}</td>
-
-      <td>
-        <div class="estado-proceso">
-          <button class="btn-proceso ${item.impreso === "Si" ? "activo" : ""}" data-proceso="impreso" onclick="toggleProceso(this)">🖨️</button>
-          <span class="fecha-proceso">${item.fechaHoraImpresion || ""}</span>
-        </div>
-      </td>
-
-      <td>
-        <div class="estado-proceso">
-          <button class="btn-proceso ${item.suajado === "Si" ? "activo" : ""}" data-proceso="suajado" onclick="toggleProceso(this)">✂️</button>
-          <span class="fecha-proceso">${item.fechaHoraSuaje || ""}</span>
-        </div>
-      </td>
-
-      <td>
-        <div class="estado-proceso">
-          <button class="btn-proceso ${item.terminado === "Si" ? "activo" : ""}" data-proceso="terminado" onclick="toggleProceso(this)">📦</button>
-          <span class="fecha-proceso">${item.fechaHoraTerminado || ""}</span>
-        </div>
+  Object.keys(grupos).sort().forEach(function(tipo) {
+    const grupoTr = document.createElement("tr");
+    grupoTr.className = "grupo-taller-row";
+    grupoTr.innerHTML = `
+      <td colspan="8">
+        <strong>${tipo}</strong>
+        <span class="grupo-taller-contador">${grupos[tipo].length}</span>
       </td>
     `;
+    tbody.appendChild(grupoTr);
 
-    tbody.appendChild(tr);
+    grupos[tipo].forEach(function(item) {
+      const tr = document.createElement("tr");
+      tr.className = "fila-taller";
+      tr.dataset.grupo = tipo;
+
+      const fechaHora = `${item.fechaCarga || ""} ${item.horaCarga || ""}`.trim();
+
+      tr.innerHTML = `
+        <td style="text-align:center;">
+          <button class="btn-proceso" onclick="toggleDescarga(this, '${item.urlArchivo || ""}')">⬇️</button>
+        </td>
+
+        <td class="col-nombre-archivo">${item.nombreArchivo || ""}</td>
+        <td>${item.piezas || ""}</td>
+        <td>${fechaHora}</td>
+        <td>${item.tipoImpresionMaquila || ""}</td>
+
+        <td>
+          <div class="estado-proceso">
+            <button class="btn-proceso ${item.impreso === "Si" ? "activo" : ""}" data-proceso="impreso" onclick="toggleProceso(this)">🖨️</button>
+            <span class="fecha-proceso">${item.fechaHoraImpresion || ""}</span>
+          </div>
+        </td>
+
+        <td>
+          <div class="estado-proceso">
+            <button class="btn-proceso ${item.suajado === "Si" ? "activo" : ""}" data-proceso="suajado" onclick="toggleProceso(this)">✂️</button>
+            <span class="fecha-proceso">${item.fechaHoraSuaje || ""}</span>
+          </div>
+        </td>
+
+        <td>
+          <div class="estado-proceso">
+            <button class="btn-proceso ${item.terminado === "Si" ? "activo" : ""}" data-proceso="terminado" onclick="toggleProceso(this)">📦</button>
+            <span class="fecha-proceso">${item.fechaHoraTerminado || ""}</span>
+          </div>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
   });
 
   aplicarFiltrosTaller();
@@ -2639,7 +2658,7 @@ function initFiltrosTaller() {
 }
 
 function aplicarFiltrosTaller() {
-  const filas = document.querySelectorAll('#contenedorTalleres tbody tr');
+  const filas = document.querySelectorAll('#contenedorTalleres tbody tr.fila-taller');
 
   filas.forEach(tr => {
     const nombre = tr.children[1].textContent.toLowerCase();
@@ -2651,27 +2670,30 @@ function aplicarFiltrosTaller() {
 
     let visible = true;
 
-    if (filtrosTaller.texto && !nombre.includes(filtrosTaller.texto)) {
-      visible = false;
-    }
-
-    if (filtrosTaller.tipo && !tipo.includes(filtrosTaller.tipo)) {
-      visible = false;
-    }
-
-    if (filtrosTaller.impreso && !impresoActivo) {
-      visible = false;
-    }
-
-    if (filtrosTaller.suajado && !suajadoActivo) {
-      visible = false;
-    }
-
-    if (filtrosTaller.terminado && !terminadoActivo) {
-      visible = false;
-    }
+    if (filtrosTaller.texto && !nombre.includes(filtrosTaller.texto)) visible = false;
+    if (filtrosTaller.tipo && !tipo.includes(filtrosTaller.tipo)) visible = false;
+    if (filtrosTaller.impreso && !impresoActivo) visible = false;
+    if (filtrosTaller.suajado && !suajadoActivo) visible = false;
+    if (filtrosTaller.terminado && !terminadoActivo) visible = false;
 
     tr.style.display = visible ? '' : 'none';
+  });
+
+  const grupos = document.querySelectorAll('#contenedorTalleres tbody tr.grupo-taller-row');
+
+  grupos.forEach(grupo => {
+    let siguiente = grupo.nextElementSibling;
+    let tieneVisible = false;
+
+    while (siguiente && siguiente.classList.contains('fila-taller')) {
+      if (siguiente.style.display !== 'none') {
+        tieneVisible = true;
+        break;
+      }
+      siguiente = siguiente.nextElementSibling;
+    }
+
+    grupo.style.display = tieneVisible ? '' : 'none';
   });
 }
 
