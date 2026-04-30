@@ -1855,25 +1855,6 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
       <div id="ccMensaje" class="field full helper"></div>
     </form>
-
-    <div class="placeholder-table" style="margin-top: 18px;">
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre del Cliente</th>
-            <th>Sucursal</th>
-            <th>Usuario Carga</th>
-            <th>Fecha y Hora Carga</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody id="tablaClientesCreditoBody">
-          <tr>
-            <td colspan="5">Cargando clientes crédito...</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
   </div>
 </div>
 
@@ -2695,70 +2676,7 @@ function inicializarClientesCredito() {
   cargarSucursalesCC();
   activarBuscadorClientesCredito();
   activarGuardarClientesCredito();
-  cargarTablaClientesCredito();
 }
-
-function cargarTablaClientesCredito() {
-  const tbody = document.getElementById("tablaClientesCreditoBody");
-
-  if (!tbody) return;
-
-  tbody.innerHTML = `
-    <tr>
-      <td colspan="5">Cargando clientes crédito...</td>
-    </tr>
-  `;
-
-  jsonp(WEB_APP_URL + "?action=getClientesCredito", function(res) {
-    tbody.innerHTML = "";
-
-    if (!res || !res.ok || !Array.isArray(res.data) || res.data.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="5">No hay clientes crédito registrados.</td>
-        </tr>
-      `;
-      return;
-    }
-
-    res.data.forEach(function(cliente) {
-      const tr = document.createElement("tr");
-
-      tr.innerHTML = `
-        <td>${cliente.nombreCliente || ""}</td>
-        <td>${cliente.sucursal || ""}</td>
-        <td>${cliente.usuarioCarga || ""}</td>
-        <td>${cliente.fechaHoraCarga || ""}</td>
-        <td>
-          <button type="button" class="btn-delete" onclick="eliminarClienteCreditoDesdeTabla('${cliente.idCliente}')">
-            🗑️
-          </button>
-        </td>
-      `;
-
-      tbody.appendChild(tr);
-    });
-  });
-}	 
-
-function eliminarClienteCreditoDesdeTabla(idCliente) {
-
-  if (!idCliente) return;
-
-  var confirmar = confirm("¿Seguro que deseas eliminar este cliente?");
-
-  if (!confirmar) return;
-
-  jsonp(WEB_APP_URL + "?action=eliminarClienteCredito&idCliente=" + encodeURIComponent(idCliente), function(res) {
-
-    if (res && res.ok) {
-      cargarTablaClientesCredito();
-    } else {
-      alert(res.message || "Error al eliminar el cliente.");
-    }
-
-  });
-}	  
 
 function cargarUsuarioCC() {
   const usuarioSesion = obtenerUsuarioSesion();
@@ -2823,7 +2741,8 @@ function activarBuscadorClientesCredito() {
   input.addEventListener('input', function() {
     const texto = input.value.trim();
 
-    
+    contenedor.innerHTML = '';
+    contenedor.classList.remove('open');
 
     if (texto.length < 2) return;
 
@@ -2883,7 +2802,6 @@ function activarGuardarClientesCredito() {
   const sucursalSelect = document.getElementById('ccSucursal');
   const usuarioInput = document.getElementById('ccUsuarioCarga');
   const msg = document.getElementById('ccMensaje');
-  Queconst contenedor = document.getElementById('ccResultadosClientes');
 
   if (!btn || !nombreInput || !sucursalSelect || !usuarioInput) return;
 
@@ -2921,11 +2839,7 @@ function activarGuardarClientesCredito() {
         return;
       }
 
-     if (msg) msg.textContent = respuesta.message || 'Cliente crédito guardado correctamente.';
-
-nombreInput.value = '';
-sucursalSelect.value = '';
-cargarTablaClientesCredito();
+      if (msg) msg.textContent = respuesta.message || 'Cliente crédito guardado correctamente.';
 
       nombreInput.value = '';
       sucursalSelect.value = '';
