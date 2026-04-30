@@ -2923,13 +2923,8 @@ function activarGuardarClientesCredito() {
 
      if (msg) msg.textContent = respuesta.message || 'Cliente crédito guardado correctamente.';
 
-// 🔄 Limpiar formulario
 nombreInput.value = '';
 sucursalSelect.value = '';
-contenedor.innerHTML = '';
-contenedor.classList.remove('open');
-
-// 🔄 Recargar tabla
 cargarTablaClientesCredito();
 
       nombreInput.value = '';
