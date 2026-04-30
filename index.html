@@ -2755,6 +2755,39 @@ function cargarTablaClientesCredito() {
   document.body.appendChild(script);
 }
 
+function eliminarClienteCreditoDesdeTabla(idCliente) {
+  if (!idCliente) {
+    alert("No se encontró el ID del cliente.");
+    return;
+  }
+
+  if (!confirm("¿Seguro que deseas eliminar este cliente crédito?")) {
+    return;
+  }
+
+  window.eliminarClienteCreditoCallback = function(res) {
+    if (res && res.ok === true) {
+      cargarTablaClientesCredito();
+    } else {
+      alert((res && res.message) || "No se pudo eliminar el cliente.");
+    }
+  };
+
+  const script = document.createElement("script");
+  script.src = WEB_APP_URL
+    + "?action=eliminarClienteCredito"
+    + "&idCliente=" + encodeURIComponent(idCliente)
+    + "&callback=eliminarClienteCreditoCallback"
+    + "&_ts=" + Date.now();
+
+  script.onerror = function() {
+    alert("Error de conexión al intentar eliminar el cliente.");
+  };
+
+  document.body.appendChild(script);
+}	  
+	  
+
 	  
 function cargarUsuarioCC() {
   const usuarioSesion = obtenerUsuarioSesion();
