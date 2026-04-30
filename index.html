@@ -2699,7 +2699,6 @@ function inicializarClientesCredito() {
 
 function cargarTablaClientesCredito() {
   const tbody = document.getElementById("tablaClientesCreditoBody");
-
   if (!tbody) return;
 
   tbody.innerHTML = `
@@ -2708,14 +2707,13 @@ function cargarTablaClientesCredito() {
     </tr>
   `;
 
-  jsonp(WEB_APP_URL + "?action=getClientesCredito", function(res) {
-
+  window.clientesCreditoTablaCallback = function(res) {
     tbody.innerHTML = "";
 
-    if (!res || !res.ok || !Array.isArray(res.data) || res.data.length === 0) {
+    if (!res || res.ok !== true || !Array.isArray(res.data) || res.data.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="5">No hay clientes registrados.</td>
+          <td colspan="5">No hay clientes crédito registrados.</td>
         </tr>
       `;
       return;
@@ -2730,14 +2728,31 @@ function cargarTablaClientesCredito() {
         <td>${c.usuarioCarga || ""}</td>
         <td>${c.fechaHoraCarga || ""}</td>
         <td>
-          <button onclick="eliminarClienteCreditoDesdeTabla('${c.idCliente}')">🗑️</button>
+          <button type="button" class="btn-delete" onclick="eliminarClienteCreditoDesdeTabla('${c.idCliente || ""}')">
+            🗑️
+          </button>
         </td>
       `;
 
       tbody.appendChild(tr);
     });
+  };
 
-  });
+  const script = document.createElement("script");
+  script.src = WEB_APP_URL
+    + "?action=getClientesCredito"
+    + "&callback=clientesCreditoTablaCallback"
+    + "&_ts=" + Date.now();
+
+  script.onerror = function() {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5">No se pudo conectar con Apps Script.</td>
+      </tr>
+    `;
+  };
+
+  document.body.appendChild(script);
 }
 
 	  
