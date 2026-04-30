@@ -1865,6 +1865,27 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
         </div>
       </div>
 
+<div class="filters" style="grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto;">
+  <div class="field">
+    <label>Buscar archivo</label>
+    <input id="filtroTallerArchivo" type="text" placeholder="Buscar por nombre de archivo...">
+  </div>
+
+  <div class="field">
+    <label>Tipo Impresión/Maquila</label>
+    <input id="filtroTallerTipo" type="text" placeholder="Buscar por tipo...">
+  </div>
+
+  <div class="field">
+    <label>Procesos</label>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button type="button" class="btn btn-secondary btn-small" id="filtroTallerImpreso">Impresos</button>
+      <button type="button" class="btn btn-secondary btn-small" id="filtroTallerSuajado">Suajado</button>
+      <button type="button" class="btn btn-secondary btn-small" id="filtroTallerTerminado">Terminado</button>
+    </div>
+  </div>
+</div>
+		
       <div id="contenedorTalleres">
         <div style="margin-bottom:18px;">
           <span class="tag">LONA</span>
@@ -1877,6 +1898,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 				  <th>Nombre Archivo</th>
 				  <th>Piezas</th>
 				  <th>Fecha y Hora</th>
+				  <th>Tipo Impresión/Maquila</th>	
 				  <th>Impreso</th>
 				  <th>Suajado</th>
 				  <th>Terminado</th>
@@ -1887,7 +1909,8 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
   <td style="text-align:center;">⬇️</td>
   <td>archivo_ejemplo.pdf</td>
   <td>1</td>
-  <td>24/04/2026 21:35:28</td>
+ <td>24/04/2026 21:35:28</td>
+ <td>LONA</td>
 
   <!-- Impreso -->
   <td>
@@ -2374,6 +2397,90 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
   }
 }
 
+// Estado de filtros
+const filtrosTaller = {
+  texto: '',
+  tipo: '',
+  impreso: false,
+  suajado: false,
+  terminado: false
+};
+
+function initFiltrosTaller() {
+  const inputTexto = document.getElementById('filtroTallerArchivo');
+  const inputTipo = document.getElementById('filtroTallerTipo');
+
+  const btnImpreso = document.getElementById('filtroTallerImpreso');
+  const btnSuajado = document.getElementById('filtroTallerSuajado');
+  const btnTerminado = document.getElementById('filtroTallerTerminado');
+
+  inputTexto.addEventListener('input', () => {
+    filtrosTaller.texto = inputTexto.value.toLowerCase();
+    aplicarFiltrosTaller();
+  });
+
+  inputTipo.addEventListener('input', () => {
+    filtrosTaller.tipo = inputTipo.value.toLowerCase();
+    aplicarFiltrosTaller();
+  });
+
+  btnImpreso.addEventListener('click', () => {
+    filtrosTaller.impreso = !filtrosTaller.impreso;
+    btnImpreso.classList.toggle('activo');
+    aplicarFiltrosTaller();
+  });
+
+  btnSuajado.addEventListener('click', () => {
+    filtrosTaller.suajado = !filtrosTaller.suajado;
+    btnSuajado.classList.toggle('activo');
+    aplicarFiltrosTaller();
+  });
+
+  btnTerminado.addEventListener('click', () => {
+    filtrosTaller.terminado = !filtrosTaller.terminado;
+    btnTerminado.classList.toggle('activo');
+    aplicarFiltrosTaller();
+  });
+}
+
+function aplicarFiltrosTaller() {
+  const filas = document.querySelectorAll('#contenedorTalleres tbody tr');
+
+  filas.forEach(tr => {
+    const nombre = tr.children[1].textContent.toLowerCase();
+    const tipo = tr.children[4].textContent.toLowerCase();
+
+    const impresoActivo = tr.children[5].querySelector('.btn-proceso').classList.contains('activo');
+    const suajadoActivo = tr.children[6].querySelector('.btn-proceso').classList.contains('activo');
+    const terminadoActivo = tr.children[7].querySelector('.btn-proceso').classList.contains('activo');
+
+    let visible = true;
+
+    if (filtrosTaller.texto && !nombre.includes(filtrosTaller.texto)) {
+      visible = false;
+    }
+
+    if (filtrosTaller.tipo && !tipo.includes(filtrosTaller.tipo)) {
+      visible = false;
+    }
+
+    if (filtrosTaller.impreso && !impresoActivo) {
+      visible = false;
+    }
+
+    if (filtrosTaller.suajado && !suajadoActivo) {
+      visible = false;
+    }
+
+    if (filtrosTaller.terminado && !terminadoActivo) {
+      visible = false;
+    }
+
+    tr.style.display = visible ? '' : 'none';
+  });
+}
+
+	  
     function limpiarMensaje() {
       mensaje.style.display = 'none';
       mensaje.textContent = '';
@@ -2827,6 +2934,10 @@ function mostrarVistaTablero(vista) {
 
   if (vista === 'clientesCredito') {
     inicializarClientesCredito();
+  }
+
+  if (vista === 'talleres') {
+    initFiltrosTaller();
   }
 }
 
