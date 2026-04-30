@@ -2694,8 +2694,53 @@ function inicializarClientesCredito() {
   cargarSucursalesCC();
   activarBuscadorClientesCredito();
   activarGuardarClientesCredito();
+  cargarTablaClientesCredito();
 }
 
+function cargarTablaClientesCredito() {
+  const tbody = document.getElementById("tablaClientesCreditoBody");
+
+  if (!tbody) return;
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="5">Cargando clientes crédito...</td>
+    </tr>
+  `;
+
+  jsonp(WEB_APP_URL + "?action=getClientesCredito", function(res) {
+
+    tbody.innerHTML = "";
+
+    if (!res || !res.ok || !Array.isArray(res.data) || res.data.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5">No hay clientes registrados.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    res.data.forEach(function(c) {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${c.nombreCliente || ""}</td>
+        <td>${c.sucursal || ""}</td>
+        <td>${c.usuarioCarga || ""}</td>
+        <td>${c.fechaHoraCarga || ""}</td>
+        <td>
+          <button onclick="eliminarClienteCreditoDesdeTabla('${c.idCliente}')">🗑️</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+  });
+}
+
+	  
 function cargarUsuarioCC() {
   const usuarioSesion = obtenerUsuarioSesion();
   const nombreUsuario = String(usuarioSesion.nombre || usuarioSesion.usuario || '').trim();
