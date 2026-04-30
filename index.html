@@ -1866,12 +1866,14 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
   <section class="card">
     <div class="panel-body">
-      <div class="panel-header">
-        <div>
-          <h3>Trabajos por taller</h3>
-          <p>Vista visual preliminar. Después conectaremos los datos reales desde Sheets.</p>
-        </div>
-      </div>
+    <div class="panel-header">
+  <div>
+    <h3>Trabajos por taller</h3>
+    <p>Vista visual preliminar. Después conectaremos los datos reales desde Sheets.</p>
+  </div>
+
+  <div class="tag" id="estadoRefreshTalleres">Sin actualizar</div>
+</div>
 
 <div class="filters" style="grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto;">
   <div class="field">
@@ -2417,6 +2419,37 @@ function toggleDescarga(btn, url) {
     window.open(url, '_blank');
   }
 }
+
+function iniciarAutoRefreshTalleres() {
+  detenerAutoRefreshTalleres();
+
+  intervaloTalleres = setInterval(function() {
+    console.log('🔄 Refrescando Talleres...');
+    cargarDatosTalleres();
+  }, 30000);
+}
+
+function detenerAutoRefreshTalleres() {
+  if (intervaloTalleres) {
+    clearInterval(intervaloTalleres);
+    intervaloTalleres = null;
+  }
+}
+
+function cargarDatosTalleres() {
+  console.log('Simulación de carga de datos Talleres...');
+
+  const estado = document.getElementById('estadoRefreshTalleres');
+  if (!estado) return;
+
+  const ahora = new Date();
+
+  const horas = String(ahora.getHours()).padStart(2, '0');
+  const minutos = String(ahora.getMinutes()).padStart(2, '0');
+  const segundos = String(ahora.getSeconds()).padStart(2, '0');
+
+  estado.textContent = `Actualizado ${horas}:${minutos}:${segundos}`;
+}	  
 	  
 
 // Estado de filtros
@@ -2429,6 +2462,9 @@ const filtrosTaller = {
 };
 
 function initFiltrosTaller() {
+  if (window.filtrosTallerInicializados) return;
+  window.filtrosTallerInicializados = true;
+	
   const inputTexto = document.getElementById('filtroTallerArchivo');
   const inputTipo = document.getElementById('filtroTallerTipo');
 
@@ -2959,7 +2995,11 @@ function mostrarVistaTablero(vista) {
   }
 
   if (vista === 'talleres') {
-    initFiltrosTaller();
+  initFiltrosTaller();
+  iniciarAutoRefreshTalleres();
+} else {
+  detenerAutoRefreshTalleres();
+}
   }
 }
 
@@ -4350,6 +4390,7 @@ async function guardarEnSheet_(data) {
 
 let driveUploadTokenClient = null;
 let driveUploadAccessToken = "";
+let intervaloTalleres = null;	
 </script>
 
 
