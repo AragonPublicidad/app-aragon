@@ -2454,9 +2454,15 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       }
     }
 
-	  function toggleProceso(btn) {
+function toggleProceso(btn) {
   const tr = btn.closest('tr');
   const proceso = btn.dataset.proceso;
+  const idCarga = tr.dataset.idCarga || "";
+
+  if (!idCarga) {
+    console.error("No se encontró ID Carga en la fila.");
+    return;
+  }
 
   const btnImpreso = tr.querySelector('[data-proceso="impreso"]');
   const btnSuajado = tr.querySelector('[data-proceso="suajado"]');
@@ -2466,6 +2472,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
   if (btn.classList.contains('activo')) {
     desactivarProceso(btn);
+    guardarProcesoTaller(idCarga, proceso, false, "");
     aplicarFiltrosTaller();
     return;
   }
@@ -2491,8 +2498,38 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
     activarProceso(btnTerminado, fechaHora);
   }
 
+  guardarProcesoTaller(idCarga, proceso, true, fechaHora);
   aplicarFiltrosTaller();
 }
+
+function guardarProcesoTaller(idCarga, proceso, activo, fechaHora) {
+  const callbackName = "procesarGuardadoProcesoTaller_" + Date.now();
+
+  window[callbackName] = function(res) {
+    if (!res || res.ok !== true) {
+      console.error("Error al guardar proceso Taller:", res);
+      return;
+    }
+
+    console.log("Proceso Taller guardado:", res);
+
+    delete window[callbackName];
+  };
+
+  const url = WEB_APP_URL
+    + "?action=actualizarProcesoTaller"
+    + "&callback=" + callbackName
+    + "&idCarga=" + encodeURIComponent(idCarga)
+    + "&proceso=" + encodeURIComponent(proceso)
+    + "&activo=" + encodeURIComponent(String(activo))
+    + "&fechaHora=" + encodeURIComponent(fechaHora || "")
+    + "&_ts=" + Date.now();
+
+  const script = document.createElement("script");
+  script.src = url;
+  document.body.appendChild(script);
+}
+	  
 
 function activarProceso(btn, fechaHora) {
   if (!btn) return;
@@ -2657,6 +2694,7 @@ contenedor.querySelectorAll(".grupo-taller-row").forEach(function(grupo) {
     grupos[tipo].forEach(function(item) {
       const tr = document.createElement("tr");
       tr.className = "fila-taller";
+	  tr.dataset.idCarga = item.idCarga || "";
       tr.dataset.grupo = tipo;
       tr.dataset.tipo = tipo.toLowerCase();
 
