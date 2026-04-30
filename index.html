@@ -2481,19 +2481,101 @@ function detenerAutoRefreshTalleres() {
 }
 
 function cargarDatosTalleres() {
-  console.log('Simulación de carga de datos Talleres...');
+  const url = WEB_APP_URL + "?action=getTalleres&callback=procesarDatosTalleres";
 
-  const estado = document.getElementById('estadoRefreshTalleres');
-  if (!estado) return;
+  const script = document.createElement("script");
+  script.src = url;
 
-  const ahora = new Date();
-
-  const horas = String(ahora.getHours()).padStart(2, '0');
-  const minutos = String(ahora.getMinutes()).padStart(2, '0');
-  const segundos = String(ahora.getSeconds()).padStart(2, '0');
-
-  estado.textContent = `Actualizado ${horas}:${minutos}:${segundos}`;
+  document.body.appendChild(script);
 }	  
+
+function procesarDatosTalleres(res) {
+  if (!res || !res.ok) {
+    console.error("Error al obtener datos");
+    return;
+  }
+
+  console.log("Datos recibidos:", res.data);
+
+  pintarTablaTalleres(res.data);
+}
+
+function pintarTablaTalleres(data) {
+  const contenedor = document.getElementById("contenedorTalleres");
+  if (!contenedor) return;
+
+  contenedor.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Nombre Archivo</th>
+            <th>Piezas</th>
+            <th>Fecha y Hora</th>
+            <th>Tipo Impresión/Maquila</th>
+            <th>Impreso</th>
+            <th>Suajado</th>
+            <th>Terminado</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  `;
+
+  const tbody = contenedor.querySelector("tbody");
+
+  if (!data || data.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8">No hay trabajos para mostrar.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  data.forEach(function(item) {
+    const tr = document.createElement("tr");
+    const fechaHora = `${item.fechaCarga || ""} ${item.horaCarga || ""}`.trim();
+
+    tr.innerHTML = `
+      <td style="text-align:center;">
+        <button class="btn-proceso" onclick="toggleDescarga(this, '${item.urlArchivo || ""}')">⬇️</button>
+      </td>
+
+      <td>${item.nombreArchivo || ""}</td>
+      <td>${item.piezas || ""}</td>
+      <td>${fechaHora}</td>
+      <td>${item.tipoImpresionMaquila || ""}</td>
+
+      <td>
+        <div class="estado-proceso">
+          <button class="btn-proceso ${item.impreso === "Si" ? "activo" : ""}" data-proceso="impreso" onclick="toggleProceso(this)">🖨️</button>
+          <span class="fecha-proceso">${item.fechaHoraImpresion || ""}</span>
+        </div>
+      </td>
+
+      <td>
+        <div class="estado-proceso">
+          <button class="btn-proceso ${item.suajado === "Si" ? "activo" : ""}" data-proceso="suajado" onclick="toggleProceso(this)">✂️</button>
+          <span class="fecha-proceso">${item.fechaHoraSuaje || ""}</span>
+        </div>
+      </td>
+
+      <td>
+        <div class="estado-proceso">
+          <button class="btn-proceso ${item.terminado === "Si" ? "activo" : ""}" data-proceso="terminado" onclick="toggleProceso(this)">📦</button>
+          <span class="fecha-proceso">${item.fechaHoraTerminado || ""}</span>
+        </div>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  aplicarFiltrosTaller();
+}
 	  
 
 // Estado de filtros
