@@ -2491,15 +2491,26 @@ function cargarDatosTalleres() {
 
 function procesarDatosTalleres(res) {
   if (!res || !res.ok) {
-    console.error("Error al obtener datos");
+    console.error("Error al obtener datos", res);
     return;
   }
 
   console.log("Datos recibidos:", res.data);
 
   pintarTablaTalleres(res.data);
-}
 
+  const estado = document.getElementById("estadoRefreshTalleres");
+  if (estado) {
+    const ahora = new Date();
+
+    const horas = String(ahora.getHours()).padStart(2, "0");
+    const minutos = String(ahora.getMinutes()).padStart(2, "0");
+    const segundos = String(ahora.getSeconds()).padStart(2, "0");
+
+    estado.textContent = `Actualizado ${horas}:${minutos}:${segundos}`;
+  }
+}
+	  
 function pintarTablaTalleres(data) {
   const contenedor = document.getElementById("contenedorTalleres");
   if (!contenedor) return;
