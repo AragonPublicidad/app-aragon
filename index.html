@@ -1603,7 +1603,7 @@ body {
           <span class="menu-icon">👤</span>
           <span class="menu-label">Usuarios</span>
         </a>
-        <a href="#" class="menu-item" data-vista="pendiente" data-modulo="Talleres">
+        <a href="#" class="menu-item" data-vista="talleres" data-modulo="Talleres">
           <span class="menu-icon">🏭</span>
           <span class="menu-label">Talleres</span>
         </a>
@@ -1810,8 +1810,57 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
 
 		  
-      <div id="vistaPendiente" class="vista-modulo vista-oculta">
+     <div id="vistaPendiente" class="vista-modulo vista-oculta">
 
+</div>
+
+<div id="vistaTalleres" class="vista-modulo vista-oculta">
+  <div class="topbar">
+    <div class="page-title">
+      <h2>Talleres</h2>
+      <p>Consulta de archivos cargados, agrupados por tipo de impresión o maquila.</p>
+    </div>
+    <div class="tag">Carga de Archivos</div>
+  </div>
+
+  <section class="card">
+    <div class="panel-body">
+      <div class="panel-header">
+        <div>
+          <h3>Trabajos por taller</h3>
+          <p>Vista visual preliminar. Después conectaremos los datos reales desde Sheets.</p>
+        </div>
+      </div>
+
+      <div id="contenedorTalleres">
+        <div style="margin-bottom:18px;">
+          <span class="tag">LONA</span>
+
+          <div class="table-wrap" style="margin-top:12px;">
+            <table style="min-width:720px;">
+              <thead>
+                <tr>
+                  <th style="width:54px;"></th>
+                  <th>Nombre Archivo</th>
+                  <th>Piezas</th>
+                  <th>Fecha y Hora</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>⬇️</td>
+                  <td>archivo_ejemplo.pdf</td>
+                  <td>1</td>
+                  <td>24/04/2026 21:35:28</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
 </div>
 
 <div id="vistaClientesCredito" class="vista-modulo vista-oculta">
@@ -2669,6 +2718,7 @@ function mostrarVistaTablero(vista) {
     usuarios: document.getElementById('vistaUsuarios'),
     produccion: document.getElementById('vistaProduccion'),
     clientesCredito: document.getElementById('vistaClientesCredito'),
+    talleres: document.getElementById('vistaTalleres'),
     pendiente: document.getElementById('vistaPendiente')
   };
 
