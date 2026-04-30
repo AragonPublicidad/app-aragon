@@ -2580,8 +2580,8 @@ function iniciarAutoRefreshTalleres() {
   detenerAutoRefreshTalleres();
 
   intervaloTalleres = setInterval(function() {
-    console.log('🔄 Refrescando Talleres...');
-    cargarDatosTalleres();
+    console.log('🔎 Revisando versión Talleres...');
+    revisarVersionTalleres();
   }, 30000);
 }
 
@@ -2591,6 +2591,38 @@ function detenerAutoRefreshTalleres() {
     intervaloTalleres = null;
   }
 }
+
+function revisarVersionTalleres() {
+  const callbackName = "procesarVersionTalleres_" + Date.now();
+
+  window[callbackName] = function(res) {
+    if (!res || res.ok !== true) {
+      console.error("Error al revisar versión Talleres:", res);
+      delete window[callbackName];
+      return;
+    }
+
+    if (res.version !== versionTalleresActual) {
+      versionTalleresActual = res.version;
+      cargarDatosTalleres();
+    } else {
+      const estado = document.getElementById("estadoRefreshTalleres");
+      if (estado) {
+        estado.textContent = "Sin cambios";
+      }
+    }
+
+    delete window[callbackName];
+  };
+
+  const script = document.createElement("script");
+  script.src = WEB_APP_URL
+    + "?action=getVersionTalleres"
+    + "&callback=" + callbackName
+    + "&_ts=" + Date.now();
+
+  document.body.appendChild(script);
+}	  
 
 function cargarDatosTalleres() {
   const url = WEB_APP_URL + "?action=getTalleres&callback=procesarDatosTalleres";
@@ -4742,6 +4774,7 @@ async function guardarEnSheet_(data) {
 let driveUploadTokenClient = null;
 let driveUploadAccessToken = "";
 let intervaloTalleres = null;	
+let versionTalleresActual = "";
 </script>
 
 
