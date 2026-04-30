@@ -2995,11 +2995,11 @@ function mostrarVistaTablero(vista) {
   }
 
   if (vista === 'talleres') {
-  initFiltrosTaller();
-  iniciarAutoRefreshTalleres();
-} else {
-  detenerAutoRefreshTalleres();
-}
+    initFiltrosTaller();
+    cargarDatosTalleres();
+    iniciarAutoRefreshTalleres();
+  } else {
+    detenerAutoRefreshTalleres();
   }
 }
 
