@@ -1927,7 +1927,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
   <!-- Impreso -->
   <td>
     <div class="estado-proceso">
-      <button class="btn-proceso" onclick="toggleProceso(this)">🖨️</button>
+      <button class="btn-proceso" data-proceso="impreso" onclick="toggleProceso(this)">🖨️</button>
       <span class="fecha-proceso"></span>
     </div>
   </td>
@@ -1935,7 +1935,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
   <!-- Suajado -->
   <td>
     <div class="estado-proceso">
-      <button class="btn-proceso" onclick="toggleProceso(this)">✂️</button>
+      <button class="btn-proceso" data-proceso="suajado" onclick="toggleProceso(this)">✂️</button>
       <span class="fecha-proceso"></span>
     </div>
   </td>
@@ -1943,7 +1943,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
   <!-- Terminado -->
   <td>
     <div class="estado-proceso">
-      <button class="btn-proceso" onclick="toggleProceso(this)">📦</button>
+      <button class="btn-proceso" data-proceso="terminado" onclick="toggleProceso(this)">📦</button>
       <span class="fecha-proceso"></span>
     </div>
   </td>
@@ -2380,33 +2380,77 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
     }
 
 	  function toggleProceso(btn) {
+  const tr = btn.closest('tr');
+  const proceso = btn.dataset.proceso;
+
+  const btnImpreso = tr.querySelector('[data-proceso="impreso"]');
+  const btnSuajado = tr.querySelector('[data-proceso="suajado"]');
+  const btnTerminado = tr.querySelector('[data-proceso="terminado"]');
+
+  const fechaHora = obtenerFechaHoraActual();
+
+  if (btn.classList.contains('activo')) {
+    desactivarProceso(btn);
+    aplicarFiltrosTaller();
+    return;
+  }
+
+  if (proceso === 'impreso') {
+    activarProceso(btnImpreso, fechaHora);
+  }
+
+  if (proceso === 'suajado') {
+    if (!btnImpreso.classList.contains('activo')) {
+      activarProceso(btnImpreso, fechaHora);
+    }
+    activarProceso(btnSuajado, fechaHora);
+  }
+
+  if (proceso === 'terminado') {
+    if (!btnImpreso.classList.contains('activo')) {
+      activarProceso(btnImpreso, fechaHora);
+    }
+    if (!btnSuajado.classList.contains('activo')) {
+      activarProceso(btnSuajado, fechaHora);
+    }
+    activarProceso(btnTerminado, fechaHora);
+  }
+
+  aplicarFiltrosTaller();
+}
+
+function activarProceso(btn, fechaHora) {
+  if (!btn) return;
+
   const contenedor = btn.closest('.estado-proceso');
   const fechaSpan = contenedor.querySelector('.fecha-proceso');
 
-  const estaActivo = btn.classList.contains('activo');
+  btn.classList.add('activo');
+  fechaSpan.textContent = fechaHora;
+}
 
-  if (estaActivo) {
-    // 🔴 RESET
-    btn.classList.remove('activo');
-    fechaSpan.textContent = '';
-  } else {
-    // 🟢 ACTIVAR
-    btn.classList.add('activo');
+function desactivarProceso(btn) {
+  if (!btn) return;
 
-    const ahora = new Date();
+  const contenedor = btn.closest('.estado-proceso');
+  const fechaSpan = contenedor.querySelector('.fecha-proceso');
 
-    const dia = String(ahora.getDate()).padStart(2, '0');
-    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
-    const anio = ahora.getFullYear();
+  btn.classList.remove('activo');
+  fechaSpan.textContent = '';
+}
 
-    const horas = String(ahora.getHours()).padStart(2, '0');
-    const minutos = String(ahora.getMinutes()).padStart(2, '0');
-    const segundos = String(ahora.getSeconds()).padStart(2, '0');
+function obtenerFechaHoraActual() {
+  const ahora = new Date();
 
-    const fechaHora = `${dia}/${mes}/${anio} ${horas}:${minutos}:${segundos}`;
+  const dia = String(ahora.getDate()).padStart(2, '0');
+  const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+  const anio = ahora.getFullYear();
 
-    fechaSpan.textContent = fechaHora;
-  }
+  const horas = String(ahora.getHours()).padStart(2, '0');
+  const minutos = String(ahora.getMinutes()).padStart(2, '0');
+  const segundos = String(ahora.getSeconds()).padStart(2, '0');
+
+  return `${dia}/${mes}/${anio} ${horas}:${minutos}:${segundos}`;
 }
 
 function toggleDescarga(btn, url) {
