@@ -1662,12 +1662,33 @@ body {
 /* ===== COLUMNA NOMBRE ARCHIVO ===== */
 
 .col-nombre-archivo {
-  max-width: 250px;
+  width: 260px;
+  min-width: 160px;
+  max-width: 700px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.th-resizable {
+  position: relative;
+  width: 260px;
+  min-width: 160px;
+}
+
+.resizer-col {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 7px;
+  height: 100%;
+  cursor: col-resize;
+  user-select: none;
+}
+
+.resizer-col:hover {
+  background: rgba(22,149,214,0.25);
+}
 /* ===== FILAS ===== */
 
 .fila-taller:hover {
@@ -2574,7 +2595,10 @@ function pintarTablaTalleres(data) {
         <thead>
           <tr>
             <th></th>
-            <th>Nombre Archivo</th>
+            <th class="th-resizable">
+  Nombre Archivo
+  <span class="resizer-col" onmousedown="iniciarResizeNombreArchivo(event)"></span>
+</th>
             <th>Piezas</th>
             <th>Fecha y Hora</th>
             <th>Impreso</th>
@@ -2774,6 +2798,46 @@ function aplicarFiltrosTaller() {
   aplicarFiltrosTaller();
 } 
 
+	  let resizingNombreArchivo = false;
+let startXNombreArchivo = 0;
+let startWidthNombreArchivo = 0;
+
+function iniciarResizeNombreArchivo(e) {
+  e.preventDefault();
+
+  resizingNombreArchivo = true;
+  startXNombreArchivo = e.clientX;
+
+  const th = e.target.closest("th");
+  startWidthNombreArchivo = th.offsetWidth;
+
+  document.addEventListener("mousemove", resizeColumnaNombreArchivo);
+  document.addEventListener("mouseup", detenerResizeNombreArchivo);
+}
+
+function resizeColumnaNombreArchivo(e) {
+  if (!resizingNombreArchivo) return;
+
+  const diff = e.clientX - startXNombreArchivo;
+  let newWidth = startWidthNombreArchivo + diff;
+
+  if (newWidth < 160) newWidth = 160;
+  if (newWidth > 700) newWidth = 700;
+
+  const th = document.querySelector(".th-resizable");
+  if (th) th.style.width = newWidth + "px";
+
+  document.querySelectorAll(".col-nombre-archivo").forEach(td => {
+    td.style.width = newWidth + "px";
+  });
+}
+
+function detenerResizeNombreArchivo() {
+  resizingNombreArchivo = false;
+
+  document.removeEventListener("mousemove", resizeColumnaNombreArchivo);
+  document.removeEventListener("mouseup", detenerResizeNombreArchivo);
+}
 	  
     function limpiarMensaje() {
       mensaje.style.display = 'none';
