@@ -1662,8 +1662,8 @@ body {
 /* ===== COLUMNA NOMBRE ARCHIVO ===== */
 
 .col-nombre-archivo {
-  width: 260px;
-  min-width: 160px;
+  width: 140px;
+  min-width: 100px;
   max-width: 700px;
   white-space: nowrap;
   overflow: hidden;
@@ -1672,8 +1672,8 @@ body {
 
 .th-resizable {
   position: relative;
-  width: 260px;
-  min-width: 160px;
+  width: 140px;
+  min-width: 100px;
 }
 
 .resizer-col {
@@ -2589,6 +2589,15 @@ function pintarTablaTalleres(data) {
   const contenedor = document.getElementById("contenedorTalleres");
   if (!contenedor) return;
 
+	const gruposColapsadosPrevios = {};
+
+contenedor.querySelectorAll(".grupo-taller-row").forEach(function(grupo) {
+  const nombreGrupo = grupo.dataset.grupo;
+  if (nombreGrupo && grupo.dataset.colapsado === "true") {
+    gruposColapsadosPrevios[nombreGrupo] = true;
+  }
+});
+
   contenedor.innerHTML = `
     <div class="table-wrap">
       <table>
@@ -2630,12 +2639,12 @@ function pintarTablaTalleres(data) {
     const grupoTr = document.createElement("tr");
     grupoTr.className = "grupo-taller-row";
     grupoTr.dataset.grupo = tipo;
-    grupoTr.dataset.colapsado = "false";
+   grupoTr.dataset.colapsado = gruposColapsadosPrevios[tipo] ? "true" : "false";
 
     grupoTr.innerHTML = `
       <td colspan="7">
         <button class="btn-grupo-taller" onclick="toggleGrupoTaller(this)">
-          <span class="grupo-flecha">▾</span>
+          <span class="grupo-flecha">${gruposColapsadosPrevios[tipo] ? "▸" : "▾"}</span>
           <strong>${tipo}</strong>
           <span class="grupo-taller-contador">${grupos[tipo].length}</span>
         </button>
