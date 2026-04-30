@@ -2344,6 +2344,36 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       }
     }
 
+	  function toggleProceso(btn) {
+  const contenedor = btn.closest('.estado-proceso');
+  const fechaSpan = contenedor.querySelector('.fecha-proceso');
+
+  const estaActivo = btn.classList.contains('activo');
+
+  if (estaActivo) {
+    // 🔴 RESET
+    btn.classList.remove('activo');
+    fechaSpan.textContent = '';
+  } else {
+    // 🟢 ACTIVAR
+    btn.classList.add('activo');
+
+    const ahora = new Date();
+
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const anio = ahora.getFullYear();
+
+    const horas = String(ahora.getHours()).padStart(2, '0');
+    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+    const segundos = String(ahora.getSeconds()).padStart(2, '0');
+
+    const fechaHora = `${dia}/${mes}/${anio} ${horas}:${minutos}:${segundos}`;
+
+    fechaSpan.textContent = fechaHora;
+  }
+}
+
     function limpiarMensaje() {
       mensaje.style.display = 'none';
       mensaje.textContent = '';
