@@ -1662,9 +1662,9 @@ body {
 /* ===== COLUMNA NOMBRE ARCHIVO ===== */
 
 .col-nombre-archivo {
-  width: 140px;
-  min-width: 100px;
-  max-width: 700px;
+  width: 150px;
+  max-width: 150px;
+  min-width: 40px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1672,8 +1672,9 @@ body {
 
 .th-resizable {
   position: relative;
-  width: 140px;
-  min-width: 100px;
+  width: 150px;
+  max-width: 150px;
+  min-width: 40px;
 }
 
 .resizer-col {
@@ -2830,14 +2831,17 @@ function resizeColumnaNombreArchivo(e) {
   const diff = e.clientX - startXNombreArchivo;
   let newWidth = startWidthNombreArchivo + diff;
 
-  if (newWidth < 160) newWidth = 160;
-  if (newWidth > 700) newWidth = 700;
+  if (newWidth < 40) newWidth = 40;
 
   const th = document.querySelector(".th-resizable");
-  if (th) th.style.width = newWidth + "px";
+  if (th) {
+  th.style.width = newWidth + "px";
+  th.style.maxWidth = newWidth + "px";
+}
 
   document.querySelectorAll(".col-nombre-archivo").forEach(td => {
     td.style.width = newWidth + "px";
+td.style.maxWidth = newWidth + "px";
   });
 }
 
