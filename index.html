@@ -1620,6 +1620,59 @@ body {
   font-size: 11px;
   color: var(--texto-suave);
 }
+
+	  /* ===== GRUPOS TALLER ===== */
+
+.grupo-taller-row td {
+  background: #111827;
+  color: #fff;
+  font-size: 13px;
+  padding: 8px 10px;
+}
+
+.btn-grupo-taller {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-grupo-taller:hover {
+  opacity: 0.85;
+}
+
+.grupo-flecha {
+  font-size: 12px;
+  width: 14px;
+}
+
+.grupo-taller-contador {
+  margin-left: auto;
+  background: #374151;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+/* ===== COLUMNA NOMBRE ARCHIVO ===== */
+
+.col-nombre-archivo {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== FILAS ===== */
+
+.fila-taller:hover {
+  background: #f9fafb;
+}
 	  
 </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -2524,7 +2577,6 @@ function pintarTablaTalleres(data) {
             <th>Nombre Archivo</th>
             <th>Piezas</th>
             <th>Fecha y Hora</th>
-            <th>Tipo Impresión/Maquila</th>
             <th>Impreso</th>
             <th>Suajado</th>
             <th>Terminado</th>
@@ -2538,7 +2590,7 @@ function pintarTablaTalleres(data) {
   const tbody = contenedor.querySelector("tbody");
 
   if (!data || data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8">No hay trabajos para mostrar.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7">No hay trabajos para mostrar.</td></tr>`;
     return;
   }
 
@@ -2553,18 +2605,26 @@ function pintarTablaTalleres(data) {
   Object.keys(grupos).sort().forEach(function(tipo) {
     const grupoTr = document.createElement("tr");
     grupoTr.className = "grupo-taller-row";
+    grupoTr.dataset.grupo = tipo;
+    grupoTr.dataset.colapsado = "false";
+
     grupoTr.innerHTML = `
-      <td colspan="8">
-        <strong>${tipo}</strong>
-        <span class="grupo-taller-contador">${grupos[tipo].length}</span>
+      <td colspan="7">
+        <button class="btn-grupo-taller" onclick="toggleGrupoTaller(this)">
+          <span class="grupo-flecha">▾</span>
+          <strong>${tipo}</strong>
+          <span class="grupo-taller-contador">${grupos[tipo].length}</span>
+        </button>
       </td>
     `;
+
     tbody.appendChild(grupoTr);
 
     grupos[tipo].forEach(function(item) {
       const tr = document.createElement("tr");
       tr.className = "fila-taller";
       tr.dataset.grupo = tipo;
+      tr.dataset.tipo = tipo.toLowerCase();
 
       const fechaHora = `${item.fechaCarga || ""} ${item.horaCarga || ""}`.trim();
 
@@ -2576,7 +2636,6 @@ function pintarTablaTalleres(data) {
         <td class="col-nombre-archivo">${item.nombreArchivo || ""}</td>
         <td>${item.piezas || ""}</td>
         <td>${fechaHora}</td>
-        <td>${item.tipoImpresionMaquila || ""}</td>
 
         <td>
           <div class="estado-proceso">
@@ -2662,11 +2721,11 @@ function aplicarFiltrosTaller() {
 
   filas.forEach(tr => {
     const nombre = tr.children[1].textContent.toLowerCase();
-    const tipo = tr.children[4].textContent.toLowerCase();
+    const tipo = tr.dataset.tipo || "";
 
-    const impresoActivo = tr.children[5].querySelector('.btn-proceso').classList.contains('activo');
-    const suajadoActivo = tr.children[6].querySelector('.btn-proceso').classList.contains('activo');
-    const terminadoActivo = tr.children[7].querySelector('.btn-proceso').classList.contains('activo');
+    const impresoActivo = tr.children[4].querySelector('.btn-proceso').classList.contains('activo');
+    const suajadoActivo = tr.children[5].querySelector('.btn-proceso').classList.contains('activo');
+    const terminadoActivo = tr.children[6].querySelector('.btn-proceso').classList.contains('activo');
 
     let visible = true;
 
@@ -2676,26 +2735,44 @@ function aplicarFiltrosTaller() {
     if (filtrosTaller.suajado && !suajadoActivo) visible = false;
     if (filtrosTaller.terminado && !terminadoActivo) visible = false;
 
-    tr.style.display = visible ? '' : 'none';
+    tr.dataset.filtroVisible = visible ? "true" : "false";
   });
 
   const grupos = document.querySelectorAll('#contenedorTalleres tbody tr.grupo-taller-row');
 
   grupos.forEach(grupo => {
-    let siguiente = grupo.nextElementSibling;
+    const grupoNombre = grupo.dataset.grupo;
+    const colapsado = grupo.dataset.colapsado === "true";
+    const filasGrupo = document.querySelectorAll(`#contenedorTalleres tbody tr.fila-taller[data-grupo="${CSS.escape(grupoNombre)}"]`);
+
     let tieneVisible = false;
 
-    while (siguiente && siguiente.classList.contains('fila-taller')) {
-      if (siguiente.style.display !== 'none') {
-        tieneVisible = true;
-        break;
-      }
-      siguiente = siguiente.nextElementSibling;
-    }
+    filasGrupo.forEach(fila => {
+      const visiblePorFiltro = fila.dataset.filtroVisible === "true";
 
-    grupo.style.display = tieneVisible ? '' : 'none';
+      if (visiblePorFiltro) tieneVisible = true;
+
+      fila.style.display = visiblePorFiltro && !colapsado ? "" : "none";
+    });
+
+    grupo.style.display = tieneVisible ? "" : "none";
   });
 }
+
+	 function toggleGrupoTaller(btn) {
+  const grupoTr = btn.closest('.grupo-taller-row');
+  if (!grupoTr) return;
+
+  const colapsado = grupoTr.dataset.colapsado === "true";
+  grupoTr.dataset.colapsado = colapsado ? "false" : "true";
+
+  const flecha = grupoTr.querySelector('.grupo-flecha');
+  if (flecha) {
+    flecha.textContent = colapsado ? "▾" : "▸";
+  }
+
+  aplicarFiltrosTaller();
+} 
 
 	  
     function limpiarMensaje() {
