@@ -3818,8 +3818,11 @@ function mostrarVistaTablero(vista) {
   }
 
 
-	if (vista === 'flujo') {
+if (vista === 'flujo') {
   cargarFlujoTrabajos();
+  iniciarAutoRefreshFlujo();
+} else {
+  detenerAutoRefreshFlujo();
 }
   
 }
