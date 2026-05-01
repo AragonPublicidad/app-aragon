@@ -2567,6 +2567,29 @@ function pintarPendientes(lista) {
 
   contador.innerText = lista.length;
 }
+
+function pintarPendientes(lista) {
+  const tbody = document.getElementById('tablaPendientesFlujo');
+  const contador = document.getElementById('contadorPendientesFlujo');
+
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  lista.forEach(item => {
+    const tr = document.createElement('tr');
+
+    tr.innerHTML = `
+      <td class="flujo-nombre">${item.nombreArchivo || ''}</td>
+      <td>${item.fechaCarga || ''}</td>
+      <td>${item.descargado || ''}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  if (contador) contador.innerText = lista.length;
+}
 	  
 
 function pintarAcabados(lista) {
@@ -2650,8 +2673,6 @@ function pintarTerminados(lista) {
   if (buscadorFlujo) {
     buscadorFlujo.addEventListener('input', aplicarBusquedaFlujo);
   }
-
-  cargarFlujoTrabajos();
 });
 	  
     const multiEstado = crearMultiSelect('multiEstado', {
@@ -3766,10 +3787,17 @@ function mostrarVistaTablero(vista) {
   }
 
   if (vista === 'talleres') {
-    initFiltrosTaller();
-    cargarDatosTalleres();
-    iniciarAutoRefreshTalleres();
-  } else {
+  initFiltrosTaller();
+  cargarDatosTalleres();
+  iniciarAutoRefreshTalleres();
+} else {
+  detenerAutoRefreshTalleres();
+}
+
+if (vista === 'flujo') {
+  cargarFlujoTrabajos();
+} 
+  else {
     detenerAutoRefreshTalleres();
   }
 }
