@@ -2517,123 +2517,6 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw5OG9c0oeDWRyuZ6SshfWZk_AZxtKftEsc5IcTf4a7qk_6Dn2KOtS2UP31xYNGc1OP/exec";
-
-	  function cargarFlujoTrabajos() {
-
-  const url = WEB_APP_URL + "?action=getFlujoTrabajos&callback=callback";
-
-  fetch(url)
-    .then(res => res.text())
-    .then(text => {
-
-      // limpiar callback()
-      const json = text.replace(/^callback\(/, '').replace(/\);$/, '');
-      const resp = JSON.parse(json);
-
-      if (!resp.ok) {
-        console.error("Error Flujo:", resp.message);
-        return;
-      }
-
-      const data = resp.data || {};
-
-      pintarPendientes(data.pendientes || []);
-      pintarAcabados(data.acabados || []);
-      pintarTerminados(data.terminados || []);
-
-    })
-    .catch(err => {
-      console.error("Error fetch Flujo:", err);
-    });
-}
-
-function pintarPendientes(lista) {
-  const tbody = document.getElementById('tablaPendientesFlujo');
-  const contador = document.getElementById('contadorPendientesFlujo');
-
-  tbody.innerHTML = "";
-
-  lista.forEach(item => {
-    const tr = document.createElement('tr');
-
-    tr.innerHTML = `
-      <td class="flujo-nombre">${item.nombreArchivo}</td>
-      <td>${item.fechaCarga}</td>
-      <td>${item.descargado}</td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-
-  contador.innerText = lista.length;
-}
-
-function pintarPendientes(lista) {
-  const tbody = document.getElementById('tablaPendientesFlujo');
-  const contador = document.getElementById('contadorPendientesFlujo');
-
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  lista.forEach(item => {
-    const tr = document.createElement('tr');
-
-    tr.innerHTML = `
-      <td class="flujo-nombre">${item.nombreArchivo || ''}</td>
-      <td>${item.fechaCarga || ''}</td>
-      <td>${item.descargado || ''}</td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-
-  if (contador) contador.innerText = lista.length;
-}
-	  
-
-function pintarAcabados(lista) {
-  const tbody = document.getElementById('tablaAcabadosFlujo');
-  const contador = document.getElementById('contadorAcabadosFlujo');
-
-  tbody.innerHTML = "";
-
-  lista.forEach(item => {
-    const tr = document.createElement('tr');
-
-    tr.innerHTML = `
-      <td class="flujo-nombre">${item.nombreArchivo}</td>
-      <td>${item.fechaHoraImpresion}</td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-
-  contador.innerText = lista.length;
-}
-
-function pintarTerminados(lista) {
-  const tbody = document.getElementById('tablaTerminadosFlujo');
-  const contador = document.getElementById('contadorTerminadosFlujo');
-
-  tbody.innerHTML = "";
-
-  lista.forEach(item => {
-    const tr = document.createElement('tr');
-
-    tr.innerHTML = `
-      <td class="flujo-nombre">${item.nombreArchivo}</td>
-      <td>${item.fechaHoraTerminado}</td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-
-  contador.innerText = lista.length;
-}
-	  
-	  
-	  
 	const usuario = JSON.parse(sessionStorage.getItem("usuario") || "{}");
     const sidebar = document.getElementById('sidebar');
     const toggleSidebar = document.getElementById('toggleSidebar');
@@ -3766,7 +3649,7 @@ function mostrarVistaTablero(vista) {
     produccion: document.getElementById('vistaProduccion'),
     clientesCredito: document.getElementById('vistaClientesCredito'),
     talleres: document.getElementById('vistaTalleres'),
-    flujo: document.getElementById('vistaFlujo'),
+	flujo: document.getElementById('vistaFlujo'),
     pendiente: document.getElementById('vistaPendiente')
   };
 
@@ -3793,8 +3676,6 @@ function mostrarVistaTablero(vista) {
   } else {
     detenerAutoRefreshTalleres();
   }
-
-  
 }
 
 function inicializarClientesCredito() {
