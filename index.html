@@ -3766,7 +3766,7 @@ function mostrarVistaTablero(vista) {
     produccion: document.getElementById('vistaProduccion'),
     clientesCredito: document.getElementById('vistaClientesCredito'),
     talleres: document.getElementById('vistaTalleres'),
-	flujo: document.getElementById('vistaFlujo'),
+    flujo: document.getElementById('vistaFlujo'),
     pendiente: document.getElementById('vistaPendiente')
   };
 
@@ -3787,18 +3787,15 @@ function mostrarVistaTablero(vista) {
   }
 
   if (vista === 'talleres') {
-  initFiltrosTaller();
-  cargarDatosTalleres();
-  iniciarAutoRefreshTalleres();
-} else {
-  detenerAutoRefreshTalleres();
-}
-
-if (vista === 'flujo') {
-  cargarFlujoTrabajos();
-} 
-  else {
+    initFiltrosTaller();
+    cargarDatosTalleres();
+    iniciarAutoRefreshTalleres();
+  } else {
     detenerAutoRefreshTalleres();
+  }
+
+  if (vista === 'flujo') {
+    cargarFlujoTrabajos();
   }
 }
 
