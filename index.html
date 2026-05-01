@@ -1690,6 +1690,155 @@ body {
 .resizer-col:hover {
   background: rgba(22,149,214,0.25);
 }
+
+	  /* ===== FLUJO DE TRABAJOS ===== */
+
+.flujo-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.flujo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.flujo-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--texto);
+}
+
+.flujo-header p {
+  margin: 5px 0 0;
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+.flujo-search-card {
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: 18px;
+  box-shadow: var(--sombra);
+  padding: 14px;
+}
+
+.flujo-search-card input {
+  width: 100%;
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.flujo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.flujo-card {
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: 18px;
+  box-shadow: var(--sombra);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.flujo-card-header {
+  padding: 13px 14px;
+  border-bottom: 1px solid #edf2f7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: #f8fbff;
+}
+
+.flujo-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.flujo-card-title strong {
+  font-size: 14px;
+  color: var(--texto);
+}
+
+.flujo-card-title span {
+  font-size: 11px;
+  color: var(--texto-suave);
+}
+
+.flujo-counter {
+  min-width: 28px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(22,149,214,0.12);
+  color: var(--azul-oscuro);
+  font-size: 12px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flujo-table-wrap {
+  overflow: auto;
+  max-height: calc(100vh - 310px);
+}
+
+.flujo-table {
+  width: 100%;
+  min-width: 430px;
+  border-collapse: collapse;
+}
+
+.flujo-table th,
+.flujo-table td {
+  padding: 9px 10px;
+  font-size: 12px;
+  border-bottom: 1px solid #edf2f7;
+  white-space: nowrap;
+}
+
+.flujo-table th {
+  background: #f0f5fb;
+  color: #475569;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.flujo-nombre {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flujo-empty {
+  padding: 18px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--texto-suave);
+}
+
+@media (max-width: 1200px) {
+  .flujo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .flujo-table-wrap {
+    max-height: none;
+  }
+}
+	  
 /* ===== FILAS ===== */
 
 .fila-taller:hover {
@@ -2267,70 +2416,102 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
         
       </div>
-    </main>
 
-	  <div id="vistaFlujo" class="vista" style="display:none; padding:20px;">
+<div id="vistaFlujo" class="vista" style="display:none; padding:20px;">
 
-  <h2>Flujo de Trabajos</h2>
+  <div class="flujo-page">
 
-  <!-- Buscador -->
-  <div style="margin-bottom:15px;">
-    <input 
-      type="text" 
-      id="buscadorFlujo" 
-      placeholder="Buscar por Nombre de Archivo..." 
-      style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;"
-    >
-  </div>
-
-  <div style="display:flex; gap:20px; flex-wrap:wrap;">
-
-    <!-- Pendientes -->
-    <div style="flex:1; min-width:300px;">
-      <h3>Trabajos Pendientes</h3>
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th>Nombre Archivo</th>
-            <th>Fecha Carga</th>
-            <th>Descargado</th>
-          </tr>
-        </thead>
-        <tbody id="tablaPendientesFlujo"></tbody>
-      </table>
+    <div class="flujo-header">
+      <div>
+        <h2>Flujo de Trabajos</h2>
+        <p>Seguimiento visual de pendientes, acabados y terminados.</p>
+      </div>
     </div>
 
-    <!-- Acabados -->
-    <div style="flex:1; min-width:300px;">
-      <h3>Trabajos en Acabados</h3>
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th>Nombre Archivo</th>
-            <th>Fecha Impresión</th>
-          </tr>
-        </thead>
-        <tbody id="tablaAcabadosFlujo"></tbody>
-      </table>
+    <div class="flujo-search-card">
+      <input 
+        type="text" 
+        id="buscadorFlujo" 
+        placeholder="Buscar por Nombre de Archivo..."
+      >
     </div>
 
-    <!-- Terminados -->
-    <div style="flex:1; min-width:300px;">
-      <h3>Trabajos Terminados</h3>
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th>Nombre Archivo</th>
-            <th>Fecha Terminado</th>
-          </tr>
-        </thead>
-        <tbody id="tablaTerminadosFlujo"></tbody>
-      </table>
+    <div class="flujo-grid">
+
+      <div class="flujo-card">
+        <div class="flujo-card-header">
+          <div class="flujo-card-title">
+            <strong>Trabajos Pendientes</strong>
+            <span>Descargados o pendientes de descargar</span>
+          </div>
+          <span class="flujo-counter" id="contadorPendientesFlujo">0</span>
+        </div>
+
+        <div class="flujo-table-wrap">
+          <table class="flujo-table">
+            <thead>
+              <tr>
+                <th>Nombre Archivo</th>
+                <th>Fecha Carga</th>
+                <th>Descargado</th>
+              </tr>
+            </thead>
+            <tbody id="tablaPendientesFlujo"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flujo-card">
+        <div class="flujo-card-header">
+          <div class="flujo-card-title">
+            <strong>Trabajos en Acabados</strong>
+            <span>Impresos en espera de suaje o acabados</span>
+          </div>
+          <span class="flujo-counter" id="contadorAcabadosFlujo">0</span>
+        </div>
+
+        <div class="flujo-table-wrap">
+          <table class="flujo-table">
+            <thead>
+              <tr>
+                <th>Nombre Archivo</th>
+                <th>FechaHora Impresión</th>
+              </tr>
+            </thead>
+            <tbody id="tablaAcabadosFlujo"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flujo-card">
+        <div class="flujo-card-header">
+          <div class="flujo-card-title">
+            <strong>Trabajos Terminados</strong>
+            <span>Trabajos finalizados</span>
+          </div>
+          <span class="flujo-counter" id="contadorTerminadosFlujo">0</span>
+        </div>
+
+        <div class="flujo-table-wrap">
+          <table class="flujo-table">
+            <thead>
+              <tr>
+                <th>Nombre Archivo</th>
+                <th>FechaHora Terminado</th>
+              </tr>
+            </thead>
+            <tbody id="tablaTerminadosFlujo"></tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
   </div>
 
 </div>
+
+	  
 	  
     <iframe id="iframeEnvio" name="iframeEnvio" style="display:none;"></iframe>
   </div>
@@ -2363,6 +2544,21 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
     let usuariosCache = [];
 
+	let flujoCache = {
+		
+	  pendientes: [],
+	  acabados: [],
+	  terminados: []
+	};
+
+	document.addEventListener('DOMContentLoaded', function () {
+  const buscadorFlujo = document.getElementById('buscadorFlujo');
+
+  if (buscadorFlujo) {
+    buscadorFlujo.addEventListener('input', aplicarBusquedaFlujo);
+  }
+});
+	  
     const multiEstado = crearMultiSelect('multiEstado', {
       placeholder: 'Selecciona estado(s)',
       allowAll: false
@@ -3048,6 +3244,33 @@ function detenerResizeNombreArchivo() {
       return /^\d{10}$/.test(telefono);
     }
 
+	  function normalizarTextoFlujo(valor) {
+  return String(valor || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function filtrarTablaFlujo(idTabla, texto) {
+  const filas = document.querySelectorAll(`#${idTabla} tr`);
+  const filtro = normalizarTextoFlujo(texto);
+
+  filas.forEach(function(fila) {
+    const nombreArchivo = normalizarTextoFlujo(fila.cells[0]?.innerText || '');
+
+    fila.style.display = nombreArchivo.includes(filtro) ? '' : 'none';
+  });
+}
+
+function aplicarBusquedaFlujo() {
+  const input = document.getElementById('buscadorFlujo');
+  const texto = input ? input.value : '';
+
+  filtrarTablaFlujo('tablaPendientesFlujo', texto);
+  filtrarTablaFlujo('tablaAcabadosFlujo', texto);
+  filtrarTablaFlujo('tablaTerminadosFlujo', texto);
+}
 
     function normalizarTextoBusqueda(valor) {
       return String(valor || '')
