@@ -2518,20 +2518,19 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
   <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw5OG9c0oeDWRyuZ6SshfWZk_AZxtKftEsc5IcTf4a7qk_6Dn2KOtS2UP31xYNGc1OP/exec";
 
-	  function cargarFlujoTrabajos() {
-
-  const url = WEB_APP_URL + "?action=getFlujoTrabajos&callback=callback";
+function cargarFlujoTrabajos() {
+  const url = WEB_APP_URL + "?action=getFlujoTrabajos&callback=callback&_ts=" + Date.now();
 
   fetch(url)
     .then(res => res.text())
     .then(text => {
-
-      // limpiar callback()
-      const json = text.replace(/^callback\(/, '').replace(/\);$/, '');
+      const json = text.replace(/^callback\(/, '').replace(/\);?\s*$/, '');
       const resp = JSON.parse(json);
 
-      if (!resp.ok) {
-        console.error("Error Flujo:", resp.message);
+      console.log("Flujo recibido:", resp);
+
+      if (!resp || !resp.ok) {
+        console.error("Error Flujo:", resp ? resp.message : resp);
         return;
       }
 
@@ -2540,7 +2539,7 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       pintarPendientes(data.pendientes || []);
       pintarAcabados(data.acabados || []);
       pintarTerminados(data.terminados || []);
-
+      aplicarBusquedaFlujo();
     })
     .catch(err => {
       console.error("Error fetch Flujo:", err);
@@ -2550,86 +2549,59 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 function pintarPendientes(lista) {
   const tbody = document.getElementById('tablaPendientesFlujo');
   const contador = document.getElementById('contadorPendientesFlujo');
-
-  tbody.innerHTML = "";
-
-  lista.forEach(item => {
-    const tr = document.createElement('tr');
-
-    tr.innerHTML = `
-      <td class="flujo-nombre">${item.nombreArchivo}</td>
-      <td>${item.fechaCarga}</td>
-      <td>${item.descargado}</td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-
-  contador.innerText = lista.length;
-}
-
-function pintarPendientes(lista) {
-  const tbody = document.getElementById('tablaPendientesFlujo');
-  const contador = document.getElementById('contadorPendientesFlujo');
-
   if (!tbody) return;
 
   tbody.innerHTML = "";
 
   lista.forEach(item => {
     const tr = document.createElement('tr');
-
     tr.innerHTML = `
       <td class="flujo-nombre">${item.nombreArchivo || ''}</td>
       <td>${item.fechaCarga || ''}</td>
       <td>${item.descargado || ''}</td>
     `;
-
     tbody.appendChild(tr);
   });
 
   if (contador) contador.innerText = lista.length;
 }
-	  
 
 function pintarAcabados(lista) {
   const tbody = document.getElementById('tablaAcabadosFlujo');
   const contador = document.getElementById('contadorAcabadosFlujo');
+  if (!tbody) return;
 
   tbody.innerHTML = "";
 
   lista.forEach(item => {
     const tr = document.createElement('tr');
-
     tr.innerHTML = `
-      <td class="flujo-nombre">${item.nombreArchivo}</td>
-      <td>${item.fechaHoraImpresion}</td>
+      <td class="flujo-nombre">${item.nombreArchivo || ''}</td>
+      <td>${item.fechaHoraImpresion || ''}</td>
     `;
-
     tbody.appendChild(tr);
   });
 
-  contador.innerText = lista.length;
+  if (contador) contador.innerText = lista.length;
 }
 
 function pintarTerminados(lista) {
   const tbody = document.getElementById('tablaTerminadosFlujo');
   const contador = document.getElementById('contadorTerminadosFlujo');
+  if (!tbody) return;
 
   tbody.innerHTML = "";
 
   lista.forEach(item => {
     const tr = document.createElement('tr');
-
     tr.innerHTML = `
-      <td class="flujo-nombre">${item.nombreArchivo}</td>
-      <td>${item.fechaHoraTerminado}</td>
+      <td class="flujo-nombre">${item.nombreArchivo || ''}</td>
+      <td>${item.fechaHoraTerminado || ''}</td>
     `;
-
     tbody.appendChild(tr);
   });
 
-  contador.innerText = lista.length;
+  if (contador) contador.innerText = lista.length;
 }
 	  
 	  
