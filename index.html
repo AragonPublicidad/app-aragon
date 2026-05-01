@@ -2603,7 +2603,56 @@ function pintarTerminados(lista) {
 
   if (contador) contador.innerText = lista.length;
 }
-	  
+
+	  let intervaloFlujo = null;
+let ultimaVersionFlujo = null;
+
+function iniciarAutoRefreshFlujo() {
+  if (intervaloFlujo) return;
+
+  console.log("⏱ Iniciando auto refresh Flujo");
+
+  intervaloFlujo = setInterval(revisarVersionFlujo, 30000);
+}
+
+function detenerAutoRefreshFlujo() {
+  if (intervaloFlujo) {
+    clearInterval(intervaloFlujo);
+    intervaloFlujo = null;
+    console.log("⛔ Auto refresh Flujo detenido");
+  }
+}
+
+function revisarVersionFlujo() {
+  fetch(`${WEB_APP_URL}?action=getVersionFlujoTrabajos`)
+    .then(res => res.json())
+    .then(resp => {
+
+      if (!resp.ok) {
+        console.error("Error version flujo:", resp);
+        return;
+      }
+
+      const nuevaVersion = resp.version;
+
+      if (!ultimaVersionFlujo) {
+        ultimaVersionFlujo = nuevaVersion;
+        return;
+      }
+
+      if (nuevaVersion !== ultimaVersionFlujo) {
+        console.log("🔄 Cambios detectados en Flujo");
+        ultimaVersionFlujo = nuevaVersion;
+        cargarFlujoTrabajos();
+      } else {
+        console.log("✔ Flujo sin cambios");
+      }
+
+    })
+    .catch(err => {
+      console.error("Error revisando version flujo:", err);
+    });
+}
 	  
 	  
 	const usuario = JSON.parse(sessionStorage.getItem("usuario") || "{}");
