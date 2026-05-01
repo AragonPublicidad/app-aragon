@@ -3008,16 +3008,7 @@ function procesarDatosTalleres(res) {
   }
 }
 
-	  function procesarDatosTalleres(resp) {
-  console.log("Datos recibidos:", resp);
-
-  if (!resp || !resp.ok) {
-    console.error("Error en talleres:", resp);
-    return;
-  }
-
-  pintarTablaTalleres(resp.data || []);
-}
+	
 	  
 function pintarTablaTalleres(data) {
   const contenedor = document.getElementById("contenedorTalleres");
