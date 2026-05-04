@@ -3212,7 +3212,7 @@ contenedor.querySelectorAll(".grupo-taller-row").forEach(function(grupo) {
 
       tr.innerHTML = `
         <td style="text-align:center;">
-         <button class="btn-proceso ${item.descargado ? 'activo' : ''}" onclick="toggleDescarga(this, '${item.urlArchivo || ''}')">⬇️</button>
+         <button class="btn-proceso ${item.descargado === 'Si' ? 'activo' : ''}" onclick="toggleDescarga(this, '${item.urlArchivo || ''}')">⬇️</button>
         </td>
 
         <td class="col-nombre-archivo">${item.nombreArchivo || ""}</td>
