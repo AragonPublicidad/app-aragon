@@ -2656,7 +2656,7 @@ function detenerAutoRefreshFlujo() {
 }
 
 function revisarVersionFlujo() {
-  fetch(`${WEB_APP_URL}?action=getVersionFlujoTrabajos`)
+  fetch(`${WEB_APP_URL}?action=getVersionFlujoTrabajos&_ts=${Date.now()}`)
     .then(res => res.json())
     .then(resp => {
 
