@@ -1817,9 +1817,32 @@ body {
 }
 
 .flujo-nombre {
-  max-width: 220px;
+  width: var(--flujo-nombre-width, 220px);
+  min-width: var(--flujo-nombre-width, 220px);
+  max-width: var(--flujo-nombre-width, 220px);
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.th-flujo-nombre {
+  position: relative;
+  width: var(--flujo-nombre-width, 220px);
+  min-width: var(--flujo-nombre-width, 220px);
+  max-width: var(--flujo-nombre-width, 220px);
+}
+
+.resizer-flujo-nombre {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 7px;
+  height: 100%;
+  cursor: col-resize;
+  user-select: none;
+}
+
+.resizer-flujo-nombre:hover {
+  background: rgba(22,149,214,0.25);
 }
 
 .flujo-empty {
@@ -2450,7 +2473,10 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
           <table class="flujo-table">
             <thead>
               <tr>
-                <th>Nombre Archivo</th>
+                <th class="th-flujo-nombre">
+  Nombre Archivo
+  <div class="resizer-flujo-nombre"></div>
+</th>
                 <th>Fecha Carga</th>
                 <th>Descargado</th>
               </tr>
@@ -2473,7 +2499,10 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
           <table class="flujo-table">
             <thead>
               <tr>
-                <th>Nombre Archivo</th>
+                <th class="th-flujo-nombre">
+  Nombre Archivo
+  <div class="resizer-flujo-nombre"></div>
+</th>
                 <th>FechaHora Impresión</th>
               </tr>
             </thead>
@@ -2495,7 +2524,10 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
           <table class="flujo-table">
             <thead>
               <tr>
-                <th>Nombre Archivo</th>
+                <th class="th-flujo-nombre">
+  Nombre Archivo
+  <div class="resizer-flujo-nombre"></div>
+</th>
                 <th>FechaHora Terminado</th>
               </tr>
             </thead>
@@ -5524,7 +5556,31 @@ async function subirArchivosDirectoDrive_(archivos, onProgressArchivo) {
 
   return resultados;
 }
-</script>
+// ===== REDIMENSIONAR COLUMNA NOMBRE ARCHIVO (FLUJO) =====
+(function() {
+  let startX, startWidth;
 
+  document.querySelectorAll('.resizer-flujo-nombre').forEach(resizer => {
+    resizer.addEventListener('mousedown', function(e) {
+      startX = e.pageX;
+      const th = resizer.parentElement;
+      startWidth = th.offsetWidth;
+
+      function onMouseMove(e) {
+        const newWidth = startWidth + (e.pageX - startX);
+        document.documentElement.style.setProperty('--flujo-nombre-width', newWidth + 'px');
+      }
+
+      function onMouseUp() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      }
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+  });
+})();
+</script>
 </body>
 </html>
