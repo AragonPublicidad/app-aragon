@@ -3000,15 +3000,57 @@ function obtenerFechaHoraActual() {
 }
 
 function toggleDescarga(btn, url) {
-  const estaActivo = btn.classList.contains('activo');
+  const tr = btn.closest('tr');
+  const idCarga = tr ? tr.dataset.idCarga : '';
 
-  if (estaActivo) {
-    btn.classList.remove('activo');
-  } else {
+  if (!idCarga) {
+    console.error('No se encontró ID Carga para actualizar descarga.');
+    return;
+  }
+
+  const estaActivo = btn.classList.contains('activo');
+  const nuevoActivo = !estaActivo;
+  const fechaHora = nuevoActivo ? obtenerFechaHoraActual() : "";
+
+  if (nuevoActivo) {
     btn.classList.add('activo');
     window.open(url, '_blank');
+  } else {
+    btn.classList.remove('activo');
   }
+
+  guardarDescargaTaller(idCarga, nuevoActivo, fechaHora);
+  aplicarFiltrosTaller();
 }
+
+function guardarDescargaTaller(idCarga, activo, fechaHora) {
+  const callbackName = "procesarGuardadoDescargaTaller_" + Date.now();
+
+  window[callbackName] = function(res) {
+    if (!res || res.ok !== true) {
+      console.error("Error al guardar descarga Taller:", res);
+      delete window[callbackName];
+      return;
+    }
+
+    console.log("Descarga Taller guardada:", res);
+
+    delete window[callbackName];
+  };
+
+  const url = WEB_APP_URL
+    + "?action=actualizarDescargaTaller"
+    + "&callback=" + callbackName
+    + "&idCarga=" + encodeURIComponent(idCarga)
+    + "&activo=" + encodeURIComponent(String(activo))
+    + "&fechaHora=" + encodeURIComponent(fechaHora || "")
+    + "&_ts=" + Date.now();
+
+  const script = document.createElement("script");
+  script.src = url;
+  document.body.appendChild(script);
+}
+	  
 
 function iniciarAutoRefreshTalleres() {
   detenerAutoRefreshTalleres();
@@ -3170,7 +3212,7 @@ contenedor.querySelectorAll(".grupo-taller-row").forEach(function(grupo) {
 
       tr.innerHTML = `
         <td style="text-align:center;">
-          <button class="btn-proceso" onclick="toggleDescarga(this, '${item.urlArchivo || ""}')">⬇️</button>
+         <button class="btn-proceso ${item.descargado ? 'activo' : ''}" onclick="toggleDescarga(this, '${item.urlArchivo || ''}')">⬇️</button>
         </td>
 
         <td class="col-nombre-archivo">${item.nombreArchivo || ""}</td>
