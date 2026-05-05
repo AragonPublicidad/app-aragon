@@ -4381,6 +4381,7 @@ function activarNavegacionInterna() {
 
       // 🔥 CLAVE: obtener vista correctamente
       var vista = item.getAttribute('data-vista');
+		if (vista === "cerrar") return;
 
       console.log("Vista clic:", vista); // para debug
 
@@ -4390,17 +4391,26 @@ function activarNavegacionInterna() {
 }
 
     pintarUsuarioLogueado();
-    aplicarPermisosMenu();
-    activarNavegacionInterna();
-	mostrarVistaTablero("inicio");
+aplicarPermisosMenu();
+activarNavegacionInterna();
 
-    busquedaUsuarios.addEventListener('input', aplicarFiltrosUsuarios);
-    filtroEstatus.addEventListener('change', aplicarFiltrosUsuarios);
-    filtroTipoUsuario.addEventListener('change', aplicarFiltrosUsuarios);
+const btnCerrarSesion = document.getElementById('btnCerrarSesion');
 
-    activarModoNuevo();
+if (btnCerrarSesion) {
+  btnCerrarSesion.addEventListener('click', function(e) {
+    e.preventDefault();
+    sessionStorage.clear();
+    window.location.href = 'login_aragon_v6.html';
+  });
+}
 
-    const btnCerrarSesion = document.getElementById('btnCerrarSesion');
+mostrarVistaTablero("inicio");
+
+if (busquedaUsuarios) busquedaUsuarios.addEventListener('input', aplicarFiltrosUsuarios);
+if (filtroEstatus) filtroEstatus.addEventListener('change', aplicarFiltrosUsuarios);
+if (filtroTipoUsuario) filtroTipoUsuario.addEventListener('change', aplicarFiltrosUsuarios);
+
+activarModoNuevo();
 
     function verificarSesionActiva() {
       const usuarioSesion = sessionStorage.getItem('usuario');
@@ -4409,13 +4419,7 @@ function activarNavegacionInterna() {
       }
     }
 
-    if (btnCerrarSesion) {
-      btnCerrarSesion.addEventListener('click', function(e) {
-        e.preventDefault();
-        sessionStorage.clear();
-        window.location.href = 'login_aragon_v6.html';
-      });
-    }
+    
 
     verificarSesionActiva();
 
