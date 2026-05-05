@@ -2951,6 +2951,9 @@ function guardarProcesoTaller(idCarga, proceso, activo, fechaHora) {
     delete window[callbackName];
   };
 
+    const usuarioLogeado = JSON.parse(sessionStorage.getItem("usuario") || "{}");
+  const nombreUsuarioLogeado = usuarioLogeado.nombre || "";
+
   const url = WEB_APP_URL
     + "?action=actualizarProcesoTaller"
     + "&callback=" + callbackName
@@ -2958,6 +2961,7 @@ function guardarProcesoTaller(idCarga, proceso, activo, fechaHora) {
     + "&proceso=" + encodeURIComponent(proceso)
     + "&activo=" + encodeURIComponent(String(activo))
     + "&fechaHora=" + encodeURIComponent(fechaHora || "")
+    + "&usuarioProceso=" + encodeURIComponent(nombreUsuarioLogeado)
     + "&_ts=" + Date.now();
 
   const script = document.createElement("script");
@@ -3039,13 +3043,17 @@ function guardarDescargaTaller(idCarga, activo, fechaHora) {
     delete window[callbackName];
   };
 
-  const url = WEB_APP_URL
-    + "?action=actualizarDescargaTaller"
-    + "&callback=" + callbackName
-    + "&idCarga=" + encodeURIComponent(idCarga)
-    + "&activo=" + encodeURIComponent(String(activo))
-    + "&fechaHora=" + encodeURIComponent(fechaHora || "")
-    + "&_ts=" + Date.now();
+  const usuarioLogeado = JSON.parse(sessionStorage.getItem("usuario") || "{}");
+const nombreUsuarioLogeado = usuarioLogeado.nombre || "";
+
+const url = WEB_APP_URL
+  + "?action=actualizarDescargaTaller"
+  + "&callback=" + callbackName
+  + "&idCarga=" + encodeURIComponent(idCarga)
+  + "&activo=" + encodeURIComponent(String(activo))
+  + "&fechaHora=" + encodeURIComponent(fechaHora || "")
+  + "&usuarioProceso=" + encodeURIComponent(nombreUsuarioLogeado)
+  + "&_ts=" + Date.now();
 
   const script = document.createElement("script");
   script.src = url;
