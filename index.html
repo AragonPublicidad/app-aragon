@@ -3554,7 +3554,7 @@ function aplicarBusquedaFlujo() {
       catalogos = data;
 
       const estados = opcionesUnicas(catalogos.configuracion.map(item => item.estado));
-      const talleres = opcionesUnicas(catalogos.talleres.map(item => item.taller));
+      const talleres = opcionesUnicas(catalogos.talleres.map(item => item.carpeta));
       const tiposUsuario = opcionesUnicas(catalogos.tiposUsuario.map(item => item.tipoUsuario));
 
       multiEstado.setValues(estados);
@@ -3833,6 +3833,8 @@ function aplicarBusquedaFlujo() {
         return {};
       }
     }
+
+	  console.log("USUARIO SESIÓN:", obtenerUsuarioSesion());
 
     function pintarUsuarioLogueado() {
       const usuario = obtenerUsuarioSesion();
