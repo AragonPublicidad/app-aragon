@@ -3133,9 +3133,45 @@ function procesarDatosTalleres(res) {
 
   console.log("Datos recibidos:", res.data);
 
-  pintarTablaTalleres(res.data);
+  const usuarioSesion = obtenerUsuarioSesion();
+
+  const agrupamientosUsuario = String(usuarioSesion.agrupamiento || "")
+    .split(",")
+    .map(function(item) {
+      return item.trim().toLowerCase();
+    })
+    .filter(function(item) {
+      return item;
+    });
+
+  const datosFiltrados = (res.data || []).filter(function(item) {
+    const tipo = String(item.tipoImpresionMaquila || "").trim().toLowerCase();
+
+    if (agrupamientosUsuario.length === 0) {
+      return false;
+    }
+
+    return agrupamientosUsuario.some(function(agrupamiento) {
+      return tipo === agrupamiento;
+    });
+  });
+
+  console.log("Agrupamientos usuario:", agrupamientosUsuario);
+  console.log("Datos filtrados Talleres:", datosFiltrados);
+
+  pintarTablaTalleres(datosFiltrados);
 
   const estado = document.getElementById("estadoRefreshTalleres");
+  if (estado) {
+    const ahora = new Date();
+
+    const horas = String(ahora.getHours()).padStart(2, "0");
+    const minutos = String(ahora.getMinutes()).padStart(2, "0");
+    const segundos = String(ahora.getSeconds()).padStart(2, "0");
+
+    estado.textContent = `Actualizado ${horas}:${minutos}:${segundos}`;
+  }
+}
   if (estado) {
     const ahora = new Date();
 
