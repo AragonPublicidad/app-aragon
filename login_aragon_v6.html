@@ -124,7 +124,8 @@ function login(){
     if(data.ok){
       document.getElementById("msg").innerHTML = "Login correcto";
 
-      sessionStorage.setItem("usuario", JSON.stringify(data.usuario));
+     data.usuario.agrupamiento = data.usuario.agrupamiento || "";
+sessionStorage.setItem("usuario", JSON.stringify(data.usuario));
 
       setTimeout(()=>{
         window.location.href = "index.html";
