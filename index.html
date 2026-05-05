@@ -1874,6 +1874,27 @@ body {
   cursor: not-allowed;
   filter: grayscale(100%);
 }
+
+	  .flujo-grupo-row td {
+  background: linear-gradient(90deg, var(--azul-principal), var(--verde-principal));
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 8px 10px;
+}
+
+.flujo-grupo-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flujo-grupo-contador {
+  background: rgba(255,255,255,0.22);
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+}
 	  
 	  
 </style>
@@ -2586,65 +2607,128 @@ function cargarFlujoTrabajos() {
     });
 }
 
+function numeroPiezasFlujo_(valor) {
+  const n = Number(String(valor || "0").replace(",", "."));
+  return isNaN(n) ? 0 : n;
+}
+
+function sumarPiezasFlujo_(lista) {
+  return (lista || []).reduce((total, item) => {
+    return total + numeroPiezasFlujo_(item.piezas);
+  }, 0);
+}
+
+function agruparPorTipoFlujo_(lista) {
+  const grupos = {};
+
+  (lista || []).forEach(item => {
+    const tipo = String(item.tipoImpresionMaquila || "Sin tipo").trim() || "Sin tipo";
+
+    if (!grupos[tipo]) {
+      grupos[tipo] = {
+        tipo: tipo,
+        piezas: 0,
+        items: []
+      };
+    }
+
+    grupos[tipo].piezas += numeroPiezasFlujo_(item.piezas);
+    grupos[tipo].items.push(item);
+  });
+
+  return Object.values(grupos).sort((a, b) => a.tipo.localeCompare(b.tipo));
+}
+
+function agregarFilaGrupoFlujo_(tbody, tipo, piezas, colspan) {
+  const trGrupo = document.createElement("tr");
+  trGrupo.className = "flujo-grupo-row";
+  trGrupo.innerHTML = `
+    <td colspan="${colspan}">
+      <div class="flujo-grupo-header">
+        <span>${tipo}</span>
+        <span class="flujo-grupo-contador">${piezas} piezas</span>
+      </div>
+    </td>
+  `;
+  tbody.appendChild(trGrupo);
+}
+
 function pintarPendientes(lista) {
-  const tbody = document.getElementById('tablaPendientesFlujo');
-  const contador = document.getElementById('contadorPendientesFlujo');
+  const tbody = document.getElementById("tablaPendientesFlujo");
+  const contador = document.getElementById("contadorPendientesFlujo");
   if (!tbody) return;
 
   tbody.innerHTML = "";
 
-  lista.forEach(item => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="flujo-nombre">${item.nombreArchivo || ''}</td>
-      <td>${item.fechaCarga || ''}</td>
-      <td>${item.descargado || ''}</td>
-    `;
-    tbody.appendChild(tr);
+  const grupos = agruparPorTipoFlujo_(lista);
+
+  grupos.forEach(grupo => {
+    agregarFilaGrupoFlujo_(tbody, grupo.tipo, grupo.piezas, 3);
+
+    grupo.items.forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="flujo-nombre">${item.nombreArchivo || ""}</td>
+        <td>${item.fechaCarga || ""}</td>
+        <td>${item.descargado || ""}</td>
+      `;
+      tbody.appendChild(tr);
+    });
   });
 
-  if (contador) contador.innerText = lista.length;
+  if (contador) contador.innerText = sumarPiezasFlujo_(lista);
 }
 
 function pintarAcabados(lista) {
-  const tbody = document.getElementById('tablaAcabadosFlujo');
-  const contador = document.getElementById('contadorAcabadosFlujo');
+  const tbody = document.getElementById("tablaAcabadosFlujo");
+  const contador = document.getElementById("contadorAcabadosFlujo");
   if (!tbody) return;
 
   tbody.innerHTML = "";
 
-  lista.forEach(item => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="flujo-nombre">${item.nombreArchivo || ''}</td>
-      <td>${item.fechaHoraImpresion || ''}</td>
-    `;
-    tbody.appendChild(tr);
+  const grupos = agruparPorTipoFlujo_(lista);
+
+  grupos.forEach(grupo => {
+    agregarFilaGrupoFlujo_(tbody, grupo.tipo, grupo.piezas, 2);
+
+    grupo.items.forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="flujo-nombre">${item.nombreArchivo || ""}</td>
+        <td>${item.fechaHoraImpresion || ""}</td>
+      `;
+      tbody.appendChild(tr);
+    });
   });
 
-  if (contador) contador.innerText = lista.length;
+  if (contador) contador.innerText = sumarPiezasFlujo_(lista);
 }
 
 function pintarTerminados(lista) {
-  const tbody = document.getElementById('tablaTerminadosFlujo');
-  const contador = document.getElementById('contadorTerminadosFlujo');
+  const tbody = document.getElementById("tablaTerminadosFlujo");
+  const contador = document.getElementById("contadorTerminadosFlujo");
   if (!tbody) return;
 
   tbody.innerHTML = "";
 
-  lista.forEach(item => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="flujo-nombre">${item.nombreArchivo || ''}</td>
-      <td>${item.fechaHoraTerminado || ''}</td>
-    `;
-    tbody.appendChild(tr);
+  const grupos = agruparPorTipoFlujo_(lista);
+
+  grupos.forEach(grupo => {
+    agregarFilaGrupoFlujo_(tbody, grupo.tipo, grupo.piezas, 2);
+
+    grupo.items.forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="flujo-nombre">${item.nombreArchivo || ""}</td>
+        <td>${item.fechaHoraTerminado || ""}</td>
+      `;
+      tbody.appendChild(tr);
+    });
   });
 
-  if (contador) contador.innerText = lista.length;
+  if (contador) contador.innerText = sumarPiezasFlujo_(lista);
 }
-
-	  let intervaloFlujo = null;
+let intervaloFlujo = null;
 let ultimaVersionFlujo = null;
 
 function iniciarAutoRefreshFlujo() {
