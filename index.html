@@ -3301,6 +3301,21 @@ contenedor.querySelectorAll(".grupo-taller-row").forEach(function(grupo) {
   });
 
   Object.keys(grupos).sort().forEach(function(tipo) {
+
+  grupos[tipo].sort(function(a, b) {
+  const urgenteA = String(a.urgente || a.URGENTE || "").trim().toLowerCase() === "true";
+  const urgenteB = String(b.urgente || b.URGENTE || "").trim().toLowerCase() === "true";
+
+  if (urgenteA !== urgenteB) {
+    return urgenteA ? -1 : 1;
+  }
+
+  const fechaA = new Date(`${a.fechaCarga || ""} ${a.horaCarga || ""}`);
+  const fechaB = new Date(`${b.fechaCarga || ""} ${b.horaCarga || ""}`);
+
+  return fechaA - fechaB;
+});
+	  
     const grupoTr = document.createElement("tr");
     grupoTr.className = "grupo-taller-row";
     grupoTr.dataset.grupo = tipo;
