@@ -3126,6 +3126,7 @@ function cargarDatosTalleres() {
 }	  
 
 function procesarDatosTalleres(res) {
+	
   if (!res || !res.ok) {
     console.error("Error al obtener datos", res);
     return;
@@ -3152,7 +3153,7 @@ function procesarDatosTalleres(res) {
     }
 
     return agrupamientosUsuario.some(function(agrupamiento) {
-      return tipo === agrupamiento;
+      return tipo.includes(agrupamiento);
     });
   });
 
@@ -3172,17 +3173,7 @@ function procesarDatosTalleres(res) {
     estado.textContent = `Actualizado ${horas}:${minutos}:${segundos}`;
   }
 }
-  if (estado) {
-    const ahora = new Date();
-
-    const horas = String(ahora.getHours()).padStart(2, "0");
-    const minutos = String(ahora.getMinutes()).padStart(2, "0");
-    const segundos = String(ahora.getSeconds()).padStart(2, "0");
-
-    estado.textContent = `Actualizado ${horas}:${minutos}:${segundos}`;
-  }
-}
-
+  
 	
 	  
 function pintarTablaTalleres(data) {
