@@ -4807,7 +4807,7 @@ function cerrarDetalleArchivos() {
 }
 
 
-	  function cargarCumplimientoOrden_(item) {
+function cargarCumplimientoOrden_(item) {
   const el = document.getElementById("cumplimientoOrdenValor");
   if (!el) return;
 
@@ -4815,24 +4815,40 @@ function cerrarDetalleArchivos() {
   el.style.color = "";
 
   const idrg = obtenerIDRG_(item);
+  const callbackName = "cumplimientoOrdenCallback_" + Date.now();
 
-  fetch(`${WEB_APP_URL}?action=obtenerCumplimientoOrden&idrg=${encodeURIComponent(idrg)}&unidadMedida=${encodeURIComponent(item.UNIDAD_MEDIDA || "")}&piezas=${encodeURIComponent(item.PIEZAS || "")}&totalM2=${encodeURIComponent(item.TOTALM2 || "")}`)
-    .then(res => res.json())
-    .then(data => {
-      if (!data.ok) {
-        el.textContent = "Incompleta";
-        el.style.color = "#dc2626";
-        return;
-      }
-
-      const texto = data.cumplimiento || "Incompleta";
-      el.textContent = texto;
-      el.style.color = texto === "Completa" ? "#16a34a" : "#dc2626";
-    })
-    .catch(() => {
+  window[callbackName] = function(data) {
+    if (!data || data.ok !== true) {
       el.textContent = "Incompleta";
       el.style.color = "#dc2626";
-    });
+      delete window[callbackName];
+      return;
+    }
+
+    const texto = data.cumplimiento || "Incompleta";
+    el.textContent = texto;
+    el.style.color = texto === "Completa" ? "#16a34a" : "#dc2626";
+
+    delete window[callbackName];
+  };
+
+  const script = document.createElement("script");
+  script.src = WEB_APP_URL
+    + "?action=obtenerCumplimientoOrden"
+    + "&idrg=" + encodeURIComponent(idrg)
+    + "&unidadMedida=" + encodeURIComponent(item.UNIDAD_MEDIDA || "")
+    + "&piezas=" + encodeURIComponent(item.PIEZAS || "")
+    + "&totalM2=" + encodeURIComponent(item.TOTALM2 || "")
+    + "&callback=" + callbackName
+    + "&_ts=" + Date.now();
+
+  script.onerror = function() {
+    el.textContent = "Incompleta";
+    el.style.color = "#dc2626";
+    delete window[callbackName];
+  };
+
+  document.body.appendChild(script);
 }
 
 	  
