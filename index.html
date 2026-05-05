@@ -3322,14 +3322,11 @@ contenedor.querySelectorAll(".grupo-taller-row").forEach(function(grupo) {
       const tr = document.createElement("tr");
 tr.className = "fila-taller";
 console.log("URGENTE:", item.urgente);
-if (
-  item.urgente === true ||
-  item.urgente === "true" ||
-  item.urgente === "True" ||
-  item.URGENTE === true ||
-  item.URGENTE === "true" ||
-  item.URGENTE === "True"
-) {
+const urgenteTaller = String(item.urgente || item.URGENTE || "")
+  .trim()
+  .toLowerCase();
+
+if (urgenteTaller === "true") {
   tr.classList.add("fila-urgente");
 }
 
