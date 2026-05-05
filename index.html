@@ -2183,6 +2183,10 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
       <button type="button" class="btn btn-secondary btn-small" id="filtroTallerImpreso">Impresos</button>
       <button type="button" class="btn btn-secondary btn-small" id="filtroTallerSuajado">Suajado</button>
       <button type="button" class="btn btn-secondary btn-small" id="filtroTallerTerminado">Terminado</button>
+	 <button type="button" class="btn btn-secondary btn-small" id="filtroTallerUrgente"
+  onclick="this.classList.toggle('activo'); aplicarFiltrosTaller();">
+  Urgentes
+</button>
     </div>
   </div>
 </div>
@@ -3449,6 +3453,7 @@ function aplicarFiltrosTaller() {
     const impresoActivo = tr.children[4].querySelector('.btn-proceso').classList.contains('activo');
     const suajadoActivo = tr.children[5].querySelector('.btn-proceso').classList.contains('activo');
     const terminadoActivo = tr.children[6].querySelector('.btn-proceso').classList.contains('activo');
+	const filtroUrgenteActivo = document.getElementById("filtroTallerUrgente").classList.contains("activo");
 
     let visible = true;
 
@@ -3458,8 +3463,16 @@ function aplicarFiltrosTaller() {
     if (filtrosTaller.suajado && !suajadoActivo) visible = false;
     if (filtrosTaller.terminado && !terminadoActivo) visible = false;
 
+
+	  if (filtroUrgenteActivo) {
+  const urgente = String(tr.classList.contains("fila-urgente"));
+  if (urgente !== "true") visible = false;
+}
+
     tr.dataset.filtroVisible = visible ? "true" : "false";
   });
+
+	
 
   const grupos = document.querySelectorAll('#contenedorTalleres tbody tr.grupo-taller-row');
 
