@@ -2146,6 +2146,27 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
 </div>
 
+<div id="vistaInicio" class="vista-modulo">
+
+  <div style="
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:70vh;
+    width:100%;
+    opacity:0.08;
+  ">
+
+    <img src="RUTA_DE_TU_LOGO_AQUI" style="
+      max-width:400px;
+      width:60%;
+      object-fit:contain;
+    ">
+
+  </div>
+
+</div>
+		
 <div id="vistaTalleres" class="vista-modulo vista-oculta">
   <div class="topbar">
     <div class="page-title">
@@ -4015,6 +4036,7 @@ function aplicarBusquedaFlujo() {
 
 function mostrarVistaTablero(vista) {
   const vistas = {
+	inicio: document.getElementById("vistaInicio"),
     usuarios: document.getElementById('vistaUsuarios'),
     produccion: document.getElementById('vistaProduccion'),
     clientesCredito: document.getElementById('vistaClientesCredito'),
@@ -4029,7 +4051,7 @@ function mostrarVistaTablero(vista) {
     }
   });
 
-  const destino = vistas[vista] || vistas.pendiente || vistas.usuarios;
+  const destino = vistas[vista] || vistas.inicio || vistas.pendiente || vistas.usuarios;
 
   if (destino) {
     destino.classList.remove('vista-oculta');
@@ -4370,6 +4392,7 @@ function activarNavegacionInterna() {
     pintarUsuarioLogueado();
     aplicarPermisosMenu();
     activarNavegacionInterna();
+	mostrarVistaTablero("inicio");
 
     busquedaUsuarios.addEventListener('input', aplicarFiltrosUsuarios);
     filtroEstatus.addEventListener('change', aplicarFiltrosUsuarios);
