@@ -4655,7 +4655,7 @@ function activarNavegacionInterna() {
       document.getElementById("modalSubtitle").textContent = `Folio ${item.FOLIO} · IDRG ${obtenerIDRG_(item)}`;
 
       const fields = [
-  ["IDRG", obtenerIDRG_(item)],
+  ["Cumplimiento Orden", "Calculando..."],
   ["Folio", item.FOLIO],
   ["% Pagado", item.PORCENTAJE_PAGADO || "0.00%"],
   ["Tipo de Cliente", item.TIPO_CLIENTE],
@@ -4668,12 +4668,18 @@ function activarNavegacionInterna() {
   ["Fecha/Hora", `${item.FECHA} ${item.HORA}`]
 ];
 
-      const resumenHTML = fields.map(([label, value]) => `
-  <div class="info-cell">
-    <span>${escapeHtml(label)}</span>
-    <strong title="${escapeHtml(value)}">${escapeHtml(value)}</strong>
-  </div>
-`).join("");
+      const resumenHTML = fields.map(([label, value]) => {
+  const extraId = label === "Cumplimiento Orden" ? 'id="cumplimientoOrdenValor"' : "";
+
+  return `
+    <div class="info-cell">
+      <span>${escapeHtml(label)}</span>
+      <strong ${extraId} title="${escapeHtml(value)}">${escapeHtml(value)}</strong>
+    </div>
+  `;
+}).join("");
+
+		
 
 document.getElementById("itemResume").innerHTML = `
   ${resumenHTML}
@@ -4682,7 +4688,9 @@ document.getElementById("itemResume").innerHTML = `
     <strong id="contadorArchivosEnviados">...</strong>
   </div>
 `;
+
 cargarContadorArchivosEnviados_(obtenerIDRG_(item));
+cargarCumplimientoOrden_(item);
     }
 
     fileInput.addEventListener("change", (event) => {
@@ -4797,6 +4805,37 @@ function cerrarDetalleArchivos() {
 
   document.body.appendChild(script);
 }
+
+
+	  function cargarCumplimientoOrden_(item) {
+  const el = document.getElementById("cumplimientoOrdenValor");
+  if (!el) return;
+
+  el.textContent = "Calculando...";
+  el.style.color = "";
+
+  const idrg = obtenerIDRG_(item);
+
+  fetch(`${WEB_APP_URL}?action=obtenerCumplimientoOrden&idrg=${encodeURIComponent(idrg)}&unidadMedida=${encodeURIComponent(item.UNIDAD_MEDIDA || "")}&piezas=${encodeURIComponent(item.PIEZAS || "")}&totalM2=${encodeURIComponent(item.TOTALM2 || "")}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.ok) {
+        el.textContent = "Incompleta";
+        el.style.color = "#dc2626";
+        return;
+      }
+
+      const texto = data.cumplimiento || "Incompleta";
+      el.textContent = texto;
+      el.style.color = texto === "Completa" ? "#16a34a" : "#dc2626";
+    })
+    .catch(() => {
+      el.textContent = "Incompleta";
+      el.style.color = "#dc2626";
+    });
+}
+
+	  
 	  function eliminarArchivoUI(idCarga, btn) {
 
   if (!idCarga) {
