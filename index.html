@@ -1868,6 +1868,13 @@ body {
 .fila-taller:hover {
   background: #f9fafb;
 }
+
+.btn-delete:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(100%);
+}
+	  
 	  
 </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -4993,8 +5000,9 @@ function abrirDetalleArchivosPorIDRG(index) {
 </td>
 <td>
   <button class="btn-delete"
+    ${archivo.impreso === "Si" ? "disabled" : ""}
     onclick="eliminarArchivoUI('${escapeHtml(archivo.idCarga || "")}', this)"
-    title="Eliminar archivo">
+    title="${archivo.impreso === "Si" ? "No se puede eliminar: ya fue impreso" : "Eliminar archivo"}">
     🗑
   </button>
 </td>
