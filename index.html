@@ -543,6 +543,14 @@
     .vista-modulo { width: 100%; }
     .menu-item.disabled { opacity: .45; pointer-events: none; }
 
+	  .reporte-modulo{
+  display:none;
+}
+
+.reporte-modulo.activo{
+  display:block;
+}
+
     /* ===== Estilos del módulo Producción embebido ===== */
 
     :root {
@@ -1948,6 +1956,11 @@ body {
 		  <span class="menu-icon">💳</span>
 		  <span class="menu-label">Clientes Crédito</span>
 		</a>
+
+		  <a href="#" class="menu-item" data-vista="reportes" data-modulo="Reportes">
+		  <span class="menu-icon">📊</span>
+		  <span class="menu-label">Reportes</span>
+		</a>
 		  
         <a href="#" class="menu-item" data-vista="pendiente" data-modulo="Entregas">
           <span class="menu-icon">🚚</span>
@@ -2245,6 +2258,46 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
   </section>
 </div>
 
+<div id="vistaReportes" class="vista-modulo vista-oculta">
+
+  <div class="topbar">
+    <div class="page-title">
+      <h2>Reportes</h2>
+      <p>Selecciona un reporte para visualizarlo en el tablero.</p>
+    </div>
+  </div>
+
+  <div class="card panel-body">
+    <div class="panel-header">
+      <div>
+        <h3>Seleccionar reporte</h3>
+        <p>Elige un reporte de la lista para mostrarlo debajo.</p>
+      </div>
+      <span class="tag">Reportes dinámicos</span>
+    </div>
+
+    <div class="field" style="max-width:420px;">
+      <label for="selectReporte">Reporte</label>
+      <select id="selectReporte" onchange="cambiarReporteSeleccionado()">
+        <option value="">Selecciona un reporte...</option>
+      </select>
+      <div class="helper">Los reportes se tomarán de la hoja "Reportes".</div>
+    </div>
+
+    <div id="contenedorReportes" style="margin-top:20px;">
+
+      <div id="EfectAflu" class="reporte-modulo vista-oculta">
+        <div class="empty-state">
+          Aquí irá el reporte <strong>Efectividad y Afluencia</strong>.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+		
 <div id="vistaClientesCredito" class="vista-modulo vista-oculta">
   <div class="topbar">
     <div class="page-title">
@@ -4046,12 +4099,74 @@ function aplicarBusquedaFlujo() {
       });
     }
 
+async function cargarReportes(){
+
+  try{
+
+    const response = await fetch(
+      WEB_APP_URL + "?action=getReportes"
+    );
+
+    const data = await response.json();
+
+    const select = document.getElementById("selectReporte");
+
+    if(!select) return;
+
+    select.innerHTML = `
+      <option value="">Selecciona un reporte...</option>
+    `;
+
+    (data.reportes || []).forEach(r => {
+
+      select.innerHTML += `
+        <option value="${r.idModulo}">
+          ${r.reporte}
+        </option>
+      `;
+
+    });
+
+  }catch(error){
+
+    console.error("Error cargando reportes:", error);
+
+  }
+
+}
+
+
+	  function cambiarReporteSeleccionado(){
+
+  const select = document.getElementById("selectReporte");
+
+  if(!select) return;
+
+  const idModulo = select.value;
+
+  document.querySelectorAll(".reporte-modulo")
+    .forEach(modulo => {
+      modulo.classList.remove("activo");
+    });
+
+  if(!idModulo) return;
+
+  const modulo = document.getElementById(idModulo);
+
+  if(modulo){
+    modulo.classList.add("activo");
+  }
+
+}
+
+	  
 function mostrarVistaTablero(vista) {
   const vistas = {
 	inicio: document.getElementById("vistaInicio"),
     usuarios: document.getElementById('vistaUsuarios'),
     produccion: document.getElementById('vistaProduccion'),
     clientesCredito: document.getElementById('vistaClientesCredito'),
+	reportes: document.getElementById('vistaReportes'),
     talleres: document.getElementById('vistaTalleres'),
     flujo: document.getElementById('vistaFlujo'),
     pendiente: document.getElementById('vistaPendiente')
@@ -4405,6 +4520,7 @@ function activarNavegacionInterna() {
     pintarUsuarioLogueado();
 aplicarPermisosMenu();
 activarNavegacionInterna();
+	  cargarReportes();
 
 const btnCerrarSesion = document.getElementById('btnCerrarSesion');
 
