@@ -51,6 +51,14 @@ button{
   border-radius:6px;
   cursor:pointer;
   font-weight:bold;
+  transition:transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
+  box-shadow:0 3px 0 rgba(0,0,0,0.18);
+}
+
+button:active{
+  transform:translateY(3px) scale(0.98);
+  box-shadow:0 1px 0 rgba(0,0,0,0.22);
+  filter:brightness(0.95);
 }
 
 .btn-consultar{
@@ -579,7 +587,7 @@ const fechaFin2 = document.getElementById("fechaFin2").value || "";
 const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=9" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=10" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
 "&fechaInicio2=" + encodeURIComponent(fechaInicio2) +
