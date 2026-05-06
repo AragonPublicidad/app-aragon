@@ -3807,7 +3807,7 @@ function aplicarBusquedaFlujo() {
 
     function renderUsuarios(usuarios) {
       if (!usuarios || usuarios.length === 0) {
-        tablaUsuariosBody.innerHTML = '<tr><td colspan="8">No hay usuarios que coincidan con el filtro.</td></tr>';
+        tablaUsuariosBody.innerHTML = '<tr><td colspan="5">No hay usuarios que coincidan con el filtro.</td></tr>';
         return;
       }
 
@@ -3817,7 +3817,7 @@ function aplicarBusquedaFlujo() {
             <td>${item.nombre || ''}</td>
             <td>${item.tipoUsuario || ''}</td>
             <td>${item.usuario || ''}</td>
-            <td>${item.agrupamiento || ''}</td>
+            
             <td>${item.estatus === 'Activo'
               ? `<span class="estatus-activo">Activo</span>`
               : `<span class="estatus-inactivo">Inactivo</span>`}</td>
@@ -3834,7 +3834,7 @@ function aplicarBusquedaFlujo() {
           llenarFiltrosUsuarios();
           aplicarFiltrosUsuarios();
         } else {
-          tablaUsuariosBody.innerHTML = '<tr><td colspan="8">No se pudieron cargar los usuarios.</td></tr>';
+          tablaUsuariosBody.innerHTML = '<tr><td colspan="5">No se pudieron cargar los usuarios.</td></tr>';
         }
       };
 
