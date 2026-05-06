@@ -4433,7 +4433,7 @@ function cargarReportes(){
 }
 
 
-	  function cambiarReporteSeleccionado(){
+	 function cambiarReporteSeleccionado(){
 
   const select = document.getElementById("selectReporte");
 
@@ -4442,8 +4442,9 @@ function cargarReportes(){
   const idModulo = select.value;
 
   document.querySelectorAll(".reporte-modulo")
-    .forEach(modulo => {
+    .forEach(function(modulo){
       modulo.classList.remove("activo");
+      modulo.classList.add("vista-oculta");
     });
 
   if(!idModulo) return;
@@ -4451,6 +4452,7 @@ function cargarReportes(){
   const modulo = document.getElementById(idModulo);
 
   if(modulo){
+    modulo.classList.remove("vista-oculta");
     modulo.classList.add("activo");
   }
 
