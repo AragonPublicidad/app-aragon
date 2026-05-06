@@ -4099,39 +4099,61 @@ function aplicarBusquedaFlujo() {
       });
     }
 
-async function cargarReportes(){
+function cargarReportes(){
 
-  try{
+  const select = document.getElementById("selectReporte");
 
-    const response = await fetch(
-      WEB_APP_URL + "?action=getReportes"
-    );
+  if(!select) return;
 
-    const data = await response.json();
+  select.innerHTML = `
+    <option value="">Cargando reportes...</option>
+  `;
 
-    const select = document.getElementById("selectReporte");
+  const callbackName = "callbackReportes_" + Date.now();
 
-    if(!select) return;
+  window[callbackName] = function(res){
 
     select.innerHTML = `
       <option value="">Selecciona un reporte...</option>
     `;
 
-    (data.reportes || []).forEach(r => {
-
-      select.innerHTML += `
-        <option value="${r.idModulo}">
-          ${r.reporte}
-        </option>
+    if(!res || res.ok !== true){
+      console.error("Error cargando reportes:", res);
+      select.innerHTML = `
+        <option value="">Error al cargar reportes</option>
       `;
+      delete window[callbackName];
+      return;
+    }
+
+    (res.reportes || []).forEach(function(r){
+
+      const option = document.createElement("option");
+      option.value = r.idModulo;
+      option.textContent = r.reporte;
+
+      select.appendChild(option);
 
     });
 
-  }catch(error){
+    delete window[callbackName];
 
-    console.error("Error cargando reportes:", error);
+  };
 
-  }
+  const script = document.createElement("script");
+  script.src = WEB_APP_URL
+    + "?action=getReportes"
+    + "&callback=" + callbackName
+    + "&_ts=" + Date.now();
+
+  script.onerror = function(){
+    select.innerHTML = `
+      <option value="">Error de conexión</option>
+    `;
+    delete window[callbackName];
+  };
+
+  document.body.appendChild(script);
 
 }
 
