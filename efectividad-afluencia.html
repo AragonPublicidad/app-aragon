@@ -578,8 +578,15 @@ function cargarLineasReporte(){
       return;
     }
 
-    lineasCatalogo = resp.data || [];
-    pintarLineasDropdown();
+   lineasCatalogo = resp.data || [];
+
+if(lineasSeleccionadas.length === 0){
+  lineasSeleccionadas = lineasCatalogo.map(function(item){
+    return item.numCodigo;
+  });
+}
+
+pintarLineasDropdown();
 
     delete window[callbackName];
   };
@@ -652,13 +659,17 @@ function actualizarTextoLineas(){
   const texto = document.getElementById("lineasTexto");
 
   if(!lineasSeleccionadas.length){
-    texto.innerText = "Todas las líneas";
+    texto.innerText = "Ninguna línea seleccionada";
     return;
   }
 
-  texto.innerText = lineasSeleccionadas.length + " línea(s) seleccionada(s)";
-}
+  if(lineasCatalogo.length && lineasSeleccionadas.length === lineasCatalogo.length){
+    texto.innerText = "Todas las líneas seleccionadas";
+    return;
+  }
 
+  texto.innerText = lineasSeleccionadas.length + " de " + lineasCatalogo.length + " línea(s)";
+}
 function toggleLineasDropdown(){
   document.getElementById("lineasDropdown").classList.toggle("show");
 }
@@ -704,8 +715,9 @@ pintarGrafica(graficaGeneral, "Vista general");
     "&fechaInicio2=" + encodeURIComponent(convertirFechaInput(fechaInicio2)) +
     "&fechaFin2=" + encodeURIComponent(convertirFechaInput(fechaFin2)) +
     "&vista=" + encodeURIComponent(vista) +
-    "&estado=" + encodeURIComponent(estado) +
-    "&callback=" + callbackName +
+   "&estado=" + encodeURIComponent(estado) +
+"&lineas=" + encodeURIComponent(lineasSeleccionadas.join(",")) +
+"&callback=" + callbackName +
     "&_ts=" + Date.now();
 
   document.body.appendChild(script);
@@ -736,7 +748,7 @@ const fechaFin2 = document.getElementById("fechaFin2").value || "";
 const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=11" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=12" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
 "&fechaInicio2=" + encodeURIComponent(fechaInicio2) +
