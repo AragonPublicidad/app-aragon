@@ -361,8 +361,15 @@ tbody tr.seleccionado{
       <button class="btn-toggle" onclick="toggleVista()" id="toggleBtn">
         Ver por Usuario
       </button>
+
+  <button class="btn-toggle" onclick="expandirReporte()">
+  Expandir
+</button>
+      
     </div>
   </div>
+
+
 
   <div class="cards">
     <div class="card">
@@ -513,6 +520,16 @@ function toggleVista(){
   consultar();
 }
 
+function expandirReporte(){
+
+  window.open(
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=2",
+    "_blank"
+  );
+
+}
+
+  
 function pintarCards(r){
   document.getElementById("totalOrdenes").innerText = r.ordenes;
   document.getElementById("totalVenta").innerText = formatoMoneda(r.venta);
