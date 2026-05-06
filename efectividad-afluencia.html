@@ -448,15 +448,53 @@ let vista = "sucursal";
 let chart = null;
 let seleccion = null;
 
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw5OG9c0oeDWRyuZ6SshfWZk_AZxtKftEsc5IcTf4a7qk_6Dn2KOtS2UP31xYNGc1OP/exec";
+
+function convertirFechaInput(valor){
+  if(!valor) return "";
+
+  const partes = valor.split("-");
+
+  if(partes.length !== 3) return "";
+
+  return partes[2] + "/" + partes[1] + "/" + partes[0];
+}
+
 function consultar(){
   seleccion = null;
 
-  const data = generarDatosDemo();
+  const fechaInicio = document.getElementById("fechaInicio").value;
+  const fechaFin = document.getElementById("fechaFin").value;
 
-  pintarCards(data.resumen);
-  pintarTabla(data.tabla);
-  pintarGrafica(data.grafica, "Vista general");
-  pintarTermometro(data.termometro);
+  const callbackName = "callbackEfectAflu_" + Date.now();
+
+  window[callbackName] = function(resp){
+
+    if(!resp || resp.ok !== true){
+      console.error("Error reporte:", resp);
+      alert(resp && resp.message ? resp.message : "Error al cargar reporte");
+      delete window[callbackName];
+      return;
+    }
+
+    pintarCards(resp.resumen || {});
+    pintarTabla(resp.tabla || []);
+
+    delete window[callbackName];
+  };
+
+  const script = document.createElement("script");
+
+  script.src =
+    WEB_APP_URL +
+    "?action=getReporteEfectividadAfluencia" +
+    "&fechaInicio=" + encodeURIComponent(convertirFechaInput(fechaInicio)) +
+    "&fechaFin=" + encodeURIComponent(convertirFechaInput(fechaFin)) +
+    "&vista=" + encodeURIComponent(vista) +
+    "&callback=" + callbackName +
+    "&_ts=" + Date.now();
+
+  document.body.appendChild(script);
 }
 
 function toggleVista(){
