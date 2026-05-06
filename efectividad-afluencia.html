@@ -8,6 +8,39 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
+.btn-expand-row{
+  width:22px;
+  height:22px;
+  border:none;
+  border-radius:50%;
+  background:#ecf0f1;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:bold;
+  transition:all 0.15s ease;
+}
+
+.btn-expand-row:hover{
+  background:#d0d7de;
+}
+
+.tr-linea-detalle{
+  background:#f8fafc;
+}
+
+.tr-linea-detalle td{
+  font-size:12px;
+  color:#555;
+}
+
+.nombre-linea{
+  padding-left:22px;
+  font-style:italic;
+}
+
+
+  
 body{
   margin:0;
   font-family:Arial;
@@ -501,8 +534,9 @@ tbody tr.seleccionado{
       <table>
         <thead>
           <tr>
-            <th id="colTitulo">Sucursal</th>
-<th>Ord R1</th>
+  <th style="width:28px;"></th>
+  <th id="colTitulo">Sucursal</th>
+  <th>Ord R1</th>
 <th>Venta R1</th>
 <th>Ticket R1</th>
 <th>Ord R2</th>
@@ -563,6 +597,9 @@ let graficaGeneral = null;
 
 let lineasCatalogo = [];
 let lineasSeleccionadas = [];
+
+  let lineasDetalleTabla = {};
+let filaExpandida = null;
   
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw5OG9c0oeDWRyuZ6SshfWZk_AZxtKftEsc5IcTf4a7qk_6Dn2KOtS2UP31xYNGc1OP/exec";
 
@@ -697,6 +734,8 @@ function consultar(){
 
    graficaGeneral = resp.grafica || {dias:[], ventas:[], ordenes:[]};
 detallesGrafica = resp.detalles || {};
+lineasDetalleTabla = resp.lineasDetalle || {};
+filaExpandida = null;
 
 pintarCards(resp.resumen || {});
 pintarTabla(resp.tabla || []);
@@ -748,7 +787,7 @@ const fechaFin2 = document.getElementById("fechaFin2").value || "";
 const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=13" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=14" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
 "&fechaInicio2=" + encodeURIComponent(fechaInicio2) +
@@ -778,6 +817,9 @@ function pintarTabla(rows){
    const claseDif = Number(r.difVentas || 0) < 0 ? "dif-negativa" : "dif-positiva";
 
 tr.innerHTML = `
+  <td>
+    <button type="button" class="btn-expand-row" onclick="toggleExpandirLinea(event, '${String(r.nombre).replace(/'/g, "\\'")}')">▶</button>
+  </td>
   <td>${r.nombre}</td>
   <td>${r.ordenesR1}</td>
   <td>${formatoMoneda(r.ventaR1)}</td>
@@ -795,6 +837,81 @@ tr.innerHTML = `
     body.appendChild(tr);
   });
 }
+
+  function toggleExpandirLinea(event, nombre){
+
+  event.stopPropagation();
+
+  const tbody = document.getElementById("tablaBody");
+
+  const filasActuales = tbody.querySelectorAll(".tr-linea-detalle");
+
+  filasActuales.forEach(f => f.remove());
+
+  const botones = tbody.querySelectorAll(".btn-expand-row");
+
+  botones.forEach(b => b.innerText = "▶");
+
+  if(filaExpandida === nombre){
+    filaExpandida = null;
+    return;
+  }
+
+  filaExpandida = nombre;
+
+  const filaPrincipal = tbody.querySelector(`tr[data-nombre="${nombre}"]`);
+
+  if(!filaPrincipal){
+    return;
+  }
+
+  const boton = filaPrincipal.querySelector(".btn-expand-row");
+
+  if(boton){
+    boton.innerText = "▼";
+  }
+
+  const lineas = lineasDetalleTabla[nombre];
+
+  if(!lineas){
+    return;
+  }
+
+  Object.values(lineas).forEach(function(linea){
+
+    const tr = document.createElement("tr");
+
+    tr.className = "tr-linea-detalle";
+
+    const ticketR1 = linea.ordenesR1 > 0
+      ? (linea.ventaR1 / linea.ordenesR1)
+      : 0;
+
+    const ticketR2 = linea.ordenesR2 > 0
+      ? (linea.ventaR2 / linea.ordenesR2)
+      : 0;
+
+    const difVentas = linea.ventaR1 - linea.ventaR2;
+
+    tr.innerHTML = `
+      <td></td>
+      <td class="nombre-linea">└ ${linea.codigo}</td>
+      <td>${linea.ordenesR1}</td>
+      <td>${formatoMoneda(linea.ventaR1)}</td>
+      <td>${formatoMoneda(ticketR1)}</td>
+      <td>${linea.ordenesR2}</td>
+      <td>${formatoMoneda(linea.ventaR2)}</td>
+      <td>${formatoMoneda(ticketR2)}</td>
+      <td>${formatoMoneda(difVentas)}</td>
+    `;
+
+    filaPrincipal.insertAdjacentElement("afterend", tr);
+
+  });
+
+}
+
+function seleccionarFila(nombre){
 
 function seleccionarFila(nombre){
 
