@@ -3012,11 +3012,22 @@ function toggleProceso(btn) {
   const fechaHora = obtenerFechaHoraActual();
 
   if (btn.classList.contains('activo')) {
-    desactivarProceso(btn);
-    guardarProcesoTaller(idCarga, proceso, false, "");
-    aplicarFiltrosTaller();
-    return;
+
+  if (proceso === 'impreso') {
+    const usuarioSesion = JSON.parse(sessionStorage.getItem("usuario") || "{}");
+    const tipoUsuario = String(usuarioSesion.tipo || "").trim().toLowerCase();
+
+    if (tipoUsuario !== "maestro") {
+      alert("No tienes permiso para deseleccionar Impreso.");
+      return;
+    }
   }
+
+  desactivarProceso(btn);
+  guardarProcesoTaller(idCarga, proceso, false, "");
+  aplicarFiltrosTaller();
+  return;
+}
 
   if (proceso === 'impreso') {
     activarProceso(btnImpreso, fechaHora);
