@@ -491,8 +491,9 @@ function consultar(){
       return;
     }
 
-    pintarCards(resp.resumen || {});
+   pintarCards(resp.resumen || {});
     pintarTabla(resp.tabla || []);
+    pintarGrafica(resp.grafica || {dias:[], ventas:[], ordenes:[]}, "Vista general");
 
     delete window[callbackName];
   };
@@ -535,7 +536,7 @@ function expandirReporte(){
   const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=5" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=6" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
     "&vista=" + encodeURIComponent(vista) +
