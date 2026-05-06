@@ -61,6 +61,56 @@ button:active{
   filter:brightness(0.95);
 }
 
+  .lineas-multi{
+  position:relative;
+  min-width:240px;
+}
+
+.lineas-trigger{
+  background:#fff;
+  border:1px solid #d0d7de;
+  padding:8px 12px;
+  border-radius:8px;
+  min-width:240px;
+  text-align:left;
+  font-size:13px;
+  color:#333;
+}
+
+.lineas-dropdown{
+  position:absolute;
+  top:110%;
+  left:0;
+  width:280px;
+  max-height:320px;
+  overflow:auto;
+  background:#fff;
+  border:1px solid #d0d7de;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.12);
+  padding:10px;
+  display:none;
+  z-index:9999;
+}
+
+.lineas-dropdown.show{
+  display:block;
+}
+
+.linea-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 4px;
+  font-size:13px;
+  cursor:pointer;
+}
+
+.linea-item:hover{
+  background:#f3f6fb;
+  border-radius:6px;
+}
+
 .btn-consultar{
   background:linear-gradient(90deg,#2ecc71,#27ae60);
   color:#fff;
@@ -398,6 +448,14 @@ tbody tr.seleccionado{
   <option value="Chiapas">Chiapas</option>
 </select>
 
+      <div class="lineas-multi" id="lineasMulti">
+  <button type="button" class="lineas-trigger" onclick="toggleLineasDropdown()">
+    <span id="lineasTexto">Todas las líneas</span>
+  </button>
+
+  <div class="lineas-dropdown" id="lineasDropdown"></div>
+</div>
+
       <button class="btn-consultar" onclick="consultar()">Consultar</button>
 
       <button class="btn-toggle" onclick="toggleVista()" id="toggleBtn">
@@ -503,8 +561,41 @@ let seleccion = null;
   let detallesGrafica = {};
 let graficaGeneral = null;
 
+let lineasCatalogo = [];
+let lineasSeleccionadas = [];
+  
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw5OG9c0oeDWRyuZ6SshfWZk_AZxtKftEsc5IcTf4a7qk_6Dn2KOtS2UP31xYNGc1OP/exec";
 
+function cargarLineasReporte(){
+
+  const callbackName = "callbackLineas_" + Date.now();
+
+  window[callbackName] = function(resp){
+
+    if(!resp || resp.ok !== true){
+      console.error("Error líneas:", resp);
+      delete window[callbackName];
+      return;
+    }
+
+    lineasCatalogo = resp.data || [];
+    pintarLineasDropdown();
+
+    delete window[callbackName];
+  };
+
+  const script = document.createElement("script");
+
+  script.src =
+    WEB_APP_URL +
+    "?action=getLineasReporte" +
+    "&callback=" + callbackName +
+    "&_ts=" + Date.now();
+
+  document.body.appendChild(script);
+}
+
+  
 function convertirFechaInput(valor){
   if(!valor) return "";
 
@@ -515,6 +606,64 @@ function convertirFechaInput(valor){
   return partes[2] + "/" + partes[1] + "/" + partes[0];
 }
 
+function pintarLineasDropdown(){
+
+  const contenedor = document.getElementById("lineasDropdown");
+  contenedor.innerHTML = "";
+
+  lineasCatalogo.forEach(function(item){
+
+    const label = document.createElement("label");
+    label.className = "linea-item";
+
+    const checked = lineasSeleccionadas.includes(item.numCodigo);
+
+    label.innerHTML = `
+      <input type="checkbox" value="${item.numCodigo}" ${checked ? "checked" : ""}>
+      <span>${item.codigo}</span>
+    `;
+
+    label.querySelector("input").addEventListener("change", function(e){
+
+      const valor = e.target.value;
+
+      if(e.target.checked){
+        if(!lineasSeleccionadas.includes(valor)){
+          lineasSeleccionadas.push(valor);
+        }
+      }else{
+        lineasSeleccionadas = lineasSeleccionadas.filter(function(v){
+          return v !== valor;
+        });
+      }
+
+      actualizarTextoLineas();
+
+    });
+
+    contenedor.appendChild(label);
+  });
+
+  actualizarTextoLineas();
+}
+
+function actualizarTextoLineas(){
+
+  const texto = document.getElementById("lineasTexto");
+
+  if(!lineasSeleccionadas.length){
+    texto.innerText = "Todas las líneas";
+    return;
+  }
+
+  texto.innerText = lineasSeleccionadas.length + " línea(s) seleccionada(s)";
+}
+
+function toggleLineasDropdown(){
+  document.getElementById("lineasDropdown").classList.toggle("show");
+}
+
+  
 function consultar(){
   seleccion = null;
 
@@ -587,7 +736,7 @@ const fechaFin2 = document.getElementById("fechaFin2").value || "";
 const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=10" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=11" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
 "&fechaInicio2=" + encodeURIComponent(fechaInicio2) +
@@ -1034,7 +1183,7 @@ if(vistaURL){
       ? "Ver por Usuario"
       : "Ver por Sucursal";
 }
-
+cargarLineasReporte();
 consultar();
 </script>
 
