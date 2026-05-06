@@ -787,7 +787,7 @@ const fechaFin2 = document.getElementById("fechaFin2").value || "";
 const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=15" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=16" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
 "&fechaInicio2=" + encodeURIComponent(fechaInicio2) +
@@ -892,6 +892,7 @@ tr.innerHTML = `
       : 0;
 
     const difVentas = linea.ventaR1 - linea.ventaR2;
+    const claseDifLinea = Number(difVentas || 0) < 0 ? "dif-negativa" : "dif-positiva";
 
     tr.innerHTML = `
       <td></td>
@@ -902,7 +903,7 @@ tr.innerHTML = `
       <td>${linea.ordenesR2}</td>
       <td>${formatoMoneda(linea.ventaR2)}</td>
       <td>${formatoMoneda(ticketR2)}</td>
-      <td>${formatoMoneda(difVentas)}</td>
+      <td class="${claseDifLinea}">${formatoMoneda(difVentas)}</td>
     `;
 
     filaPrincipal.insertAdjacentElement("afterend", tr);
