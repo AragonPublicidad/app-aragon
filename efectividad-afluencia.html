@@ -356,6 +356,12 @@ tbody tr.seleccionado{
       <input type="date" id="fechaInicio">
       <input type="date" id="fechaFin">
 
+      <select id="estadoFiltro">
+  <option value="">Todos los estados</option>
+  <option value="Oaxaca">Oaxaca</option>
+  <option value="Chiapas">Chiapas</option>
+</select>
+
       <button class="btn-consultar" onclick="consultar()">Consultar</button>
 
       <button class="btn-toggle" onclick="toggleVista()" id="toggleBtn">
@@ -472,6 +478,7 @@ function consultar(){
 
   const fechaInicio = document.getElementById("fechaInicio").value;
   const fechaFin = document.getElementById("fechaFin").value;
+  const estado = document.getElementById("estadoFiltro").value;
 
   const callbackName = "callbackEfectAflu_" + Date.now();
 
@@ -498,6 +505,7 @@ function consultar(){
     "&fechaInicio=" + encodeURIComponent(convertirFechaInput(fechaInicio)) +
     "&fechaFin=" + encodeURIComponent(convertirFechaInput(fechaFin)) +
     "&vista=" + encodeURIComponent(vista) +
+    "&estado=" + encodeURIComponent(estado) +
     "&callback=" + callbackName +
     "&_ts=" + Date.now();
 
@@ -524,12 +532,14 @@ function expandirReporte(){
 
   const fechaInicio = document.getElementById("fechaInicio").value || "";
   const fechaFin = document.getElementById("fechaFin").value || "";
+  const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=4" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=5" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
-    "&vista=" + encodeURIComponent(vista);
+    "&vista=" + encodeURIComponent(vista) +
+   "&estado=" + encodeURIComponent(estado);
 
   window.open(url, "_blank");
 
@@ -903,6 +913,7 @@ function formatoMoneda(valor){
 const fechaInicioURL = params.get("fechaInicio");
 const fechaFinURL = params.get("fechaFin");
 const vistaURL = params.get("vista");
+  const estadoURL = params.get("estado");
 
 if(fechaInicioURL){
   document.getElementById("fechaInicio").value = fechaInicioURL;
@@ -910,6 +921,10 @@ if(fechaInicioURL){
 
 if(fechaFinURL){
   document.getElementById("fechaFin").value = fechaFinURL;
+}
+
+  if(estadoURL){
+  document.getElementById("estadoFiltro").value = estadoURL;
 }
 
 if(vistaURL){
