@@ -492,6 +492,8 @@ tbody tr.seleccionado{
 let vista = "sucursal";
 let chart = null;
 let seleccion = null;
+  let detallesGrafica = {};
+let graficaGeneral = null;
 
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw5OG9c0oeDWRyuZ6SshfWZk_AZxtKftEsc5IcTf4a7qk_6Dn2KOtS2UP31xYNGc1OP/exec";
 
@@ -525,9 +527,12 @@ function consultar(){
       return;
     }
 
-   pintarCards(resp.resumen || {});
-    pintarTabla(resp.tabla || []);
-    pintarGrafica(resp.grafica || {dias:[], ventas:[], ordenes:[]}, "Vista general");
+   graficaGeneral = resp.grafica || {dias:[], ventas:[], ordenes:[]};
+detallesGrafica = resp.detalles || {};
+
+pintarCards(resp.resumen || {});
+pintarTabla(resp.tabla || []);
+pintarGrafica(graficaGeneral, "Vista general");
 
     delete window[callbackName];
   };
@@ -574,7 +579,7 @@ const fechaFin2 = document.getElementById("fechaFin2").value || "";
 const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=8" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=9" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
 "&fechaInicio2=" + encodeURIComponent(fechaInicio2) +
@@ -623,20 +628,19 @@ tr.innerHTML = `
 }
 
 function seleccionarFila(nombre){
-  const data = generarDatosDemo();
 
   if(seleccion === nombre){
     seleccion = null;
     limpiarSeleccionTabla();
-    pintarGrafica(data.grafica, "Vista general");
+    pintarGrafica(graficaGeneral, "Vista general");
     return;
   }
 
   seleccion = nombre;
   marcarSeleccionTabla(nombre);
 
-  if(data.detalles[nombre]){
-    pintarGrafica(data.detalles[nombre], nombre);
+  if(detallesGrafica[nombre]){
+    pintarGrafica(detallesGrafica[nombre], nombre);
   }
 }
 
