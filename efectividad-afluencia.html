@@ -748,7 +748,7 @@ const fechaFin2 = document.getElementById("fechaFin2").value || "";
 const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=12" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=13" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
 "&fechaInicio2=" + encodeURIComponent(fechaInicio2) +
@@ -852,7 +852,8 @@ function pintarGrafica(data, tituloFiltro){
     data: data.ventas || [],
     backgroundColor: "#2ecc71",
     borderRadius: 8,
-    yAxisID: "y"
+    yAxisID: "y",
+    order: 2
   },
   {
     type: "line",
@@ -862,7 +863,8 @@ function pintarGrafica(data, tituloFiltro){
     backgroundColor: "#2980b9",
     tension: 0.35,
     pointRadius: 5,
-    yAxisID: "y1"
+    yAxisID: "y1",
+    order: 1
   },
 
   // =========================
@@ -875,7 +877,8 @@ function pintarGrafica(data, tituloFiltro){
     backgroundColor: "#3498db",
     borderRadius: 8,
     yAxisID: "y",
-    hidden: !data.usarRango2
+    hidden: !data.usarRango2,
+    order: 2
   },
   {
     type: "line",
@@ -886,7 +889,8 @@ function pintarGrafica(data, tituloFiltro){
     tension: 0.35,
     pointRadius: 5,
     yAxisID: "y1",
-    hidden: !data.usarRango2
+    hidden: !data.usarRango2,
+    order: 1
   }
 
 ]
