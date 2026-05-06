@@ -140,6 +140,29 @@ th, td{
   border-bottom:1px solid #eee;
 }
 
+
+  .table-container table{
+  font-size:12px;
+}
+
+.table-container th,
+.table-container td{
+  padding:7px 6px;
+  white-space:nowrap;
+}
+
+.dif-positiva{
+  color:#1f8f4d;
+  font-weight:bold;
+}
+
+.dif-negativa{
+  color:#c0392b;
+  font-weight:bold;
+}
+
+  
+
 th{
   background:#ecf0f1;
 }
@@ -356,6 +379,11 @@ tbody tr.seleccionado{
       <input type="date" id="fechaInicio">
       <input type="date" id="fechaFin">
 
+<span style="font-size:12px;color:#7f8c8d;font-weight:bold;">VS</span>
+
+<input type="date" id="fechaInicio2">
+<input type="date" id="fechaFin2">
+
       <select id="estadoFiltro">
   <option value="">Todos los estados</option>
   <option value="Oaxaca">Oaxaca</option>
@@ -408,9 +436,13 @@ tbody tr.seleccionado{
         <thead>
           <tr>
             <th id="colTitulo">Sucursal</th>
-            <th># Órdenes</th>
-            <th>$ Venta</th>
-            <th>Ticket</th>
+<th>Ord R1</th>
+<th>Venta R1</th>
+<th>Ticket R1</th>
+<th>Ord R2</th>
+<th>Venta R2</th>
+<th>Ticket R2</th>
+<th>Dif Ventas</th>
           </tr>
         </thead>
         <tbody id="tablaBody"></tbody>
@@ -479,6 +511,8 @@ function consultar(){
   const fechaInicio = document.getElementById("fechaInicio").value;
   const fechaFin = document.getElementById("fechaFin").value;
   const estado = document.getElementById("estadoFiltro").value;
+  const fechaInicio2 = document.getElementById("fechaInicio2").value;
+  const fechaFin2 = document.getElementById("fechaFin2").value;
 
   const callbackName = "callbackEfectAflu_" + Date.now();
 
@@ -505,6 +539,8 @@ function consultar(){
     "?action=getReporteEfectividadAfluencia" +
     "&fechaInicio=" + encodeURIComponent(convertirFechaInput(fechaInicio)) +
     "&fechaFin=" + encodeURIComponent(convertirFechaInput(fechaFin)) +
+    "&fechaInicio2=" + encodeURIComponent(convertirFechaInput(fechaInicio2)) +
+    "&fechaFin2=" + encodeURIComponent(convertirFechaInput(fechaFin2)) +
     "&vista=" + encodeURIComponent(vista) +
     "&estado=" + encodeURIComponent(estado) +
     "&callback=" + callbackName +
@@ -531,15 +567,19 @@ function toggleVista(){
 
 function expandirReporte(){
 
-  const fechaInicio = document.getElementById("fechaInicio").value || "";
-  const fechaFin = document.getElementById("fechaFin").value || "";
-  const estado = document.getElementById("estadoFiltro").value || "";
+  cconst fechaInicio = document.getElementById("fechaInicio").value || "";
+const fechaFin = document.getElementById("fechaFin").value || "";
+const fechaInicio2 = document.getElementById("fechaInicio2").value || "";
+const fechaFin2 = document.getElementById("fechaFin2").value || "";
+const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=6" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=7" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
-    "&vista=" + encodeURIComponent(vista) +
+"&fechaInicio2=" + encodeURIComponent(fechaInicio2) +
+"&fechaFin2=" + encodeURIComponent(fechaFin2) +
+"&vista=" + encodeURIComponent(vista) +
    "&estado=" + encodeURIComponent(estado);
 
   window.open(url, "_blank");
@@ -561,12 +601,18 @@ function pintarTabla(rows){
     const tr = document.createElement("tr");
     tr.dataset.nombre = r.nombre;
 
-    tr.innerHTML = `
-      <td>${r.nombre}</td>
-      <td>${r.ordenes}</td>
-      <td>${formatoMoneda(r.venta)}</td>
-      <td>${formatoMoneda(r.ticket)}</td>
-    `;
+   const claseDif = Number(r.difVentas || 0) < 0 ? "dif-negativa" : "dif-positiva";
+
+tr.innerHTML = `
+  <td>${r.nombre}</td>
+  <td>${r.ordenesR1}</td>
+  <td>${formatoMoneda(r.ventaR1)}</td>
+  <td>${formatoMoneda(r.ticketR1)}</td>
+  <td>${r.ordenesR2 || 0}</td>
+  <td>${formatoMoneda(r.ventaR2)}</td>
+  <td>${formatoMoneda(r.ticketR2)}</td>
+  <td class="${claseDif}">${formatoMoneda(r.difVentas)}</td>
+`;
 
     tr.addEventListener("click", function(){
       seleccionarFila(r.nombre);
@@ -622,26 +668,55 @@ function pintarGrafica(data, tituloFiltro){
   chart = new Chart(ctx, {
     data: {
       labels: data.dias,
-      datasets: [
-        {
-          type: "bar",
-          label: "Venta $",
-          data: data.ventas,
-          backgroundColor: "#2ecc71",
-          borderRadius: 8,
-          yAxisID: "y"
-        },
-        {
-          type: "line",
-          label: "# Órdenes",
-          data: data.ordenes,
-          borderColor: "#2980b9",
-          backgroundColor: "#2980b9",
-          tension: 0.35,
-          pointRadius: 5,
-          yAxisID: "y1"
-        }
-      ]
+ datasets: [
+
+  // =========================
+  // RANGO 1
+  // =========================
+  {
+    type: "bar",
+    label: "Venta R1",
+    data: data.ventas || [],
+    backgroundColor: "#2ecc71",
+    borderRadius: 8,
+    yAxisID: "y"
+  },
+  {
+    type: "line",
+    label: "Órdenes R1",
+    data: data.ordenes || [],
+    borderColor: "#2980b9",
+    backgroundColor: "#2980b9",
+    tension: 0.35,
+    pointRadius: 5,
+    yAxisID: "y1"
+  },
+
+  // =========================
+  // RANGO 2
+  // =========================
+  {
+    type: "bar",
+    label: "Venta R2",
+    data: data.ventasR2 || [],
+    backgroundColor: "#3498db",
+    borderRadius: 8,
+    yAxisID: "y",
+    hidden: !data.usarRango2
+  },
+  {
+    type: "line",
+    label: "Órdenes R2",
+    data: data.ordenesR2 || [],
+    borderColor: "#27ae60",
+    backgroundColor: "#27ae60",
+    tension: 0.35,
+    pointRadius: 5,
+    yAxisID: "y1",
+    hidden: !data.usarRango2
+  }
+
+]
     },
     options: {
       responsive: true,
@@ -655,13 +730,13 @@ function pintarGrafica(data, tituloFiltro){
         },
         tooltip: {
           callbacks: {
-            label: function(context){
-              if(context.dataset.label === "Venta $"){
-                return "Venta: " + formatoMoneda(context.raw);
-              }
+        label: function(context){
+  if(String(context.dataset.label || "").includes("Venta")){
+    return context.dataset.label + ": " + formatoMoneda(context.raw);
+  }
 
-              return "Órdenes: " + context.raw;
-            }
+  return context.dataset.label + ": " + context.raw;
+}
           }
         }
       },
@@ -913,8 +988,10 @@ function formatoMoneda(valor){
 
 const fechaInicioURL = params.get("fechaInicio");
 const fechaFinURL = params.get("fechaFin");
+const fechaInicio2URL = params.get("fechaInicio2");
+const fechaFin2URL = params.get("fechaFin2");
 const vistaURL = params.get("vista");
-  const estadoURL = params.get("estado");
+const estadoURL = params.get("estado");
 
 if(fechaInicioURL){
   document.getElementById("fechaInicio").value = fechaInicioURL;
@@ -922,6 +999,14 @@ if(fechaInicioURL){
 
 if(fechaFinURL){
   document.getElementById("fechaFin").value = fechaFinURL;
+}
+
+  if(fechaInicio2URL){
+  document.getElementById("fechaInicio2").value = fechaInicio2URL;
+}
+
+if(fechaFin2URL){
+  document.getElementById("fechaFin2").value = fechaFin2URL;
 }
 
   if(estadoURL){
