@@ -2286,12 +2286,287 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
 
     <div id="contenedorReportes" style="margin-top:20px;">
 
-      <div id="EfectAflu" class="reporte-modulo vista-oculta">
-        <div class="empty-state">
-          Aquí irá el reporte <strong>Efectividad y Afluencia</strong>.
-        </div>
+<div id="EfectAflu" class="reporte-modulo vista-oculta activo">
+
+  <div class="ea-dashboard">
+
+    <div class="ea-header">
+      <div>
+        <h2>Efectividad y Afluencia</h2>
+        <p>Ventas y comportamiento comercial por sucursal y usuario</p>
       </div>
 
+      <div class="ea-header-actions">
+        <button class="ea-btn-toggle activo" id="btnVistaSucursal">
+          Ver por sucursal
+        </button>
+
+        <button class="ea-btn-toggle" id="btnVistaUsuario">
+          Ver por usuario
+        </button>
+      </div>
+    </div>
+
+    <div class="ea-filtros">
+
+      <div class="ea-field">
+        <label>Fecha inicial</label>
+        <input type="date" id="eaFechaInicio">
+      </div>
+
+      <div class="ea-field">
+        <label>Fecha final</label>
+        <input type="date" id="eaFechaFin">
+      </div>
+
+      <div class="ea-field ea-field-grow">
+        <label>Buscar</label>
+        <input type="text" id="eaBuscar" placeholder="Sucursal o usuario...">
+      </div>
+
+      <button class="ea-btn-filtrar">
+        Actualizar
+      </button>
+
+    </div>
+
+    <div class="ea-kpis">
+
+      <div class="ea-kpi-card">
+        <div class="ea-kpi-title">Órdenes</div>
+        <div class="ea-kpi-value">1,284</div>
+      </div>
+
+      <div class="ea-kpi-card">
+        <div class="ea-kpi-title">Venta total</div>
+        <div class="ea-kpi-value">$2,845,200</div>
+      </div>
+
+      <div class="ea-kpi-card">
+        <div class="ea-kpi-title">Ticket promedio</div>
+        <div class="ea-kpi-value">$2,216</div>
+      </div>
+
+    </div>
+
+    <div class="ea-main-grid">
+
+      <div class="ea-card">
+
+        <div class="ea-card-header">
+          <h3>Resumen comercial</h3>
+        </div>
+
+        <div class="ea-table-container">
+
+          <table class="ea-table">
+            <thead>
+              <tr>
+                <th>Sucursal</th>
+                <th># Órdenes</th>
+                <th>$ Venta</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr class="ea-row-selected">
+                <td>Sucursal Centro</td>
+                <td>152</td>
+                <td>$458,000</td>
+              </tr>
+
+              <tr>
+                <td>Sucursal Norte</td>
+                <td>124</td>
+                <td>$392,000</td>
+              </tr>
+
+              <tr>
+                <td>Sucursal Oriente</td>
+                <td>98</td>
+                <td>$285,000</td>
+              </tr>
+
+              <tr>
+                <td>Sucursal Poniente</td>
+                <td>86</td>
+                <td>$241,000</td>
+              </tr>
+
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
+
+      <div class="ea-card">
+
+        <div class="ea-card-header">
+          <h3>Tendencia semanal</h3>
+        </div>
+
+        <div class="ea-chart-area">
+
+          <div class="ea-chart-bars">
+
+            <div class="ea-bar-group">
+              <div class="ea-bar" style="height:55%;">
+                <span>$120k</span>
+              </div>
+              <label>Lun</label>
+            </div>
+
+            <div class="ea-bar-group">
+              <div class="ea-bar" style="height:72%;">
+                <span>$185k</span>
+              </div>
+              <label>Mar</label>
+            </div>
+
+            <div class="ea-bar-group">
+              <div class="ea-bar" style="height:88%;">
+                <span>$240k</span>
+              </div>
+              <label>Mié</label>
+            </div>
+
+            <div class="ea-bar-group">
+              <div class="ea-bar" style="height:64%;">
+                <span>$160k</span>
+              </div>
+              <label>Jue</label>
+            </div>
+
+            <div class="ea-bar-group">
+              <div class="ea-bar" style="height:92%;">
+                <span>$260k</span>
+              </div>
+              <label>Vie</label>
+            </div>
+
+            <div class="ea-bar-group">
+              <div class="ea-bar" style="height:48%;">
+                <span>$95k</span>
+              </div>
+              <label>Sáb</label>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="ea-card ea-termometro-card">
+
+      <div class="ea-card-header">
+        <h3>Termómetro de ventas por horario</h3>
+      </div>
+
+      <div class="ea-termometro-wrap">
+
+        <table class="ea-termometro">
+
+          <thead>
+            <tr>
+              <th>Sucursal</th>
+              <th>Día</th>
+              <th>8-10</th>
+              <th>10-12</th>
+              <th>12-2</th>
+              <th>2-4</th>
+              <th>4-6</th>
+              <th>6-8</th>
+              <th>8-10</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr class="ea-sucursal-blue ea-start">
+              <td rowspan="6">Sucursal Centro</td>
+              <td>Lunes</td>
+              <td class="lvl1">1</td>
+              <td class="lvl5">14</td>
+              <td class="lvl2">2</td>
+              <td class="lvl4">9</td>
+              <td class="lvl5">15</td>
+              <td class="lvl5">14</td>
+              <td class="lvl3">10</td>
+            </tr>
+
+            <tr class="ea-sucursal-blue">
+              <td>Martes</td>
+              <td class="lvl1">2</td>
+              <td class="lvl4">12</td>
+              <td class="lvl3">10</td>
+              <td class="lvl5">13</td>
+              <td class="lvl2">5</td>
+              <td class="lvl2">5</td>
+              <td class="lvl5">15</td>
+            </tr>
+
+            <tr class="ea-sucursal-blue">
+              <td>Miércoles</td>
+              <td class="lvl2">5</td>
+              <td class="lvl4">9</td>
+              <td class="lvl2">3</td>
+              <td class="lvl2">5</td>
+              <td class="lvl3">7</td>
+              <td class="lvl1">1</td>
+              <td class="lvl2">4</td>
+            </tr>
+
+            <tr class="ea-sucursal-blue">
+              <td>Jueves</td>
+              <td class="lvl2">3</td>
+              <td class="lvl4">11</td>
+              <td class="lvl3">7</td>
+              <td class="lvl1">2</td>
+              <td class="lvl1">1</td>
+              <td class="lvl4">12</td>
+              <td class="lvl4">11</td>
+            </tr>
+
+            <tr class="ea-sucursal-blue">
+              <td>Viernes</td>
+              <td class="lvl2">5</td>
+              <td class="lvl2">3</td>
+              <td class="lvl2">4</td>
+              <td class="lvl2">3</td>
+              <td class="lvl5">15</td>
+              <td class="lvl2">5</td>
+              <td class="lvl5">14</td>
+            </tr>
+
+            <tr class="ea-sucursal-blue ea-end">
+              <td>Sábado</td>
+              <td class="lvl3">9</td>
+              <td class="lvl3">6</td>
+              <td class="lvl3">8</td>
+              <td class="lvl3">7</td>
+              <td class="lvl5">12</td>
+              <td class="lvl4">9</td>
+              <td class="lvl2">3</td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+		
     </div>
   </div>
 
