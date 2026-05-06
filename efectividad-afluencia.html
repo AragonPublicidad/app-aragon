@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de Eficiencia</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f3f6fb;
+}
+
+.container{
+  padding:20px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.header h2{
+  margin:0;
+  color:#2c3e50;
+}
+
+.filtros{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+input[type="date"]{
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+button{
+  padding:8px 15px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.btn-consultar{
+  background:linear-gradient(90deg,#2ecc71,#27ae60);
+  color:#fff;
+}
+
+.btn-toggle{
+  background:#3498db;
+  color:#fff;
+}
+
+.cards{
+  display:flex;
+  gap:15px;
+  margin-bottom:20px;
+  flex-wrap:wrap;
+}
+
+.card{
+  flex:1;
+  min-width:180px;
+  background:#fff;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.card h4{
+  margin:0;
+  color:#7f8c8d;
+}
+
+.card h2{
+  margin:5px 0 0;
+  color:#2c3e50;
+}
+
+.content{
+  display:flex;
+  gap:20px;
+}
+
+.table-container{
+  width:40%;
+  background:#fff;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  overflow:auto;
+}
+
+.chart-container{
+  width:60%;
+  background:#fff;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.chart-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.chart-title h3{
+  margin:0;
+  color:#2c3e50;
+}
+
+#filtroGrafica{
+  color:#2980b9;
+  font-weight:bold;
+  font-size:14px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th, td{
+  padding:10px;
+  text-align:left;
+  border-bottom:1px solid #eee;
+}
+
+th{
+  background:#ecf0f1;
+}
+
+tbody tr{
+  cursor:pointer;
+  transition:0.2s;
+}
+
+tbody tr:hover{
+  background:#eef6ff;
+}
+
+tbody tr.seleccionado{
+  background:#dbeafe !important;
+  font-weight:bold;
+  box-shadow:inset 4px 0 0 #2980b9;
+}
+
+/* ===============================
+   TERMÓMETRO COMPACTO
+================================ */
+
+.termometro-container{
+  margin-top:25px;
+  background:#fff;
+  padding:14px;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.termometro-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.termometro-header h3{
+  margin:0;
+  color:#2c3e50;
+  font-size:17px;
+}
+
+.termometro-header span{
+  color:#7f8c8d;
+  font-size:12px;
+}
+
+.termometro-wrap{
+  overflow:auto;
+  max-height:520px;
+  border-radius:8px;
+}
+
+.termometro-table{
+  width:100%;
+  min-width:780px;
+  border-collapse:separate;
+  border-spacing:1px;
+  font-size:11px;
+  table-layout:fixed;
+}
+
+.termometro-table th,
+.termometro-table td{
+  border:none;
+  padding:3px 4px;
+  text-align:center;
+  height:20px;
+  line-height:16px;
+}
+
+.termometro-table th{
+  background:#eef2f7;
+  color:#111827;
+  font-weight:bold;
+  font-size:10px;
+  position:sticky;
+  top:0;
+  z-index:3;
+}
+
+.termometro-table th:nth-child(1){
+  width:115px;
+}
+
+.termometro-table th:nth-child(2){
+  width:70px;
+}
+
+.termometro-table th:nth-child(n+3){
+  width:72px;
+}
+
+/* BLOQUES AZUL / VERDE */
+.grupo-azul .termometro-sucursal{
+  background:#eaf3ff;
+  color:#0f3f78;
+  border-left:5px solid #2f80ed;
+}
+
+.grupo-azul .termometro-dia{
+  background:#f2f8ff;
+  color:#0f3f78;
+}
+
+.grupo-verde .termometro-sucursal{
+  background:#eafaf1;
+  color:#116338;
+  border-left:5px solid #27ae60;
+}
+
+.grupo-verde .termometro-dia{
+  background:#f1fbf5;
+  color:#116338;
+}
+
+.termometro-sucursal{
+  font-weight:bold;
+  text-align:left !important;
+  vertical-align:middle;
+  position:sticky;
+  left:0;
+  z-index:2;
+  font-size:10.5px;
+  padding-left:6px !important;
+  box-shadow:2px 0 4px rgba(0,0,0,0.05);
+}
+
+.termometro-dia{
+  text-align:left !important;
+  font-size:10.5px;
+  padding-left:6px !important;
+  font-weight:bold;
+}
+
+/* LÍNEAS DE SEPARACIÓN ENTRE SUCURSALES */
+.inicio-sucursal td{
+  border-top:2px solid rgba(31,41,55,0.18);
+}
+
+.fin-sucursal td{
+  border-bottom:2px solid rgba(31,41,55,0.18);
+}
+
+/* HEATMAP */
+.temp-vacio{
+  background:#ffffff;
+  color:transparent;
+}
+
+.temp-bajo{
+  background:#f8696b;
+  color:#111;
+  font-weight:bold;
+}
+
+.temp-medio-bajo{
+  background:#f7a76f;
+  color:#111;
+  font-weight:bold;
+}
+
+.temp-medio{
+  background:#ffd966;
+  color:#111;
+  font-weight:bold;
+}
+
+.temp-medio-alto{
+  background:#b7d879;
+  color:#111;
+  font-weight:bold;
+}
+
+.temp-alto{
+  background:#63be7b;
+  color:#111;
+  font-weight:bold;
+}
+
+.termometro-table td.temp-bajo,
+.termometro-table td.temp-medio-bajo,
+.termometro-table td.temp-medio,
+.termometro-table td.temp-medio-alto,
+.termometro-table td.temp-alto{
+  box-shadow:inset 0 0 14px rgba(255,255,255,0.18);
+}
+
+@media(max-width:900px){
+  .content{
+    flex-direction:column;
+  }
+
+  .table-container,
+  .chart-container{
+    width:auto;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h2>Reporte de Eficiencia</h2>
+
+    <div class="filtros">
+      <input type="date" id="fechaInicio">
+      <input type="date" id="fechaFin">
+
+      <button class="btn-consultar" onclick="consultar()">Consultar</button>
+
+      <button class="btn-toggle" onclick="toggleVista()" id="toggleBtn">
+        Ver por Usuario
+      </button>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h4>Total Órdenes</h4>
+      <h2 id="totalOrdenes">0</h2>
+    </div>
+
+    <div class="card">
+      <h4>Total Venta</h4>
+      <h2 id="totalVenta">$0</h2>
+    </div>
+
+    <div class="card">
+      <h4>Ticket Promedio</h4>
+      <h2 id="ticketPromedio">$0</h2>
+    </div>
+
+    <div class="card">
+      <h4>Mejor Resultado</h4>
+      <h2 id="mejor">-</h2>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="table-container">
+      <h3 id="tablaTitulo">Ventas por Sucursal</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th id="colTitulo">Sucursal</th>
+            <th># Órdenes</th>
+            <th>$ Venta</th>
+            <th>Ticket</th>
+          </tr>
+        </thead>
+        <tbody id="tablaBody"></tbody>
+      </table>
+    </div>
+
+    <div class="chart-container">
+      <div class="chart-title">
+        <h3>Venta y Órdenes por Día</h3>
+        <span id="filtroGrafica">Vista general</span>
+      </div>
+
+      <canvas id="grafica"></canvas>
+    </div>
+
+  </div>
+
+  <div class="termometro-container">
+    <div class="termometro-header">
+      <h3>Termómetro de Ventas por Horario</h3>
+      <span>Folios únicos por sucursal, día y rango de hora</span>
+    </div>
+
+    <div class="termometro-wrap">
+      <table class="termometro-table">
+        <thead>
+          <tr>
+            <th>Sucursal</th>
+            <th>Día</th>
+            <th>8-10 am</th>
+            <th>10-12 pm</th>
+            <th>12-2 pm</th>
+            <th>2-4 pm</th>
+            <th>4-6 pm</th>
+            <th>6-8 pm</th>
+            <th>8-10 pm</th>
+          </tr>
+        </thead>
+        <tbody id="termometroBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let vista = "sucursal";
+let chart = null;
+let seleccion = null;
+
+function consultar(){
+  seleccion = null;
+
+  const data = generarDatosDemo();
+
+  pintarCards(data.resumen);
+  pintarTabla(data.tabla);
+  pintarGrafica(data.grafica, "Vista general");
+  pintarTermometro(data.termometro);
+}
+
+function toggleVista(){
+  vista = vista === "sucursal" ? "usuario" : "sucursal";
+  seleccion = null;
+
+  document.getElementById("colTitulo").innerText =
+    vista === "sucursal" ? "Sucursal" : "Usuario";
+
+  document.getElementById("tablaTitulo").innerText =
+    vista === "sucursal" ? "Ventas por Sucursal" : "Ventas por Usuario";
+
+  document.getElementById("toggleBtn").innerText =
+    vista === "sucursal" ? "Ver por Usuario" : "Ver por Sucursal";
+
+  consultar();
+}
+
+function pintarCards(r){
+  document.getElementById("totalOrdenes").innerText = r.ordenes;
+  document.getElementById("totalVenta").innerText = formatoMoneda(r.venta);
+  document.getElementById("ticketPromedio").innerText = formatoMoneda(r.ticket);
+  document.getElementById("mejor").innerText = r.mejor;
+}
+
+function pintarTabla(rows){
+  const body = document.getElementById("tablaBody");
+  body.innerHTML = "";
+
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.dataset.nombre = r.nombre;
+
+    tr.innerHTML = `
+      <td>${r.nombre}</td>
+      <td>${r.ordenes}</td>
+      <td>${formatoMoneda(r.venta)}</td>
+      <td>${formatoMoneda(r.ticket)}</td>
+    `;
+
+    tr.addEventListener("click", function(){
+      seleccionarFila(r.nombre);
+    });
+
+    body.appendChild(tr);
+  });
+}
+
+function seleccionarFila(nombre){
+  const data = generarDatosDemo();
+
+  if(seleccion === nombre){
+    seleccion = null;
+    limpiarSeleccionTabla();
+    pintarGrafica(data.grafica, "Vista general");
+    return;
+  }
+
+  seleccion = nombre;
+  marcarSeleccionTabla(nombre);
+
+  if(data.detalles[nombre]){
+    pintarGrafica(data.detalles[nombre], nombre);
+  }
+}
+
+function marcarSeleccionTabla(nombre){
+  document.querySelectorAll("#tablaBody tr").forEach(tr => {
+    tr.classList.remove("seleccionado");
+
+    if(tr.dataset.nombre === nombre){
+      tr.classList.add("seleccionado");
+    }
+  });
+}
+
+function limpiarSeleccionTabla(){
+  document.querySelectorAll("#tablaBody tr").forEach(tr => {
+    tr.classList.remove("seleccionado");
+  });
+}
+
+function pintarGrafica(data, tituloFiltro){
+  document.getElementById("filtroGrafica").innerText = tituloFiltro;
+
+  if(chart){
+    chart.destroy();
+  }
+
+  const ctx = document.getElementById("grafica");
+
+  chart = new Chart(ctx, {
+    data: {
+      labels: data.dias,
+      datasets: [
+        {
+          type: "bar",
+          label: "Venta $",
+          data: data.ventas,
+          backgroundColor: "#2ecc71",
+          borderRadius: 8,
+          yAxisID: "y"
+        },
+        {
+          type: "line",
+          label: "# Órdenes",
+          data: data.ordenes,
+          borderColor: "#2980b9",
+          backgroundColor: "#2980b9",
+          tension: 0.35,
+          pointRadius: 5,
+          yAxisID: "y1"
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: {
+        mode: "index",
+        intersect: false
+      },
+      plugins: {
+        legend: {
+          position: "bottom"
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context){
+              if(context.dataset.label === "Venta $"){
+                return "Venta: " + formatoMoneda(context.raw);
+              }
+
+              return "Órdenes: " + context.raw;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          position: "left",
+          title: {
+            display: true,
+            text: "Venta $"
+          },
+          ticks: {
+            callback: function(value){
+              return "$" + value.toLocaleString("es-MX");
+            }
+          }
+        },
+        y1: {
+          beginAtZero: true,
+          position: "right",
+          grid: {
+            drawOnChartArea: false
+          },
+          title: {
+            display: true,
+            text: "# Órdenes"
+          },
+          ticks: {
+            precision: 0
+          }
+        }
+      }
+    }
+  });
+}
+
+function pintarTermometro(rows){
+  const body = document.getElementById("termometroBody");
+  body.innerHTML = "";
+
+  rows.forEach((sucursal, sucursalIndex) => {
+    const grupoClase = sucursalIndex % 2 === 0 ? "grupo-azul" : "grupo-verde";
+
+    sucursal.dias.forEach((dia, index) => {
+      const tr = document.createElement("tr");
+
+      tr.classList.add(grupoClase);
+
+      if(index === 0){
+        tr.classList.add("inicio-sucursal");
+      }
+
+      if(index === sucursal.dias.length - 1){
+        tr.classList.add("fin-sucursal");
+      }
+
+      let sucursalCell = "";
+
+      if(index === 0){
+        sucursalCell = `
+          <td class="termometro-sucursal" rowspan="${sucursal.dias.length}">
+            ${sucursal.sucursal}
+          </td>
+        `;
+      }
+
+      tr.innerHTML = `
+        ${sucursalCell}
+        <td class="termometro-dia">${dia.dia}</td>
+        ${dia.valores.map(v => `
+          <td class="${claseTemperatura(v)}">${v === "" ? "" : v}</td>
+        `).join("")}
+      `;
+
+      body.appendChild(tr);
+    });
+  });
+}
+
+function claseTemperatura(valor){
+  if(valor === "" || valor === null || valor === undefined) return "temp-vacio";
+
+  valor = Number(valor);
+
+  if(valor <= 2) return "temp-bajo";
+  if(valor <= 4) return "temp-medio-bajo";
+  if(valor <= 7) return "temp-medio";
+  if(valor <= 10) return "temp-medio-alto";
+  return "temp-alto";
+}
+
+function generarDatosDemo(){
+
+  const termometroDemo = [
+    {
+      sucursal:"Sucursal Centro",
+      dias:[
+        {dia:"Lunes", valores:[1,14,2,9,15,14,10]},
+        {dia:"Martes", valores:[2,12,10,13,5,5,15]},
+        {dia:"Miércoles", valores:[5,9,3,5,7,1,4]},
+        {dia:"Jueves", valores:[3,11,7,2,1,12,11]},
+        {dia:"Viernes", valores:[5,3,4,3,15,5,14]},
+        {dia:"Sábado", valores:[9,6,8,7,12,9,3]}
+      ]
+    },
+    {
+      sucursal:"Sucursal Norte",
+      dias:[
+        {dia:"Lunes", valores:[2,8,4,6,11,7,5]},
+        {dia:"Martes", valores:[1,6,5,8,9,4,7]},
+        {dia:"Miércoles", valores:[3,7,2,4,6,3,2]},
+        {dia:"Jueves", valores:[4,10,6,5,8,9,6]},
+        {dia:"Viernes", valores:[2,5,7,10,13,8,9]},
+        {dia:"Sábado", valores:[6,4,3,5,7,6,2]}
+      ]
+    },
+    {
+      sucursal:"Sucursal Sur",
+      dias:[
+        {dia:"Lunes", valores:[1,5,2,4,8,3,2]},
+        {dia:"Martes", valores:[2,7,3,6,10,4,5]},
+        {dia:"Miércoles", valores:["","","","","","",""]},
+        {dia:"Jueves", valores:[3,6,4,5,7,5,3]},
+        {dia:"Viernes", valores:[4,8,5,7,12,6,8]},
+        {dia:"Sábado", valores:[5,3,2,4,6,4,1]}
+      ]
+    },
+    {
+      sucursal:"Sucursal Poniente",
+      dias:[
+        {dia:"Lunes", valores:[2,3,2,5,7,4,2]},
+        {dia:"Martes", valores:[1,4,3,6,8,3,4]},
+        {dia:"Miércoles", valores:[2,5,1,4,6,2,3]},
+        {dia:"Jueves", valores:[3,6,4,5,7,6,5]},
+        {dia:"Viernes", valores:[4,7,5,8,10,5,6]},
+        {dia:"Sábado", valores:[3,2,2,3,5,2,1]}
+      ]
+    },
+    {
+      sucursal:"Sucursal Oriente",
+      dias:[
+        {dia:"Lunes", valores:[1,6,3,5,9,5,4]},
+        {dia:"Martes", valores:[2,8,5,7,11,6,5]},
+        {dia:"Miércoles", valores:[1,4,2,3,6,3,2]},
+        {dia:"Jueves", valores:[3,7,4,6,9,7,6]},
+        {dia:"Viernes", valores:[4,9,6,8,13,8,7]},
+        {dia:"Sábado", valores:[5,4,3,4,6,4,2]}
+      ]
+    }
+  ];
+
+  if(vista === "sucursal"){
+    return {
+      resumen:{
+        ordenes:124,
+        venta:86500,
+        ticket:697.58,
+        mejor:"Sucursal Centro"
+      },
+      tabla:[
+        {nombre:"Sucursal Centro", ordenes:48, venta:36500, ticket:760.42},
+        {nombre:"Sucursal Norte", ordenes:34, venta:22500, ticket:661.76},
+        {nombre:"Sucursal Sur", ordenes:29, venta:17800, ticket:613.79},
+        {nombre:"Sucursal Poniente", ordenes:13, venta:9700, ticket:746.15}
+      ],
+      grafica:{
+        dias:["Lun","Mar","Mié","Jue","Vie","Sáb"],
+        ventas:[12000,14500,9800,16800,21200,12200],
+        ordenes:[16,19,13,24,31,21]
+      },
+      detalles:{
+        "Sucursal Centro":{
+          dias:["Lun","Mar","Mié","Jue","Vie","Sáb"],
+          ventas:[4500,5200,3900,6200,8100,5400],
+          ordenes:[6,7,5,9,11,7]
+        },
+        "Sucursal Norte":{
+          dias:["Lun","Mar","Mié","Jue","Vie","Sáb"],
+          ventas:[2800,3600,2100,4200,5100,3000],
+          ordenes:[4,5,3,6,8,5]
+        },
+        "Sucursal Sur":{
+          dias:["Lun","Mar","Mié","Jue","Vie","Sáb"],
+          ventas:[2200,2600,1800,3000,3900,2500],
+          ordenes:[3,4,2,5,6,5]
+        },
+        "Sucursal Poniente":{
+          dias:["Lun","Mar","Mié","Jue","Vie","Sáb"],
+          ventas:[2500,3100,2000,3400,4100,1300],
+          ordenes:[3,3,3,4,6,4]
+        }
+      },
+      termometro:termometroDemo
+    };
+  }
+
+  return {
+    resumen:{
+      ordenes:124,
+      venta:86500,
+      ticket:697.58,
+      mejor:"Carlos Méndez"
+    },
+    tabla:[
+      {nombre:"Carlos Méndez", ordenes:42, venta:33200, ticket:790.48},
+      {nombre:"Ana López", ordenes:36, venta:24100, ticket:669.44},
+      {nombre:"María Pérez", ordenes:31, venta:20300, ticket:654.84},
+      {nombre:"Luis Ramírez", ordenes:15, venta:9000, ticket:600.00}
+    ],
+    grafica:{
+      dias:["Lun","Mar","Mié","Jue","Vie","Sáb"],
+      ventas:[12000,14500,9800,16800,21200,12200],
+      ordenes:[16,19,13,24,31,21]
+    },
+    detalles:{
+      "Carlos Méndez":{
+        dias:["Lun","Mar","Mié","Jue","Vie","Sáb"],
+        ventas:[4300,5100,3300,6100,7200,4600],
+        ordenes:[5,7,4,8,9,6]
+      },
+      "Ana López":{
+        dias:["Lun","Mar","Mié","Jue","Vie","Sáb"],
+        ventas:[3100,3700,2600,4200,5400,3100],
+        ordenes:[4,5,4,6,8,5]
+      },
+      "María Pérez":{
+        dias:["Lun","Mar","Mié","Jue","Vie","Sáb"],
+        ventas:[2500,3200,2100,3600,4700,2900],
+        ordenes:[3,4,2,5,7,6]
+      },
+      "Luis Ramírez":{
+        dias:["Lun","Mar","Mié","Jue","Vie","Sáb"],
+        ventas:[2100,2500,1800,2900,3900,1600],
+        ordenes:[4,3,3,5,7,4]
+      }
+    },
+    termometro:termometroDemo
+  };
+}
+
+function formatoMoneda(valor){
+  return "$" + Number(valor || 0).toLocaleString("es-MX", {
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+}
+
+consultar();
+</script>
+
+</body>
+</html>
