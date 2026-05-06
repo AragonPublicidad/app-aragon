@@ -522,13 +522,18 @@ function toggleVista(){
 
 function expandirReporte(){
 
-  window.open(
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=3",
-    "_blank"
-  );
+  const fechaInicio = document.getElementById("fechaInicio").value || "";
+  const fechaFin = document.getElementById("fechaFin").value || "";
+
+  const url =
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=4" +
+    "&fechaInicio=" + encodeURIComponent(fechaInicio) +
+    "&fechaFin=" + encodeURIComponent(fechaFin) +
+    "&vista=" + encodeURIComponent(vista);
+
+  window.open(url, "_blank");
 
 }
-
   
 function pintarCards(r){
   document.getElementById("totalOrdenes").innerText = r.ordenes;
@@ -891,6 +896,30 @@ function formatoMoneda(valor){
     minimumFractionDigits:2,
     maximumFractionDigits:2
   });
+}
+
+  const params = new URLSearchParams(window.location.search);
+
+const fechaInicioURL = params.get("fechaInicio");
+const fechaFinURL = params.get("fechaFin");
+const vistaURL = params.get("vista");
+
+if(fechaInicioURL){
+  document.getElementById("fechaInicio").value = fechaInicioURL;
+}
+
+if(fechaFinURL){
+  document.getElementById("fechaFin").value = fechaFinURL;
+}
+
+if(vistaURL){
+
+  vista = vistaURL;
+
+  document.getElementById("toggleBtn").innerText =
+    vista === "sucursal"
+      ? "Ver por Usuario"
+      : "Ver por Sucursal";
 }
 
 consultar();
