@@ -34,6 +34,16 @@
   color:#555;
 }
 
+.tr-linea-detalle td.dif-positiva{
+  color:#1f8f4d !important;
+  font-weight:bold;
+}
+
+.tr-linea-detalle td.dif-negativa{
+  color:#c0392b !important;
+  font-weight:bold;
+}
+
 .nombre-linea{
   padding-left:22px;
   font-style:italic;
@@ -787,7 +797,7 @@ const fechaFin2 = document.getElementById("fechaFin2").value || "";
 const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=17" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=18" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
 "&fechaInicio2=" + encodeURIComponent(fechaInicio2) +
