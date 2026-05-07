@@ -1144,35 +1144,29 @@ function cardEjecutiva(x,y,w,h,icono,titulo,valor,subtitulo,color){
 
   pdf.setFillColor(255,255,255);
   pdf.setDrawColor(220,225,235);
-
   pdf.roundedRect(x,y,w,h,4,4,"FD");
 
   pdf.setFillColor(color[0], color[1], color[2]);
-  pdf.circle(x + 12, y + 16, 8, "F");
+  pdf.circle(x + 10, y + 14, 7, "F");
 
   pdf.setFont("helvetica","bold");
-  pdf.setFontSize(18);
-  pdf.setTextColor(255);
-
-  pdf.text(icono, x + 12, y + 18, {align:"center"});
+  pdf.setFontSize(11);
+  pdf.setTextColor(255,255,255);
+  pdf.text(icono, x + 10, y + 17, {align:"center"});
 
   pdf.setFont("helvetica","bold");
-  pdf.setFontSize(9);
+  pdf.setFontSize(7.5);
   pdf.setTextColor(20,35,75);
+  pdf.text(titulo, x + 21, y + 9);
 
-  pdf.text(titulo, x + 24, y + 10);
-
-  pdf.setFontSize(18);
-  pdf.setTextColor(25);
-
-  pdf.text(String(valor), x + 24, y + 22);
+  pdf.setFontSize(13);
+  pdf.setTextColor(25,25,25);
+  pdf.text(String(valor), x + 21, y + 20);
 
   pdf.setFont("helvetica","normal");
-  pdf.setFontSize(8);
-  pdf.setTextColor(100);
-
-  pdf.text(subtitulo, x + 24, y + 31);
-
+  pdf.setFontSize(6.5);
+  pdf.setTextColor(100,100,100);
+  pdf.text(subtitulo, x + 21, y + 28);
 }
 
 cardEjecutiva(
@@ -1180,7 +1174,7 @@ cardEjecutiva(
   68,
   68,
   38,
-  "🛒",
+ "O",
   "TOTAL ÓRDENES (R1)",
   document.getElementById("totalOrdenes").innerText,
   "RANGO ACTUAL",
@@ -1204,7 +1198,7 @@ cardEjecutiva(
   68,
   68,
   38,
-  "≣",
+  "T",
   "TICKET PROMEDIO (R1)",
   document.getElementById("ticketPromedio").innerText,
   "RANGO ACTUAL",
@@ -1216,7 +1210,7 @@ cardEjecutiva(
   68,
   50,
   38,
-  "⌂",
+  "S",
   "MEJOR SUCURSAL",
   document.getElementById("mejor").innerText,
   "POR VENTAS (R1)",
@@ -1240,26 +1234,59 @@ const totalOrdenes = document.getElementById("totalOrdenes").innerText;
 const totalVentas = document.getElementById("totalVenta").innerText;
 const ticketPromedio = document.getElementById("ticketPromedio").innerText;
 
+let ordenesR1 = 0;
+let ventaR1 = 0;
+let ordenesR2 = 0;
+let ventaR2 = 0;
+
+document.querySelectorAll("#tablaBody tr").forEach(function(tr){
+  const c = tr.querySelectorAll("td");
+  if(c.length < 9) return;
+
+  ordenesR1 += Number((c[2].innerText || "0").replace(/[^0-9.-]/g,""));
+  ventaR1 += Number((c[3].innerText || "0").replace(/[^0-9.-]/g,""));
+  ordenesR2 += Number((c[5].innerText || "0").replace(/[^0-9.-]/g,""));
+  ventaR2 += Number((c[6].innerText || "0").replace(/[^0-9.-]/g,""));
+});
+
+const ticketR2 = ordenesR2 > 0 ? ventaR2 / ordenesR2 : 0;
+const difOrdenes = ordenesR1 - ordenesR2;
+const difVentas = ventaR1 - ventaR2;
+const difTicket = Number((ventaR1 / Math.max(ordenesR1,1)) || 0) - ticketR2;
+
+function monedaPDF(n){
+  return "$" + Number(n || 0).toLocaleString("es-MX", {
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+}
+
+function varPctPDF(actual, anterior){
+  if(!anterior) return "-";
+  return ((actual - anterior) / anterior * 100).toFixed(1) + "%";
+}
+
 let mejorLinea = "-";
+let mejorLineaVenta = -Infinity;
 
-if(
-  typeof lineasDetalleTabla !== "undefined" &&
-  Array.isArray(lineasDetalleTabla) &&
-  lineasDetalleTabla.length
-){
+if(lineasDetalleTabla && typeof lineasDetalleTabla === "object"){
+  Object.values(lineasDetalleTabla).forEach(function(grupo){
+    if(!grupo || typeof grupo !== "object") return;
 
-  const mejor = [...lineasDetalleTabla]
-    .sort((a,b)=>(b.ventaR1 || 0) - (a.ventaR1 || 0))[0];
+    Object.values(grupo).forEach(function(linea){
+      const venta = Number(linea.ventaR1 || 0);
 
-  if(mejor){
-    mejorLinea = mejor.linea || "-";
-  }
-
+      if(venta > mejorLineaVenta){
+        mejorLineaVenta = venta;
+        mejorLinea = linea.codigo || linea.linea || "-";
+      }
+    });
+  });
 }
 
 pdf.autoTable({
 
-  startY:132,
+  startY:130,
 
   theme:"grid",
 
@@ -1271,49 +1298,49 @@ pdf.autoTable({
     "Var. %"
   ]],
 
-  body:[
+body:[
 
-    [
-      "Total Órdenes",
-      totalOrdenes,
-      "-",
-      "-",
-      "-"
-    ],
-
-    [
-      "Total Ventas",
-      totalVentas,
-      "-",
-      "-",
-      "-"
-    ],
-
-    [
-      "Ticket Promedio",
-      ticketPromedio,
-      "-",
-      "-",
-      "-"
-    ],
-
-    [
-      "Mejor Sucursal",
-      document.getElementById("mejor").innerText,
-      "-",
-      "-",
-      "-"
-    ],
-
-    [
-      "Mejor Línea (Ventas)",
-      mejorLinea,
-      "-",
-      "-",
-      "-"
-    ]
-
+  [
+    "Total Órdenes",
+    String(ordenesR1),
+    String(ordenesR2),
+    String(difOrdenes),
+    varPctPDF(ordenesR1, ordenesR2)
   ],
+
+  [
+    "Total Ventas",
+    monedaPDF(ventaR1),
+    monedaPDF(ventaR2),
+    monedaPDF(difVentas),
+    varPctPDF(ventaR1, ventaR2)
+  ],
+
+  [
+    "Ticket Promedio",
+    monedaPDF(ventaR1 / Math.max(ordenesR1,1)),
+    monedaPDF(ticketR2),
+    monedaPDF(difTicket),
+    varPctPDF(ventaR1 / Math.max(ordenesR1,1), ticketR2)
+  ],
+
+  [
+    "Mejor Sucursal",
+    document.getElementById("mejor").innerText,
+    "-",
+    "-",
+    "-"
+  ],
+
+  [
+    "Mejor Línea (Ventas)",
+    mejorLinea,
+    "-",
+    "-",
+    "-"
+  ]
+
+],
 
   margin:{
     left:16,
@@ -1321,10 +1348,11 @@ pdf.autoTable({
   },
 
   styles:{
-    fontSize:9,
-    cellPadding:4
+    fontSize:8,
+    cellPadding:2.4,
+    overflow:"linebreak"
   },
-
+  
   headStyles:{
     fillColor:[255,255,255],
     textColor:[20,35,80],
