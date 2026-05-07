@@ -714,6 +714,50 @@ tbody tr.seleccionado{
 .heatmap-total-row .heatmap-total-general{
   color:#0b3f82 !important;
 } 
+
+  .distribucion-horaria-box{
+  background:#fff;
+  border:1px solid #e3e8ef;
+  border-radius:14px;
+  padding:16px 18px;
+  margin-bottom:22px;
+}
+
+.distribucion-title{
+  font-size:15px;
+  font-weight:700;
+  color:#1c2b46;
+  margin-bottom:14px;
+}
+
+.distribucion-row{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:10px;
+}
+
+.distribucion-item{
+  text-align:center;
+}
+
+.distribucion-porcentaje{
+  font-size:14px;
+  font-weight:800;
+  color:#1c2b46;
+  margin-bottom:8px;
+}
+
+.distribucion-barra{
+  height:16px;
+  border-radius:999px;
+  margin-bottom:8px;
+}
+
+.distribucion-label{
+  font-size:12px;
+  font-weight:700;
+  color:#4b5563;
+}
   
 </style>
 </head>
@@ -920,6 +964,16 @@ tbody tr.seleccionado{
 
   </div>
 
+<div class="distribucion-horaria-box">
+
+  <div class="distribucion-title">
+    Distribución promedio por horario
+  </div>
+
+  <div id="distribucionHoraria"></div>
+
+</div>
+  
   <div class="heatmap-wrapper">
 
     <div class="heatmap-header">
@@ -2368,6 +2422,8 @@ function pintarDashboardTermometro(data){
 
   const dashboard = document.getElementById("dashboardTermometro");
   const heatmapBody = document.getElementById("heatmapBody");
+  const distribucionHoraria =
+  document.getElementById("distribucionHoraria");
 
   if(!data || !data.kpis){
     dashboard.style.display = "none";
@@ -2389,10 +2445,60 @@ function pintarDashboardTermometro(data){
     data.kpis.bloqueMasBajo.horario + " (" + data.kpis.bloqueMasBajo.total + ")";
 
   heatmapBody.innerHTML = "";
+  distribucionHoraria.innerHTML = "";
 
   const valores = [];
   const totalColumnas = [0,0,0,0,0,0,0];
   let totalGeneral = 0;
+
+  const horariosLabels = [
+  "8-10",
+  "10-12",
+  "12-2",
+  "2-4",
+  "4-6",
+  "6-8",
+  "8-10 pm"
+];
+
+const sumaHorarios = totalColumnas.reduce((a,b)=>a+b,0);
+
+let distribucionHTML = `
+  <div class="distribucion-row">
+`;
+
+totalColumnas.forEach(function(total, index){
+
+  const porcentaje =
+    sumaHorarios > 0
+      ? ((total / sumaHorarios) * 100).toFixed(0)
+      : 0;
+
+  distribucionHTML += `
+    <div class="distribucion-item">
+
+      <div class="distribucion-porcentaje">
+        ${porcentaje}%
+      </div>
+
+      <div
+        class="distribucion-barra"
+        style="
+          background:${colorHeatmap(total)};
+        ">
+      </div>
+
+      <div class="distribucion-label">
+        ${horariosLabels[index]}
+      </div>
+
+    </div>
+  `;
+});
+
+distribucionHTML += `</div>`;
+
+distribucionHoraria.innerHTML = distribucionHTML;
 
   (data.matrizSucursalHorario || []).forEach(function(item){
     (item.valores || []).forEach(function(v, index){
