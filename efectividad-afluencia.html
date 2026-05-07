@@ -560,6 +560,94 @@ tbody tr.seleccionado{
     width:auto;
   }
 }
+
+.dashboard-termometro{
+  margin-top:18px;
+  background:#fff;
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+.termometro-kpis{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+  margin-bottom:22px;
+}
+
+.kpi-card{
+  background:linear-gradient(180deg,#f8fbff,#eef5ff);
+  border-radius:14px;
+  padding:18px;
+  text-align:center;
+  border:1px solid #dce7f7;
+}
+
+.kpi-label{
+  font-size:13px;
+  color:#5c6b80;
+  margin-bottom:8px;
+  font-weight:600;
+}
+
+.kpi-value{
+  font-size:22px;
+  font-weight:700;
+  color:#1c2b46;
+}
+
+.heatmap-wrapper{
+  overflow-x:auto;
+}
+
+.heatmap-header,
+.heatmap-row{
+  display:grid;
+  grid-template-columns:220px repeat(7,90px) 100px;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+.heatmap-header{
+  font-weight:700;
+  color:#3a4a66;
+  margin-bottom:14px;
+}
+
+.heatmap-sucursal{
+  font-weight:700;
+}
+
+.heatmap-cell{
+  height:42px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:#fff;
+  font-size:13px;
+}
+
+.heatmap-total-cell{
+  background:#1c2b46;
+}
+
+.heatmap-low{
+  background:#d9534f;
+}
+
+.heatmap-mid{
+  background:#f0ad4e;
+}
+
+.heatmap-high{
+  background:#28a745;
+}
+
+  
 </style>
 </head>
 
@@ -736,9 +824,61 @@ tbody tr.seleccionado{
   Consultar
 </button>
     
-  </div>
+ </div>
 </div>
 
+<div id="dashboardTermometro" class="dashboard-termometro" style="display:none;">
+
+  <div class="termometro-kpis">
+
+    <div class="kpi-card">
+      <div class="kpi-label">Hora Pico Global</div>
+      <div class="kpi-value" id="kpiHoraPico">-</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Sucursal Más Activa</div>
+      <div class="kpi-value" id="kpiSucursalActiva">-</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Día Más Fuerte</div>
+      <div class="kpi-value" id="kpiDiaFuerte">-</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Horario Más Bajo</div>
+      <div class="kpi-value" id="kpiHorarioBajo">-</div>
+    </div>
+
+  </div>
+
+  <div class="heatmap-wrapper">
+
+    <div class="heatmap-header">
+      <div class="heatmap-sucursal">Sucursal</div>
+      <div class="heatmap-col">8-10</div>
+      <div class="heatmap-col">10-12</div>
+      <div class="heatmap-col">12-2</div>
+      <div class="heatmap-col">2-4</div>
+      <div class="heatmap-col">4-6</div>
+      <div class="heatmap-col">6-8</div>
+      <div class="heatmap-col">8-10</div>
+      <div class="heatmap-total">Total</div>
+    </div>
+
+    <div id="heatmapBody"></div>
+
+  </div>
+
+</div>
+
+<div class="termometro-wrap" id="pdfTermometro">
+
+
+
+
+  
     <div class="termometro-wrap" id="pdfTermometro">
       <table class="termometro-table">
         <thead>
