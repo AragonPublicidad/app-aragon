@@ -2381,7 +2381,7 @@ function aplicarFechasDefaultReporte(){
   document.getElementById("fechaFin2").value = fechaInputDesdeDate(semanaPasada);
 }
 
-aplicarFechasDefaultReporte();
+
   
 
   const params = new URLSearchParams(window.location.search);
@@ -2393,8 +2393,8 @@ const fechaFin2URL = params.get("fechaFin2");
 const vistaURL = params.get("vista");
 const estadoURL = params.get("estado");
 
-if(fechaInicioURL){
-  document.getElementById("fechaInicio").value = fechaInicioURL;
+if(!fechaInicioURL){
+  aplicarFechasDefaultReporte();
 }
 
 if(fechaFinURL){
