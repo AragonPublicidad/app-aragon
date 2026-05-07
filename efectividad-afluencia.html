@@ -647,6 +647,59 @@ tbody tr.seleccionado{
   background:#28a745;
 }
 
+.heatmap-cell{
+  color:#111;
+  font-weight:800;
+}
+
+.heatmap-total-row{
+  margin-top:6px;
+}
+
+.heatmap-total-row .heatmap-sucursal{
+  background:#edf4ff;
+  color:#0f4c9a;
+  border-radius:8px;
+  padding:12px;
+  font-weight:800;
+}
+
+.heatmap-total-col{
+  height:42px;
+  border-radius:10px;
+  background:#edf4ff;
+  color:#0f4c9a;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:14px;
+}
+
+.heatmap-total-general{
+  background:#dbeafe;
+  color:#0b3f82;
+}
+
+.heatmap-legend{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:14px;
+  margin-top:20px;
+  font-size:13px;
+  font-weight:700;
+  color:#1c2b46;
+}
+
+.heatmap-gradient{
+  width:420px;
+  max-width:55vw;
+  height:16px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#dc4b46,#ff8c3a,#ffd646,#9bd84d,#27ae60);
+}
+  
   
 </style>
 </head>
@@ -868,6 +921,12 @@ tbody tr.seleccionado{
     </div>
 
     <div id="heatmapBody"></div>
+
+    <div class="heatmap-legend">
+  <span>Menor intensidad</span>
+  <div class="heatmap-gradient"></div>
+  <span>Mayor intensidad</span>
+</div>
 
   </div>
 
@@ -2318,33 +2377,44 @@ function pintarDashboardTermometro(data){
   heatmapBody.innerHTML = "";
 
   const valores = [];
+  const totalColumnas = [0,0,0,0,0,0,0];
+  let totalGeneral = 0;
 
   (data.matrizSucursalHorario || []).forEach(function(item){
-    (item.valores || []).forEach(function(v){
-      valores.push(Number(v || 0));
+    (item.valores || []).forEach(function(v, index){
+      const n = Number(v || 0);
+      valores.push(n);
+      totalColumnas[index] += n;
+      totalGeneral += n;
     });
   });
 
   const maximo = valores.length ? Math.max(...valores) : 0;
 
-  function claseHeatmap(valor){
+  function colorHeatmap(valor){
     valor = Number(valor || 0);
 
-    if(maximo <= 0 || valor <= 0){
-      return "heatmap-low";
+    if(maximo <= 0){
+      return "rgb(240,240,240)";
     }
 
-    const porcentaje = valor / maximo;
+    const p = valor / maximo;
 
-    if(porcentaje <= 0.35){
-      return "heatmap-low";
+    let r, g, b;
+
+    if(p <= 0.5){
+      const t = p / 0.5;
+      r = Math.round(220 + (255 - 220) * t);
+      g = Math.round(75 + (214 - 75) * t);
+      b = Math.round(70 + (70 - 70) * t);
+    }else{
+      const t = (p - 0.5) / 0.5;
+      r = Math.round(255 + (39 - 255) * t);
+      g = Math.round(214 + (174 - 214) * t);
+      b = Math.round(70 + (96 - 70) * t);
     }
 
-    if(porcentaje <= 0.70){
-      return "heatmap-mid";
-    }
-
-    return "heatmap-high";
+    return `rgb(${r},${g},${b})`;
   }
 
   (data.matrizSucursalHorario || []).forEach(function(item){
@@ -2358,7 +2428,7 @@ function pintarDashboardTermometro(data){
 
     (item.valores || []).forEach(function(valor){
       html += `
-        <div class="heatmap-cell ${claseHeatmap(valor)}">${valor}</div>
+        <div class="heatmap-cell" style="background:${colorHeatmap(valor)}">${valor}</div>
       `;
     });
 
@@ -2370,6 +2440,26 @@ function pintarDashboardTermometro(data){
     heatmapBody.appendChild(row);
 
   });
+
+  const totalRow = document.createElement("div");
+  totalRow.className = "heatmap-row heatmap-total-row";
+
+  let totalHtml = `
+    <div class="heatmap-sucursal">TOTAL GENERAL</div>
+  `;
+
+  totalColumnas.forEach(function(total){
+    totalHtml += `
+      <div class="heatmap-total-col">${total}</div>
+    `;
+  });
+
+  totalHtml += `
+    <div class="heatmap-total-col heatmap-total-general">${totalGeneral}</div>
+  `;
+
+  totalRow.innerHTML = totalHtml;
+  heatmapBody.appendChild(totalRow);
 
 }
 
