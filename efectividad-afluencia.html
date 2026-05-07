@@ -82,6 +82,83 @@ body{
   flex-wrap:wrap;
 }
 
+.grupo-fechas{
+  display:flex;
+  align-items:end;
+  gap:6px;
+  padding:8px 10px;
+  border-radius:10px;
+  background:#ffffff;
+  border:1px solid #d8e1ec;
+}
+
+.grupo-fechas.rango-actual{
+  box-shadow:inset 4px 0 0 #2980b9;
+}
+
+.grupo-fechas.rango-anterior{
+  box-shadow:inset 4px 0 0 #27ae60;
+}
+
+.grupo-fechas-titulo{
+  font-size:12px;
+  font-weight:bold;
+  color:#2c3e50;
+  margin-right:4px;
+  white-space:nowrap;
+}
+
+.campo-fecha{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.campo-fecha label{
+  font-size:10px;
+  color:#7f8c8d;
+  font-weight:bold;
+}
+
+.separador-vs{
+  font-size:12px;
+  color:#7f8c8d;
+  font-weight:bold;
+  padding:0 2px;
+}
+
+.th-grupo-actual{
+  background:#eaf3ff !important;
+  color:#0f3f78;
+  text-align:center;
+}
+
+.th-grupo-anterior{
+  background:#eafaf1 !important;
+  color:#116338;
+  text-align:center;
+}
+
+.th-grupo-resultado{
+  background:#fff3cd !important;
+  color:#7a5200;
+  text-align:center;
+}
+
+.col-separador-r2{
+  border-left:2px solid #cbd5e1 !important;
+}
+
+.col-separador-dif{
+  border-left:2px solid #f0c36d !important;
+}
+
+.dif-flecha{
+  font-weight:bold;
+  margin-right:3px;
+}
+  
+
 input[type="date"]{
   padding:8px;
   border-radius:6px;
@@ -477,13 +554,43 @@ tbody tr.seleccionado{
     <h2>Reporte de Eficiencia</h2>
 
     <div class="filtros">
-      <input type="date" id="fechaInicio">
-      <input type="date" id="fechaFin">
+     <div class="grupo-fechas rango-actual">
 
-<span style="font-size:12px;color:#7f8c8d;font-weight:bold;">VS</span>
+  <div class="grupo-fechas-titulo">
+    Rango Actual
+  </div>
 
-<input type="date" id="fechaInicio2">
-<input type="date" id="fechaFin2">
+  <div class="campo-fecha">
+    <label>Inicial</label>
+    <input type="date" id="fechaInicio">
+  </div>
+
+  <div class="campo-fecha">
+    <label>Final</label>
+    <input type="date" id="fechaFin">
+  </div>
+
+</div>
+
+<div class="separador-vs">VS</div>
+
+<div class="grupo-fechas rango-anterior">
+
+  <div class="grupo-fechas-titulo">
+    Rango Comparativo
+  </div>
+
+  <div class="campo-fecha">
+    <label>Inicial</label>
+    <input type="date" id="fechaInicio2">
+  </div>
+
+  <div class="campo-fecha">
+    <label>Final</label>
+    <input type="date" id="fechaFin2">
+  </div>
+
+</div>
 
       <select id="estadoFiltro">
   <option value="">Todos los estados</option>
@@ -543,18 +650,23 @@ tbody tr.seleccionado{
 
       <table>
         <thead>
-          <tr>
-  <th style="width:28px;"></th>
-  <th id="colTitulo">Sucursal</th>
-  <th>Ord R1</th>
-<th>Venta R1</th>
-<th>Ticket R1</th>
-<th>Ord R2</th>
-<th>Venta R2</th>
-<th>Ticket R2</th>
-<th>Dif Ventas</th>
-          </tr>
-        </thead>
+  <tr>
+    <th rowspan="2" style="width:28px;"></th>
+    <th rowspan="2" id="colTitulo">Sucursal</th>
+    <th colspan="3" class="th-grupo-actual">Rango Actual</th>
+    <th colspan="3" class="th-grupo-anterior col-separador-r2">Rango Comparativo</th>
+    <th rowspan="2" class="th-grupo-resultado col-separador-dif">Dif Ventas</th>
+  </tr>
+
+  <tr>
+    <th>Ord</th>
+    <th>Venta</th>
+    <th>Ticket</th>
+    <th class="col-separador-r2">Ord</th>
+    <th>Venta</th>
+    <th>Ticket</th>
+  </tr>
+</thead>
         <tbody id="tablaBody"></tbody>
       </table>
     </div>
@@ -797,7 +909,7 @@ const fechaFin2 = document.getElementById("fechaFin2").value || "";
 const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=19" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=20" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
 "&fechaInicio2=" + encodeURIComponent(fechaInicio2) +
@@ -824,7 +936,15 @@ function pintarTabla(rows){
     const tr = document.createElement("tr");
     tr.dataset.nombre = r.nombre;
 
-   const claseDif = Number(r.difVentas || 0) < 0 ? "dif-negativa" : "dif-positiva";
+   const difValor = Number(r.difVentas || 0);
+
+const claseDif = difValor < 0
+  ? "dif-negativa"
+  : (difValor > 0 ? "dif-positiva" : "");
+
+const flechaDif = difValor < 0
+  ? "▼"
+  : (difValor > 0 ? "▲" : "—");
 
 tr.innerHTML = `
   <td>
@@ -837,7 +957,9 @@ tr.innerHTML = `
   <td>${r.ordenesR2 || 0}</td>
   <td>${formatoMoneda(r.ventaR2)}</td>
   <td>${formatoMoneda(r.ticketR2)}</td>
-  <td class="${claseDif}">${formatoMoneda(r.difVentas)}</td>
+  <td class="${claseDif} col-separador-dif">
+  <span class="dif-flecha">${flechaDif}</span>${formatoMoneda(r.difVentas)}
+</td>
 `;
 
     tr.addEventListener("click", function(){
@@ -902,7 +1024,15 @@ tr.innerHTML = `
       : 0;
 
     const difVentas = linea.ventaR1 - linea.ventaR2;
-    const claseDifLinea = Number(difVentas || 0) < 0 ? "dif-negativa" : "dif-positiva";
+const difValorLinea = Number(difVentas || 0);
+
+const claseDifLinea = difValorLinea < 0
+  ? "dif-negativa"
+  : (difValorLinea > 0 ? "dif-positiva" : "");
+
+const flechaDifLinea = difValorLinea < 0
+  ? "▼"
+  : (difValorLinea > 0 ? "▲" : "—");
 
     tr.innerHTML = `
       <td></td>
@@ -913,7 +1043,9 @@ tr.innerHTML = `
       <td>${linea.ordenesR2}</td>
       <td>${formatoMoneda(linea.ventaR2)}</td>
       <td>${formatoMoneda(ticketR2)}</td>
-      <td class="${claseDifLinea}">${formatoMoneda(difVentas)}</td>
+      <td class="${claseDifLinea} col-separador-dif">
+  <span class="dif-flecha">${flechaDifLinea}</span>${formatoMoneda(difVentas)}
+</td>
     `;
 
     filaPrincipal.insertAdjacentElement("afterend", tr);
