@@ -7,6 +7,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>  
 
 <style>
 
@@ -620,6 +622,10 @@ tbody tr.seleccionado{
       <button class="btn-toggle" onclick="exportarExcelReporte()">
   Exportar Excel
 </button>
+
+      <button class="btn-toggle" onclick="exportarPDFReporte()">
+  Exportar PDF
+</button>
       
     </div>
   </div>
@@ -960,6 +966,80 @@ function toggleVista(){
 
   consultar();
 }
+
+async function exportarPDFReporte(){
+
+  const { jsPDF } = window.jspdf;
+
+  const botonPDF = event && event.target ? event.target : null;
+  const textoOriginal = botonPDF ? botonPDF.innerText : "";
+
+  if(botonPDF){
+    botonPDF.innerText = "Generando PDF...";
+    botonPDF.disabled = true;
+  }
+
+  try{
+
+    const elemento = document.querySelector(".container");
+
+    const canvas = await html2canvas(elemento, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#f3f6fb"
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while(heightLeft > 0){
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    const fecha = new Date();
+
+    const nombreArchivo =
+      "Reporte_Eficiencia_" +
+      fecha.getFullYear() +
+      "-" +
+      String(fecha.getMonth() + 1).padStart(2,"0") +
+      "-" +
+      String(fecha.getDate()).padStart(2,"0") +
+      ".pdf";
+
+    pdf.save(nombreArchivo);
+
+  }catch(error){
+
+    console.error("Error PDF:", error);
+    alert("No se pudo generar el PDF: " + error.message);
+
+  }finally{
+
+    if(botonPDF){
+      botonPDF.innerText = textoOriginal;
+      botonPDF.disabled = false;
+    }
+
+  }
+}
+  
 
 function exportarExcelReporte(){
 
