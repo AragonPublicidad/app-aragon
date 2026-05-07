@@ -2453,9 +2453,7 @@ function colorEscalaRojoVerde(valor, maximoBase){
   return `rgb(${r},${g},${b})`;
 }
 
-function colorHeatmap(valor){
-  return colorEscalaRojoVerde(valor, maximo);
-}
+
 
 
 function pintarDashboardTermometro(data){
@@ -2503,6 +2501,10 @@ function pintarDashboardTermometro(data){
   });
 
   const maximo = valores.length ? Math.max(...valores) : 0;
+
+  function colorHeatmap(valor){
+  return colorEscalaRojoVerde(valor, maximo);
+}
 
   const maximoDistribucion = totalColumnas.length
   ? Math.max(...totalColumnas)
