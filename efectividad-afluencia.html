@@ -755,7 +755,7 @@ let lineasCatalogo = [];
 let lineasSeleccionadas = [];
 
   let lineasDetalleTabla = {};
-let filaExpandida = null;
+let filasExpandidas = {};
   
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw5OG9c0oeDWRyuZ6SshfWZk_AZxtKftEsc5IcTf4a7qk_6Dn2KOtS2UP31xYNGc1OP/exec";
 
@@ -925,7 +925,7 @@ function consultar(){
    graficaGeneral = resp.grafica || {dias:[], ventas:[], ordenes:[]};
 detallesGrafica = resp.detalles || {};
 lineasDetalleTabla = resp.lineasDetalle || {};
-filaExpandida = null;
+filasExpandidas = {};
 
 pintarCards(resp.resumen || {});
 pintarTabla(resp.tabla || []);
@@ -1884,27 +1884,11 @@ tr.innerHTML = `
   });
 }
 
-  function toggleExpandirLinea(event, nombre){
+function toggleExpandirLinea(event, nombre){
 
   event.stopPropagation();
 
   const tbody = document.getElementById("tablaBody");
-
-  const filasActuales = tbody.querySelectorAll(".tr-linea-detalle");
-
-  filasActuales.forEach(f => f.remove());
-
-  const botones = tbody.querySelectorAll(".btn-expand-row");
-
-  botones.forEach(b => b.innerText = "▶");
-
-  if(filaExpandida === nombre){
-    filaExpandida = null;
-    return;
-  }
-
-  filaExpandida = nombre;
-
   const filaPrincipal = tbody.querySelector(`tr[data-nombre="${nombre}"]`);
 
   if(!filaPrincipal){
@@ -1912,6 +1896,22 @@ tr.innerHTML = `
   }
 
   const boton = filaPrincipal.querySelector(".btn-expand-row");
+
+  if(filasExpandidas[nombre]){
+
+    tbody.querySelectorAll(`.tr-linea-detalle[data-padre="${nombre}"]`).forEach(function(f){
+      f.remove();
+    });
+
+    if(boton){
+      boton.innerText = "▶";
+    }
+
+    delete filasExpandidas[nombre];
+    return;
+  }
+
+  filasExpandidas[nombre] = true;
 
   if(boton){
     boton.innerText = "▼";
@@ -1923,11 +1923,14 @@ tr.innerHTML = `
     return;
   }
 
+  let ultimaFila = filaPrincipal;
+
   Object.values(lineas).forEach(function(linea){
 
     const tr = document.createElement("tr");
 
     tr.className = "tr-linea-detalle";
+    tr.dataset.padre = nombre;
 
     const ticketR1 = linea.ordenesR1 > 0
       ? (linea.ventaR1 / linea.ordenesR1)
@@ -1938,15 +1941,15 @@ tr.innerHTML = `
       : 0;
 
     const difVentas = linea.ventaR1 - linea.ventaR2;
-const difValorLinea = Number(difVentas || 0);
+    const difValorLinea = Number(difVentas || 0);
 
-const claseDifLinea = difValorLinea < 0
-  ? "dif-negativa"
-  : (difValorLinea > 0 ? "dif-positiva" : "");
+    const claseDifLinea = difValorLinea < 0
+      ? "dif-negativa"
+      : (difValorLinea > 0 ? "dif-positiva" : "");
 
-const flechaDifLinea = difValorLinea < 0
-  ? "▼"
-  : (difValorLinea > 0 ? "▲" : "—");
+    const flechaDifLinea = difValorLinea < 0
+      ? "▼"
+      : (difValorLinea > 0 ? "▲" : "—");
 
     tr.innerHTML = `
       <td></td>
@@ -1958,11 +1961,12 @@ const flechaDifLinea = difValorLinea < 0
       <td>${formatoMoneda(linea.ventaR2)}</td>
       <td>${formatoMoneda(ticketR2)}</td>
       <td class="${claseDifLinea} col-separador-dif">
-  <span class="dif-flecha">${flechaDifLinea}</span>${formatoMoneda(difVentas)}
-</td>
+        <span class="dif-flecha">${flechaDifLinea}</span>${formatoMoneda(difVentas)}
+      </td>
     `;
 
-    filaPrincipal.insertAdjacentElement("afterend", tr);
+    ultimaFila.insertAdjacentElement("afterend", tr);
+    ultimaFila = tr;
 
   });
 
