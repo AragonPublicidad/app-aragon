@@ -4661,26 +4661,30 @@ cargarContadorArchivosEnviados_(obtenerIDRG_(item));
 cargarCumplimientoOrden_(item);
     }
 
-    fileInput.addEventListener("change", (event) => {
-      selectedFiles = Array.from(event.target.files || []);
-      renderFileList();
-    });
+   if (fileInput) {
+  fileInput.addEventListener("change", (event) => {
+    selectedFiles = Array.from(event.target.files || []);
+    renderFileList();
+  });
+}
 
-    dropzone.addEventListener("dragover", (event) => {
-      event.preventDefault();
-      dropzone.classList.add("dragover");
-    });
+if (dropzone) {
+  dropzone.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    dropzone.classList.add("dragover");
+  });
 
-    dropzone.addEventListener("dragleave", () => {
-      dropzone.classList.remove("dragover");
-    });
+  dropzone.addEventListener("dragleave", () => {
+    dropzone.classList.remove("dragover");
+  });
 
-    dropzone.addEventListener("drop", (event) => {
-      event.preventDefault();
-      dropzone.classList.remove("dragover");
-      selectedFiles = Array.from(event.dataTransfer.files || []);
-      renderFileList();
-    });
+  dropzone.addEventListener("drop", (event) => {
+    event.preventDefault();
+    dropzone.classList.remove("dragover");
+    selectedFiles = Array.from(event.dataTransfer.files || []);
+    renderFileList();
+  });
+}
 	  
 function obtenerM2DesdeNombreArchivo_(nombreArchivo) {
   const nombre = String(nombreArchivo || "").toUpperCase();
