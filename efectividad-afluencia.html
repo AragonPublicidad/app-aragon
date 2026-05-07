@@ -1448,6 +1448,119 @@ body:[
 
 footerPDF();
 
+/* ===============================
+   PÁGINA 2 — VENTAS POR SUCURSAL
+=============================== */
+
+pdf.addPage();
+
+headerPDF("VENTAS POR SUCURSAL", "Comparativo de Rangos");
+
+pdf.setFont("helvetica","bold");
+pdf.setFontSize(10);
+pdf.setTextColor(30,90,190);
+pdf.text("RANGO ACTUAL", 42, 34);
+
+pdf.setTextColor(39,174,96);
+pdf.text("RANGO COMPARATIVO", 145, 34);
+
+pdf.setTextColor(120,90,20);
+pdf.text("RESULTADO", 235, 34);
+
+const ventasSucursalBody = [];
+
+document.querySelectorAll("#tablaBody tr").forEach(function(tr){
+
+  const c = tr.querySelectorAll("td");
+  if(c.length < 9) return;
+
+  ventasSucursalBody.push([
+    c[1].innerText || "",
+    c[2].innerText || "",
+    c[3].innerText || "",
+    c[4].innerText || "",
+    c[5].innerText || "",
+    c[6].innerText || "",
+    c[7].innerText || "",
+    c[8].innerText || ""
+  ]);
+
+});
+
+pdf.autoTable({
+
+  startY:38,
+
+  head:[
+    [
+      "Sucursal",
+      "Ord",
+      "Venta",
+      "Ticket",
+      "Ord",
+      "Venta",
+      "Ticket",
+      "Dif Ventas"
+    ]
+  ],
+
+  body: ventasSucursalBody,
+
+  margin:{
+    left:8,
+    right:8
+  },
+
+  styles:{
+    fontSize:7.5,
+    cellPadding:2.2,
+    overflow:"linebreak",
+    valign:"middle"
+  },
+
+  headStyles:{
+    fillColor:[20,45,85],
+    textColor:[255,255,255],
+    fontStyle:"bold",
+    halign:"center"
+  },
+
+  alternateRowStyles:{
+    fillColor:[248,250,252]
+  },
+
+  columnStyles:{
+    0:{ cellWidth:45, fontStyle:"bold" },
+    1:{ halign:"center", cellWidth:16 },
+    2:{ halign:"right", cellWidth:28 },
+    3:{ halign:"right", cellWidth:28 },
+    4:{ halign:"center", cellWidth:16 },
+    5:{ halign:"right", cellWidth:28 },
+    6:{ halign:"right", cellWidth:28 },
+    7:{ halign:"right", cellWidth:32, fontStyle:"bold" }
+  },
+
+  didParseCell:function(data){
+
+    if(data.section === "body" && data.column.index === 7){
+
+      const texto = String(data.cell.text[0] || "");
+
+      if(texto.indexOf("-") >= 0){
+        data.cell.styles.textColor = [190,55,45];
+      }else{
+        data.cell.styles.textColor = [30,130,70];
+      }
+
+    }
+
+  }
+
+});
+
+footerPDF();
+  
+
   /* Guardar por ahora solo página 1 */
   const fecha = new Date();
 
