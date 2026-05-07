@@ -632,7 +632,7 @@ tbody tr.seleccionado{
 
 
 
-  <div class="cards">
+  <div class="cards" id="pdfResumen">
     <div class="card">
       <h4>Total Órdenes</h4>
       <h2 id="totalOrdenes">0</h2>
@@ -656,7 +656,7 @@ tbody tr.seleccionado{
 
   <div class="content">
 
-    <div class="table-container">
+    <div class="table-container" id="pdfVentasSucursal">
       <h3 id="tablaTitulo">Ventas por Sucursal</h3>
 
       <table>
@@ -682,7 +682,7 @@ tbody tr.seleccionado{
       </table>
     </div>
 
-    <div class="chart-container">
+    <div class="chart-container" id="pdfGrafica">
       <div class="chart-title">
         <h3>Venta y Órdenes por Día</h3>
         <span id="filtroGrafica">Vista general</span>
@@ -721,7 +721,7 @@ tbody tr.seleccionado{
   </div>
 </div>
 
-    <div class="termometro-wrap">
+    <div class="termometro-wrap" id="pdfTermometro">
       <table class="termometro-table">
         <thead>
           <tr>
@@ -981,36 +981,159 @@ async function exportarPDFReporte(){
 
   try{
 
-    const elemento = document.querySelector(".container");
-
-    const canvas = await html2canvas(elemento, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: "#f3f6fb"
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4"
     });
 
-    const imgData = canvas.toDataURL("image/png");
+    const logoURL =
+      "https://res.cloudinary.com/dw6e1kfyu/image/upload/v1774312301/Copia_de_Logo_Nuevo_Aragon_ehxgh7.png";
 
-    const pdf = new jsPDF("p", "mm", "a4");
+    const fechaExportacion = new Date().toLocaleString("es-MX");
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+    async function capturarElemento(id){
 
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const el = document.getElementById(id);
 
-    let heightLeft = imgHeight;
-    let position = 0;
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor:"#ffffff"
+      });
 
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    while(heightLeft > 0){
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      return canvas.toDataURL("image/png");
     }
+
+    async function agregarPagina({
+      titulo,
+      subtitulo,
+      imageData,
+      margenTop = 38,
+      altura = 135
+    }){
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      /* HEADER */
+      pdf.setFillColor(245,247,250);
+      pdf.rect(0,0,pageWidth,24,"F");
+
+      pdf.setFont("helvetica","bold");
+      pdf.setTextColor(44,62,80);
+      pdf.setFontSize(18);
+
+      pdf.text(titulo,10,14);
+
+      pdf.setFont("helvetica","normal");
+      pdf.setFontSize(9);
+      pdf.setTextColor(120,120,120);
+
+      pdf.text(subtitulo,10,20);
+
+      /* LOGO */
+      pdf.addImage(logoURL,"PNG",pageWidth - 42,5,32,12);
+
+      /* CONTENIDO */
+      pdf.addImage(
+        imageData,
+        "PNG",
+        10,
+        margenTop,
+        pageWidth - 20,
+        altura
+      );
+
+      /* FOOTER */
+      pdf.setDrawColor(220,220,220);
+      pdf.line(10,pageHeight - 10,pageWidth - 10,pageHeight - 10);
+
+      pdf.setFontSize(8);
+      pdf.setTextColor(120,120,120);
+
+      pdf.text(
+        "Aragón Publicidad",
+        10,
+        pageHeight - 5
+      );
+
+      pdf.text(
+        fechaExportacion,
+        pageWidth / 2,
+        pageHeight - 5,
+        { align:"center" }
+      );
+
+      pdf.text(
+        "Página " + pdf.getNumberOfPages(),
+        pageWidth - 10,
+        pageHeight - 5,
+        { align:"right" }
+      );
+    }
+
+    /* =========================================
+       PAGINA 1 — RESUMEN
+    ========================================= */
+
+    const resumenImg = await capturarElemento("pdfResumen");
+
+    await agregarPagina({
+      titulo:"Reporte de Eficiencia",
+      subtitulo:"Resumen Ejecutivo",
+      imageData: resumenImg,
+      margenTop:45,
+      altura:45
+    });
+
+    /* =========================================
+       PAGINA 2 — VENTAS
+    ========================================= */
+
+    pdf.addPage();
+
+    const ventasImg = await capturarElemento("pdfVentasSucursal");
+
+    await agregarPagina({
+      titulo:"Ventas por Sucursal",
+      subtitulo:"Comparativo de Rangos",
+      imageData: ventasImg,
+      margenTop:35,
+      altura:150
+    });
+
+    /* =========================================
+       PAGINA 3 — GRAFICA
+    ========================================= */
+
+    pdf.addPage();
+
+    const graficaImg = await capturarElemento("pdfGrafica");
+
+    await agregarPagina({
+      titulo:"Venta y Órdenes por Día",
+      subtitulo:"Análisis gráfico",
+      imageData: graficaImg,
+      margenTop:40,
+      altura:120
+    });
+
+    /* =========================================
+       PAGINA 4 — TERMOMETRO
+    ========================================= */
+
+    pdf.addPage();
+
+    const termometroImg = await capturarElemento("pdfTermometro");
+
+    await agregarPagina({
+      titulo:"Termómetro de Ventas por Horario",
+      subtitulo:"Folios únicos por horario",
+      imageData: termometroImg,
+      margenTop:32,
+      altura:160
+    });
 
     const fecha = new Date();
 
@@ -1027,8 +1150,8 @@ async function exportarPDFReporte(){
 
   }catch(error){
 
-    console.error("Error PDF:", error);
-    alert("No se pudo generar el PDF: " + error.message);
+    console.error(error);
+    alert("Error al generar PDF: " + error.message);
 
   }finally{
 
