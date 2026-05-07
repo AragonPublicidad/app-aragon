@@ -1174,8 +1174,7 @@ cardEjecutiva(
   68,
   68,
   38,
- "O",
-  "TOTAL ÓRDENES (R1)",
+   "TOTAL ÓRDENES (R1)",
   document.getElementById("totalOrdenes").innerText,
   "RANGO ACTUAL",
   [30,90,190]
@@ -1198,7 +1197,6 @@ cardEjecutiva(
   68,
   68,
   38,
-  "T",
   "TICKET PROMEDIO (R1)",
   document.getElementById("ticketPromedio").innerText,
   "RANGO ACTUAL",
@@ -1210,7 +1208,6 @@ cardEjecutiva(
   68,
   50,
   38,
-  "S",
   "MEJOR SUCURSAL",
   document.getElementById("mejor").innerText,
   "POR VENTAS (R1)",
@@ -1239,20 +1236,44 @@ let ventaR1 = 0;
 let ordenesR2 = 0;
 let ventaR2 = 0;
 
+let mejorSucursalR1 = "-";
+let mejorSucursalVentaR1 = -Infinity;
+let mejorSucursalR2 = "-";
+let mejorSucursalVentaR2 = -Infinity;
+
 document.querySelectorAll("#tablaBody tr").forEach(function(tr){
   const c = tr.querySelectorAll("td");
   if(c.length < 9) return;
 
-  ordenesR1 += Number((c[2].innerText || "0").replace(/[^0-9.-]/g,""));
-  ventaR1 += Number((c[3].innerText || "0").replace(/[^0-9.-]/g,""));
-  ordenesR2 += Number((c[5].innerText || "0").replace(/[^0-9.-]/g,""));
-  ventaR2 += Number((c[6].innerText || "0").replace(/[^0-9.-]/g,""));
+  const sucursal = c[1].innerText || "-";
+  const ord1 = Number((c[2].innerText || "0").replace(/[^0-9.-]/g,""));
+  const ven1 = Number((c[3].innerText || "0").replace(/[^0-9.-]/g,""));
+  const ord2 = Number((c[5].innerText || "0").replace(/[^0-9.-]/g,""));
+  const ven2 = Number((c[6].innerText || "0").replace(/[^0-9.-]/g,""));
+
+  ordenesR1 += ord1;
+  ventaR1 += ven1;
+  ordenesR2 += ord2;
+  ventaR2 += ven2;
+
+  if(ven1 > mejorSucursalVentaR1){
+    mejorSucursalVentaR1 = ven1;
+    mejorSucursalR1 = sucursal;
+  }
+
+  if(ven2 > mejorSucursalVentaR2){
+    mejorSucursalVentaR2 = ven2;
+    mejorSucursalR2 = sucursal;
+  }
 });
 
+const ticketR1 = ordenesR1 > 0 ? ventaR1 / ordenesR1 : 0;
 const ticketR2 = ordenesR2 > 0 ? ventaR2 / ordenesR2 : 0;
+
 const difOrdenes = ordenesR1 - ordenesR2;
 const difVentas = ventaR1 - ventaR2;
-const difTicket = Number((ventaR1 / Math.max(ordenesR1,1)) || 0) - ticketR2;
+const difTicket = ticketR1 - ticketR2;
+const difMejorSucursal = mejorSucursalVentaR1 - mejorSucursalVentaR2;
 
 function monedaPDF(n){
   return "$" + Number(n || 0).toLocaleString("es-MX", {
@@ -1266,23 +1287,64 @@ function varPctPDF(actual, anterior){
   return ((actual - anterior) / anterior * 100).toFixed(1) + "%";
 }
 
-let mejorLinea = "-";
-let mejorLineaVenta = -Infinity;
+/* ===============================
+   MEJOR LÍNEA AGRUPADA
+================================ */
+
+let lineasAgrupadas = {};
 
 if(lineasDetalleTabla && typeof lineasDetalleTabla === "object"){
-  Object.values(lineasDetalleTabla).forEach(function(grupo){
-    if(!grupo || typeof grupo !== "object") return;
 
-    Object.values(grupo).forEach(function(linea){
-      const venta = Number(linea.ventaR1 || 0);
+  Object.values(lineasDetalleTabla).forEach(function(grupoSucursal){
 
-      if(venta > mejorLineaVenta){
-        mejorLineaVenta = venta;
-        mejorLinea = linea.codigo || linea.linea || "-";
+    if(!grupoSucursal || typeof grupoSucursal !== "object") return;
+
+    Object.values(grupoSucursal).forEach(function(linea){
+
+      const codigo = String(linea.codigo || linea.linea || "-").trim();
+      if(!codigo) return;
+
+      if(!lineasAgrupadas[codigo]){
+        lineasAgrupadas[codigo] = {
+          codigo: codigo,
+          ventaR1: 0,
+          ventaR2: 0,
+          ordenesR1: 0,
+          ordenesR2: 0
+        };
       }
+
+      lineasAgrupadas[codigo].ventaR1 += Number(linea.ventaR1 || 0);
+      lineasAgrupadas[codigo].ventaR2 += Number(linea.ventaR2 || 0);
+      lineasAgrupadas[codigo].ordenesR1 += Number(linea.ordenesR1 || 0);
+      lineasAgrupadas[codigo].ordenesR2 += Number(linea.ordenesR2 || 0);
+
     });
+
   });
+
 }
+
+let mejorLineaR1 = "-";
+let mejorLineaVentaR1 = -Infinity;
+let mejorLineaR2 = "-";
+let mejorLineaVentaR2 = -Infinity;
+
+Object.values(lineasAgrupadas).forEach(function(linea){
+
+  if(linea.ventaR1 > mejorLineaVentaR1){
+    mejorLineaVentaR1 = linea.ventaR1;
+    mejorLineaR1 = linea.codigo;
+  }
+
+  if(linea.ventaR2 > mejorLineaVentaR2){
+    mejorLineaVentaR2 = linea.ventaR2;
+    mejorLineaR2 = linea.codigo;
+  }
+
+});
+
+const difMejorLinea = mejorLineaVentaR1 - mejorLineaVentaR2;
 
 pdf.autoTable({
 
@@ -1318,26 +1380,26 @@ body:[
 
   [
     "Ticket Promedio",
-    monedaPDF(ventaR1 / Math.max(ordenesR1,1)),
+    monedaPDF(ticketR1),
     monedaPDF(ticketR2),
     monedaPDF(difTicket),
-    varPctPDF(ventaR1 / Math.max(ordenesR1,1), ticketR2)
+    varPctPDF(ticketR1, ticketR2)
   ],
 
   [
     "Mejor Sucursal",
-    document.getElementById("mejor").innerText,
-    "-",
-    "-",
-    "-"
+    mejorSucursalR1,
+    mejorSucursalR2,
+    monedaPDF(difMejorSucursal),
+    varPctPDF(mejorSucursalVentaR1, mejorSucursalVentaR2)
   ],
 
   [
     "Mejor Línea (Ventas)",
-    mejorLinea,
-    "-",
-    "-",
-    "-"
+    mejorLineaR1,
+    mejorLineaR2,
+    monedaPDF(difMejorLinea),
+    varPctPDF(mejorLineaVentaR1, mejorLineaVentaR2)
   ]
 
 ],
