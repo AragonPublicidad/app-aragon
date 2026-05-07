@@ -797,7 +797,7 @@ const fechaFin2 = document.getElementById("fechaFin2").value || "";
 const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=18" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=19" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
 "&fechaInicio2=" + encodeURIComponent(fechaInicio2) +
@@ -1287,6 +1287,29 @@ function formatoMoneda(valor){
     maximumFractionDigits:2
   });
 }
+
+function fechaInputDesdeDate(fecha){
+  const y = fecha.getFullYear();
+  const m = String(fecha.getMonth() + 1).padStart(2, "0");
+  const d = String(fecha.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function aplicarFechasDefaultReporte(){
+  const hoy = new Date();
+
+  const semanaPasada = new Date();
+  semanaPasada.setDate(hoy.getDate() - 7);
+
+  document.getElementById("fechaInicio").value = fechaInputDesdeDate(hoy);
+  document.getElementById("fechaFin").value = fechaInputDesdeDate(hoy);
+
+  document.getElementById("fechaInicio2").value = fechaInputDesdeDate(semanaPasada);
+  document.getElementById("fechaFin2").value = fechaInputDesdeDate(semanaPasada);
+}
+
+aplicarFechasDefaultReporte();
+  
 
   const params = new URLSearchParams(window.location.search);
 
