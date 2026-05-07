@@ -1487,27 +1487,80 @@ document.querySelectorAll("#tablaBody tr").forEach(function(tr){
 
 });
 
+const totalOrdR1 = ventasSucursalBody.reduce((s, r) => s + Number(String(r[1]).replace(/[^0-9.-]/g,"")), 0);
+const totalVentaR1 = ventasSucursalBody.reduce((s, r) => s + Number(String(r[2]).replace(/[^0-9.-]/g,"")), 0);
+const totalTicketR1 = totalOrdR1 > 0 ? totalVentaR1 / totalOrdR1 : 0;
+
+const totalOrdR2 = ventasSucursalBody.reduce((s, r) => s + Number(String(r[4]).replace(/[^0-9.-]/g,"")), 0);
+const totalVentaR2 = ventasSucursalBody.reduce((s, r) => s + Number(String(r[5]).replace(/[^0-9.-]/g,"")), 0);
+const totalTicketR2 = totalOrdR2 > 0 ? totalVentaR2 / totalOrdR2 : 0;
+
+const totalDifVentas = totalVentaR1 - totalVentaR2;
+const totalVarPct = totalVentaR2 !== 0
+  ? ((totalDifVentas / totalVentaR2) * 100).toFixed(2) + "%"
+  : "-";
+
+function limpiarMonedaPDF(valor){
+  return Number(String(valor || "0").replace(/[^0-9.-]/g,""));
+}
+
+function formatoDifPDF(valor){
+  return valor >= 0
+    ? "+$" + valor.toLocaleString("es-MX", {minimumFractionDigits:2, maximumFractionDigits:2})
+    : "-$" + Math.abs(valor).toLocaleString("es-MX", {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+const bodyVentasPDF = ventasSucursalBody.map((r, i) => {
+
+  const ventaR1 = limpiarMonedaPDF(r[2]);
+  const ventaR2 = limpiarMonedaPDF(r[5]);
+  const dif = ventaR1 - ventaR2;
+
+  const varPct = ventaR2 !== 0
+    ? ((dif / ventaR2) * 100).toFixed(2) + "%"
+    : "-";
+
+  return [
+    i + 1,
+    r[0],
+    r[1],
+    r[2],
+    r[3],
+    r[4],
+    r[5],
+    r[6],
+    formatoDifPDF(dif),
+    varPct
+  ];
+
+});
+
+bodyVentasPDF.push([
+  "",
+  "TOTAL GENERAL",
+  String(totalOrdR1),
+  monedaPDF(totalVentaR1),
+  monedaPDF(totalTicketR1),
+  String(totalOrdR2),
+  monedaPDF(totalVentaR2),
+  monedaPDF(totalTicketR2),
+  formatoDifPDF(totalDifVentas),
+  totalVarPct
+]);
+
 pdf.autoTable({
 
-  startY: 42,
+  startY: 38,
 
   theme: "grid",
 
   head: [
-
     [
-      "",
-      "",
-      "RANGO ACTUAL (R1)",
-      "",
-      "",
-      "RANGO COMPARATIVO (R2)",
-      "",
-      "",
-      "DIFERENCIA DE VENTAS",
-      ""
+      { content:"", colSpan:2, styles:{ fillColor:[20,45,85] } },
+      { content:"RANGO ACTUAL (R1)", colSpan:3, styles:{ fillColor:[30,90,190] } },
+      { content:"RANGO COMPARATIVO (R2)", colSpan:3, styles:{ fillColor:[39,174,96] } },
+      { content:"DIFERENCIA DE VENTAS", colSpan:2, styles:{ fillColor:[180,140,20] } }
     ],
-
     [
       "#",
       "Sucursal",
@@ -1520,63 +1573,26 @@ pdf.autoTable({
       "$",
       "%"
     ]
-
   ],
 
-  body: ventasSucursalBody.map((r, i) => {
-
-    const ventaR1 = Number(String(r[2]).replace(/[^0-9.-]/g,""));
-    const ventaR2 = Number(String(r[5]).replace(/[^0-9.-]/g,""));
-
-    const dif = ventaR1 - ventaR2;
-
-    const varPct =
-      ventaR2 !== 0
-        ? ((dif / ventaR2) * 100).toFixed(2) + "%"
-        : "-";
-
-    return [
-
-      i + 1,
-      r[0],
-      r[1],
-      r[2],
-      r[3],
-      r[4],
-      r[5],
-      r[6],
-      dif >= 0
-        ? "+$" + dif.toLocaleString("es-MX", {
-            minimumFractionDigits:2,
-            maximumFractionDigits:2
-          })
-        : "-$" + Math.abs(dif).toLocaleString("es-MX", {
-            minimumFractionDigits:2,
-            maximumFractionDigits:2
-          }),
-
-      varPct
-
-    ];
-
-  }),
+  body: bodyVentasPDF,
 
   margin:{
-    left: 8,
-    right: 8
+    left: 6,
+    right: 6
   },
 
   styles:{
-    fontSize: 7,
-    cellPadding: 2,
+    fontSize: 6.6,
+    cellPadding: 1.75,
     valign: "middle",
     halign: "center",
-    lineColor: [225,230,235],
-    lineWidth: 0.2
+    lineColor: [220,225,232],
+    lineWidth: 0.18,
+    overflow: "linebreak"
   },
 
   headStyles:{
-    fillColor:[20,45,85],
     textColor:[255,255,255],
     fontStyle:"bold",
     halign:"center",
@@ -1588,67 +1604,39 @@ pdf.autoTable({
   },
 
   columnStyles:{
-
-    0:{ cellWidth: 8 },
+    0:{ cellWidth: 7, halign:"center" },
     1:{ cellWidth: 38, halign:"left", fontStyle:"bold" },
 
-    2:{ cellWidth: 16 },
-    3:{ cellWidth: 24, halign:"right" },
-    4:{ cellWidth: 22, halign:"right" },
+    2:{ cellWidth: 15, halign:"center" },
+    3:{ cellWidth: 25, halign:"right" },
+    4:{ cellWidth: 23, halign:"right" },
 
-    5:{ cellWidth: 16 },
-    6:{ cellWidth: 24, halign:"right" },
-    7:{ cellWidth: 22, halign:"right" },
+    5:{ cellWidth: 15, halign:"center" },
+    6:{ cellWidth: 25, halign:"right" },
+    7:{ cellWidth: 23, halign:"right" },
 
-    8:{ cellWidth: 28, halign:"right", fontStyle:"bold" },
-    9:{ cellWidth: 16, halign:"right", fontStyle:"bold" }
-
+    8:{ cellWidth: 29, halign:"right", fontStyle:"bold" },
+    9:{ cellWidth: 17, halign:"right", fontStyle:"bold" }
   },
 
-  didParseCell: function(data){
+  didParseCell:function(data){
 
-    /* HEADER AGRUPADO */
+    const esTotal = data.section === "body" && data.row.index === bodyVentasPDF.length - 1;
 
-    if(data.section === "head" && data.row.index === 0){
-
-      if(data.column.index >= 2 && data.column.index <= 4){
-        data.cell.styles.fillColor = [30,90,190];
-      }
-
-      if(data.column.index >= 5 && data.column.index <= 7){
-        data.cell.styles.fillColor = [39,174,96];
-      }
-
-      if(data.column.index >= 8){
-        data.cell.styles.fillColor = [180,140,20];
-      }
-
+    if(esTotal){
+      data.cell.styles.fillColor = [15,45,85];
+      data.cell.styles.textColor = [255,255,255];
+      data.cell.styles.fontStyle = "bold";
     }
 
-    /* DIFERENCIAS */
-
-    if(data.section === "body" && data.column.index === 8){
-
+    if(data.section === "body" && !esTotal && (data.column.index === 8 || data.column.index === 9)){
       const txt = String(data.cell.text[0] || "");
 
       if(txt.startsWith("-")){
         data.cell.styles.textColor = [190,55,45];
-      }else{
+      }else if(txt.startsWith("+") || txt !== "-"){
         data.cell.styles.textColor = [30,130,70];
       }
-
-    }
-
-    if(data.section === "body" && data.column.index === 9){
-
-      const txt = String(data.cell.text[0] || "");
-
-      if(txt.startsWith("-")){
-        data.cell.styles.textColor = [190,55,45];
-      }else{
-        data.cell.styles.textColor = [30,130,70];
-      }
-
     }
 
   }
