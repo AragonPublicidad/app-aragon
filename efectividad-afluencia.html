@@ -2386,28 +2386,13 @@ function aplicarFechasDefaultReporte(){
 
   const params = new URLSearchParams(window.location.search);
 
-const fechaInicioURL = params.get("fechaInicio");
-const fechaFinURL = params.get("fechaFin");
-const fechaInicio2URL = params.get("fechaInicio2");
-const fechaFin2URL = params.get("fechaFin2");
+
 const vistaURL = params.get("vista");
 const estadoURL = params.get("estado");
 
-if(!fechaInicioURL){
-  aplicarFechasDefaultReporte();
-}
+aplicarFechasDefaultReporte();
 
-if(fechaFinURL){
-  document.getElementById("fechaFin").value = fechaFinURL;
-}
 
-  if(fechaInicio2URL){
-  document.getElementById("fechaInicio2").value = fechaInicio2URL;
-}
-
-if(fechaFin2URL){
-  document.getElementById("fechaFin2").value = fechaFin2URL;
-}
 
   if(estadoURL){
   document.getElementById("estadoFiltro").value = estadoURL;
