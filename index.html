@@ -3886,6 +3886,10 @@ function mostrarVistaTablero(vista) {
     inicializarClientesCredito();
   }
 
+	if (vista === 'produccion') {
+  init();
+}
+
   if (vista === 'talleres') {
     initFiltrosTaller();
     cargarDatosTalleres();
