@@ -1040,8 +1040,10 @@ function consultarTermometro(){
       return;
     }
 
-    pintarTermometro(resp.termometro || []);
+   pintarTermometro(resp.termometro || []);
+pintarDashboardTermometro(resp.termometroDashboard || null);
 
+    
     delete window[callbackName];
   };
 
@@ -2289,6 +2291,89 @@ function pintarGrafica(data, tituloFiltro){
   });
 }
 
+function pintarDashboardTermometro(data){
+
+  const dashboard = document.getElementById("dashboardTermometro");
+  const heatmapBody = document.getElementById("heatmapBody");
+
+  if(!data || !data.kpis){
+    dashboard.style.display = "none";
+    return;
+  }
+
+  dashboard.style.display = "block";
+
+  document.getElementById("kpiHoraPico").innerText =
+    data.kpis.horaPicoGlobal.horario + " (" + data.kpis.horaPicoGlobal.total + ")";
+
+  document.getElementById("kpiSucursalActiva").innerText =
+    data.kpis.sucursalMasActiva.sucursal + " (" + data.kpis.sucursalMasActiva.total + ")";
+
+  document.getElementById("kpiDiaFuerte").innerText =
+    data.kpis.diaMasFuerte.dia + " (" + data.kpis.diaMasFuerte.total + ")";
+
+  document.getElementById("kpiHorarioBajo").innerText =
+    data.kpis.bloqueMasBajo.horario + " (" + data.kpis.bloqueMasBajo.total + ")";
+
+  heatmapBody.innerHTML = "";
+
+  const valores = [];
+
+  (data.matrizSucursalHorario || []).forEach(function(item){
+    (item.valores || []).forEach(function(v){
+      valores.push(Number(v || 0));
+    });
+  });
+
+  const maximo = valores.length ? Math.max(...valores) : 0;
+
+  function claseHeatmap(valor){
+    valor = Number(valor || 0);
+
+    if(maximo <= 0 || valor <= 0){
+      return "heatmap-low";
+    }
+
+    const porcentaje = valor / maximo;
+
+    if(porcentaje <= 0.35){
+      return "heatmap-low";
+    }
+
+    if(porcentaje <= 0.70){
+      return "heatmap-mid";
+    }
+
+    return "heatmap-high";
+  }
+
+  (data.matrizSucursalHorario || []).forEach(function(item){
+
+    const row = document.createElement("div");
+    row.className = "heatmap-row";
+
+    let html = `
+      <div class="heatmap-sucursal">${item.sucursal}</div>
+    `;
+
+    (item.valores || []).forEach(function(valor){
+      html += `
+        <div class="heatmap-cell ${claseHeatmap(valor)}">${valor}</div>
+      `;
+    });
+
+    html += `
+      <div class="heatmap-cell heatmap-total-cell">${item.total}</div>
+    `;
+
+    row.innerHTML = html;
+    heatmapBody.appendChild(row);
+
+  });
+
+}
+
+  
 function pintarTermometro(rows){
   const body = document.getElementById("termometroBody");
   body.innerHTML = "";
