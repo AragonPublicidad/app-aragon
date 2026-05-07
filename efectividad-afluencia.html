@@ -978,328 +978,156 @@ async function exportarPDFReporte(){
     format: "a4"
   });
 
-  const logoURL =
-    "https://res.cloudinary.com/dw6e1kfyu/image/upload/v1774312301/Copia_de_Logo_Nuevo_Aragon_ehxgh7.png";
-
-  const fechaExportacion = new Date().toLocaleString("es-MX");
-
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
-  /* =========================================
-     HELPERS
-  ========================================= */
+  const logoURL = "https://res.cloudinary.com/dw6e1kfyu/image/upload/v1774312301/Copia_de_Logo_Nuevo_Aragon_ehxgh7.png";
+  const fechaExportacion = new Date().toLocaleString("es-MX");
 
-  function agregarHeader(titulo, subtitulo){
+  function headerPDF(titulo, subtitulo){
+    pdf.setFillColor(245, 247, 250);
+    pdf.rect(0, 0, pageWidth, 26, "F");
 
-    pdf.setFillColor(245,247,250);
-    pdf.rect(0,0,pageWidth,22,"F");
-
-    pdf.setFont("helvetica","bold");
+    pdf.setFont("helvetica", "bold");
     pdf.setFontSize(18);
-    pdf.setTextColor(20,40,90);
+    pdf.setTextColor(15, 45, 85);
+    pdf.text(titulo, 12, 14);
 
-    pdf.text(titulo,10,13);
-
-    pdf.setFont("helvetica","normal");
+    pdf.setFont("helvetica", "normal");
     pdf.setFontSize(9);
-    pdf.setTextColor(120);
+    pdf.setTextColor(110, 110, 110);
+    pdf.text(subtitulo, 12, 21);
 
-    pdf.text(subtitulo,10,19);
-
-    pdf.addImage(logoURL,"PNG",pageWidth - 42,4,32,12);
+    pdf.addImage(logoURL, "PNG", pageWidth - 48, 5, 38, 14);
   }
 
-  function agregarFooter(){
-
-    pdf.setDrawColor(220);
-    pdf.line(10,pageHeight - 8,pageWidth - 10,pageHeight - 8);
+  function footerPDF(){
+    pdf.setDrawColor(210, 210, 210);
+    pdf.line(10, pageHeight - 10, pageWidth - 10, pageHeight - 10);
 
     pdf.setFontSize(8);
-    pdf.setTextColor(120);
+    pdf.setTextColor(110, 110, 110);
 
-    pdf.text(
-      "Aragón Publicidad",
-      10,
-      pageHeight - 3
-    );
-
-    pdf.text(
-      fechaExportacion,
-      pageWidth / 2,
-      pageHeight - 3,
-      { align:"center" }
-    );
-
-    pdf.text(
-      "Página " + pdf.getNumberOfPages(),
-      pageWidth - 10,
-      pageHeight - 3,
-      { align:"right" }
-    );
+    pdf.text("Aragón Publicidad", 10, pageHeight - 4);
+    pdf.text(fechaExportacion, pageWidth / 2, pageHeight - 4, { align:"center" });
+    pdf.text("Página " + pdf.getNumberOfPages(), pageWidth - 10, pageHeight - 4, { align:"right" });
   }
 
-  /* =========================================
-     PAGINA 1 — RESUMEN
-  ========================================= */
+  function cardPDF(x, y, w, h, titulo, valor, subtitulo, color){
+    pdf.setFillColor(255, 255, 255);
+    pdf.roundedRect(x, y, w, h, 4, 4, "F");
 
-  agregarHeader(
-    "Reporte de Eficiencia",
-    "Resumen Ejecutivo"
+    pdf.setDrawColor(220, 225, 235);
+    pdf.roundedRect(x, y, w, h, 4, 4, "S");
+
+    pdf.setFillColor(color[0], color[1], color[2]);
+    pdf.circle(x + 11, y + 14, 7, "F");
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(8);
+    pdf.setTextColor(90, 100, 115);
+    pdf.text(titulo, x + 24, y + 10);
+
+    pdf.setFontSize(16);
+    pdf.setTextColor(25, 35, 55);
+    pdf.text(String(valor), x + 24, y + 20);
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(7);
+    pdf.setTextColor(120, 120, 120);
+    pdf.text(subtitulo, x + 24, y + 27);
+  }
+
+  /* ===============================
+     PÁGINA 1 — RESUMEN EJECUTIVO
+  =============================== */
+
+  headerPDF("Reporte de Eficiencia", "Resumen Ejecutivo");
+
+  const fechaInicio = document.getElementById("fechaInicio").value || "";
+  const fechaFin = document.getElementById("fechaFin").value || "";
+  const fechaInicio2 = document.getElementById("fechaInicio2").value || "";
+  const fechaFin2 = document.getElementById("fechaFin2").value || "";
+  const fechaTermometroInicio = document.getElementById("fechaTermometroInicio").value || "";
+  const fechaTermometroFin = document.getElementById("fechaTermometroFin").value || "";
+
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(9);
+
+  pdf.setTextColor(41, 128, 185);
+  pdf.text("RANGO ACTUAL", 18, 38);
+
+  pdf.setTextColor(39, 174, 96);
+  pdf.text("RANGO COMPARATIVO", 105, 38);
+
+  pdf.setTextColor(90, 90, 90);
+  pdf.text("TERMÓMETRO", 198, 38);
+
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(10);
+  pdf.setTextColor(40, 40, 40);
+
+  pdf.roundedRect(12, 42, 75, 14, 3, 3);
+  pdf.text(fechaInicio + "  -  " + fechaFin, 25, 51);
+
+  pdf.roundedRect(99, 42, 80, 14, 3, 3);
+  pdf.text(fechaInicio2 + "  -  " + fechaFin2, 112, 51);
+
+  pdf.roundedRect(193, 42, 82, 14, 3, 3);
+  pdf.text(fechaTermometroInicio + "  -  " + fechaTermometroFin, 204, 51);
+
+  cardPDF(
+    12, 70, 62, 34,
+    "TOTAL ÓRDENES",
+    document.getElementById("totalOrdenes").innerText,
+    "Rango actual",
+    [41, 128, 185]
   );
 
-  const cards = [
-    {
-      titulo:"Total Órdenes",
-      valor:document.getElementById("totalOrdenes").innerText
-    },
-    {
-      titulo:"Total Venta",
-      valor:document.getElementById("totalVenta").innerText
-    },
-    {
-      titulo:"Ticket Promedio",
-      valor:document.getElementById("ticketPromedio").innerText
-    },
-    {
-      titulo:"Mejor Resultado",
-      valor:document.getElementById("mejor").innerText
-    }
-  ];
-
-  let x = 12;
-
-  cards.forEach(card => {
-
-    pdf.setFillColor(255,255,255);
-    pdf.roundedRect(x,35,62,30,3,3,"F");
-
-    pdf.setDrawColor(220);
-    pdf.roundedRect(x,35,62,30,3,3);
-
-    pdf.setFont("helvetica","bold");
-    pdf.setFontSize(10);
-    pdf.setTextColor(120);
-
-    pdf.text(card.titulo,x + 5,45);
-
-    pdf.setFontSize(18);
-    pdf.setTextColor(40);
-
-    pdf.text(String(card.valor),x + 5,57);
-
-    x += 68;
-
-  });
-
-  pdf.setFontSize(11);
-  pdf.setTextColor(90);
-
-  pdf.text(
-    "Rango Actual: " +
-    document.getElementById("fechaInicio").value +
-    " al " +
-    document.getElementById("fechaFin").value,
-    12,
-    80
+  cardPDF(
+    82, 70, 62, 34,
+    "TOTAL VENTA",
+    document.getElementById("totalVenta").innerText,
+    "Rango actual",
+    [39, 174, 96]
   );
 
-  pdf.text(
-    "Rango Comparativo: " +
-    document.getElementById("fechaInicio2").value +
-    " al " +
-    document.getElementById("fechaFin2").value,
-    12,
-    88
+  cardPDF(
+    152, 70, 62, 34,
+    "TICKET PROMEDIO",
+    document.getElementById("ticketPromedio").innerText,
+    "Rango actual",
+    [243, 156, 18]
   );
 
-  agregarFooter();
-
-  /* =========================================
-     PAGINA 2 — VENTAS
-  ========================================= */
-
-  pdf.addPage();
-
-  agregarHeader(
-    "Ventas por Sucursal",
-    "Comparativo de Rangos"
+  cardPDF(
+    222, 70, 62, 34,
+    "MEJOR RESULTADO",
+    document.getElementById("mejor").innerText,
+    "Por ventas",
+    [142, 68, 173]
   );
 
-  const bodyVentas = [];
+  pdf.setFillColor(255, 255, 255);
+  pdf.roundedRect(12, 120, 272, 45, 4, 4, "F");
+  pdf.setDrawColor(220, 225, 235);
+  pdf.roundedRect(12, 120, 272, 45, 4, 4, "S");
 
-  document.querySelectorAll("#tablaBody tr").forEach(tr => {
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(13);
+  pdf.setTextColor(15, 45, 85);
+  pdf.text("Resumen general del reporte", 20, 132);
 
-    const celdas = tr.querySelectorAll("td");
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(10);
+  pdf.setTextColor(80, 80, 80);
 
-    if(celdas.length < 9) return;
+  pdf.text("Este reporte compara el desempeño de ventas entre el rango actual y el rango comparativo seleccionado.", 20, 143);
+  pdf.text("Incluye ventas por sucursal, comportamiento diario y concentración de folios por horario.", 20, 151);
 
-    bodyVentas.push([
-      celdas[1]?.innerText || "",
-      celdas[2]?.innerText || "",
-      celdas[3]?.innerText || "",
-      celdas[4]?.innerText || "",
-      celdas[5]?.innerText || "",
-      celdas[6]?.innerText || "",
-      celdas[7]?.innerText || "",
-      celdas[8]?.innerText || ""
-    ]);
+  footerPDF();
 
-  });
-
-  pdf.autoTable({
-
-    startY: 32,
-
-    head:[[
-      "Sucursal",
-      "Ord R1",
-      "Venta R1",
-      "Ticket R1",
-      "Ord R2",
-      "Venta R2",
-      "Ticket R2",
-      "Dif Ventas"
-    ]],
-
-    body: bodyVentas,
-
-    styles:{
-      fontSize:8,
-      cellPadding:2
-    },
-
-    headStyles:{
-      fillColor:[30,64,175],
-      halign:"center"
-    },
-
-    alternateRowStyles:{
-      fillColor:[248,250,252]
-    },
-
-    columnStyles:{
-      7:{ halign:"right" }
-    },
-
-    margin:{
-      left:10,
-      right:10
-    }
-
-  });
-
-  agregarFooter();
-
-  /* =========================================
-     PAGINA 3 — GRAFICA
-  ========================================= */
-
-  pdf.addPage();
-
-  agregarHeader(
-    "Venta y Órdenes por Día",
-    "Análisis gráfico"
-  );
-
-  const canvasGrafica = await html2canvas(
-    document.getElementById("pdfGrafica"),
-    {
-      scale:2,
-      backgroundColor:"#ffffff"
-    }
-  );
-
-  const imgGrafica = canvasGrafica.toDataURL("image/png");
-
-  pdf.addImage(
-    imgGrafica,
-    "PNG",
-    15,
-    35,
-    255,
-    130
-  );
-
-  agregarFooter();
-
-  /* =========================================
-     PAGINA 4 — TERMOMETRO
-  ========================================= */
-
-  pdf.addPage();
-
-  agregarHeader(
-    "Termómetro de Ventas por Horario",
-    "Folios únicos por horario"
-  );
-
-  const bodyTermometro = [];
-
-  document.querySelectorAll("#termometroBody tr").forEach(tr => {
-
-    const celdas = tr.querySelectorAll("td");
-
-    const row = [];
-
-    celdas.forEach(td => {
-      row.push(td.innerText || "");
-    });
-
-    bodyTermometro.push(row);
-
-  });
-
-  pdf.autoTable({
-
-    startY:32,
-
-    body: bodyTermometro,
-
-    styles:{
-      fontSize:6,
-      cellPadding:1,
-      halign:"center"
-    },
-
-    margin:{
-      left:8,
-      right:8
-    },
-
-    didParseCell:function(data){
-
-      const texto = Number(
-        String(data.cell.text[0] || "")
-          .replace(/[^0-9.-]/g,"")
-      );
-
-      if(!isNaN(texto)){
-
-        if(texto <= 2){
-          data.cell.styles.fillColor = [248,105,107];
-        }else if(texto <= 4){
-          data.cell.styles.fillColor = [247,167,111];
-        }else if(texto <= 7){
-          data.cell.styles.fillColor = [255,217,102];
-        }else if(texto <= 10){
-          data.cell.styles.fillColor = [183,216,121];
-        }else{
-          data.cell.styles.fillColor = [99,190,123];
-        }
-
-      }
-
-    }
-
-  });
-
-  agregarFooter();
-
-  /* =========================================
-     SAVE
-  ========================================= */
-
+  /* Guardar por ahora solo página 1 */
   const fecha = new Date();
 
   const nombreArchivo =
