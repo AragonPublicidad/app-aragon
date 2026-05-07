@@ -1568,8 +1568,8 @@ pdf.autoTable({
   body: bodyVentasPDF,
 
   margin:{
-    left: 6,
-    right: 6
+    left: 12,
+    right: 12
   },
 
   styles:{
@@ -1593,22 +1593,23 @@ pdf.autoTable({
     fillColor:[248,250,252]
   },
 
-  columnStyles:{
-    0:{ cellWidth: 7, halign:"center" },
-    1:{ cellWidth: 38, halign:"left", fontStyle:"bold" },
+ columnStyles:{
 
-    2:{ cellWidth: 15, halign:"center" },
-    3:{ cellWidth: 25, halign:"right" },
-    4:{ cellWidth: 23, halign:"right" },
+  0:{ cellWidth: 7, halign:"center" },
+  1:{ cellWidth: 42, halign:"left", fontStyle:"bold" },
 
-    5:{ cellWidth: 15, halign:"center" },
-    6:{ cellWidth: 25, halign:"right" },
-    7:{ cellWidth: 23, halign:"right" },
+  2:{ cellWidth: 14, halign:"center" },
+  3:{ cellWidth: 24, halign:"right" },
+  4:{ cellWidth: 20, halign:"right" },
 
-    8:{ cellWidth: 29, halign:"right", fontStyle:"bold" },
-    9:{ cellWidth: 17, halign:"right", fontStyle:"bold" }
-  },
+  5:{ cellWidth: 14, halign:"center" },
+  6:{ cellWidth: 24, halign:"right" },
+  7:{ cellWidth: 20, halign:"right" },
 
+  8:{ cellWidth: 28, halign:"right", fontStyle:"bold" },
+  9:{ cellWidth: 15, halign:"right", fontStyle:"bold" }
+
+},
   didParseCell:function(data){
 
     const esTotal = data.section === "body" && data.row.index === bodyVentasPDF.length - 1;
