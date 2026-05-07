@@ -682,11 +682,33 @@ tbody tr.seleccionado{
 
   </div>
 
-  <div class="termometro-container">
-    <div class="termometro-header">
-      <h3>Termómetro de Ventas por Horario</h3>
-      <span>Folios únicos por sucursal, día y rango de hora</span>
+  <div class="termometro-header">
+  <div>
+    <h3>Termómetro de Ventas por Horario</h3>
+    <span>Folios únicos por sucursal, día y rango de hora</span>
+  </div>
+
+  <div class="grupo-fechas rango-actual">
+    <div class="grupo-fechas-titulo">
+      Rango de medición
     </div>
+
+    <div class="campo-fecha">
+      <label>Inicial</label>
+      <input type="date" id="fechaTermometroInicio">
+    </div>
+
+    <div class="campo-fecha">
+      <label>Final</label>
+      <input type="date" id="fechaTermometroFin">
+    </div>
+
+    <button class="btn-consultar" onclick="consultarTermometro()">
+  Consultar
+</button>
+    
+  </div>
+</div>
 
     <div class="termometro-wrap">
       <table class="termometro-table">
@@ -833,6 +855,40 @@ function toggleLineasDropdown(){
   document.getElementById("lineasDropdown").classList.toggle("show");
 }
 
+function consultarTermometro(){
+
+  const fechaInicio = document.getElementById("fechaTermometroInicio").value;
+  const fechaFin = document.getElementById("fechaTermometroFin").value;
+
+  const callbackName = "callbackTermometro_" + Date.now();
+
+  window[callbackName] = function(resp){
+
+    if(!resp || resp.ok !== true){
+      console.error("Error termómetro:", resp);
+      alert(resp && resp.message ? resp.message : "Error al cargar termómetro");
+      delete window[callbackName];
+      return;
+    }
+
+    pintarTermometro(resp.termometro || []);
+
+    delete window[callbackName];
+  };
+
+  const script = document.createElement("script");
+
+  script.src =
+    WEB_APP_URL +
+    "?action=getTermometroVentasHorario" +
+    "&fechaInicio=" + encodeURIComponent(convertirFechaInput(fechaInicio)) +
+    "&fechaFin=" + encodeURIComponent(convertirFechaInput(fechaFin)) +
+    "&callback=" + callbackName +
+    "&_ts=" + Date.now();
+
+  document.body.appendChild(script);
+}
+  
   
 function consultar(){
   seleccion = null;
@@ -909,7 +965,7 @@ const fechaFin2 = document.getElementById("fechaFin2").value || "";
 const estado = document.getElementById("estadoFiltro").value || "";
 
   const url =
-    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=20" +
+    "https://aragonpublicidad.github.io/app-aragon/efectividad-afluencia.html?v=21" +
     "&fechaInicio=" + encodeURIComponent(fechaInicio) +
     "&fechaFin=" + encodeURIComponent(fechaFin) +
 "&fechaInicio2=" + encodeURIComponent(fechaInicio2) +
@@ -1427,6 +1483,23 @@ function fechaInputDesdeDate(fecha){
   return `${y}-${m}-${d}`;
 }
 
+function aplicarFechasDefaultTermometro(){
+  const hoy = new Date();
+
+  const diaSemana = hoy.getDay();
+  const diferenciaLunes = diaSemana === 0 ? -6 : 1 - diaSemana;
+
+  const lunes = new Date(hoy);
+  lunes.setDate(hoy.getDate() + diferenciaLunes);
+
+  const sabado = new Date(lunes);
+  sabado.setDate(lunes.getDate() + 5);
+
+  document.getElementById("fechaTermometroInicio").value = fechaInputDesdeDate(lunes);
+  document.getElementById("fechaTermometroFin").value = fechaInputDesdeDate(sabado);
+}
+
+  
 function aplicarFechasDefaultReporte(){
   const hoy = new Date();
 
@@ -1483,6 +1556,7 @@ if(vistaURL){
 }
 cargarLineasReporte();
 consultar();
+consultarTermometro();
 </script>
 
 </body>
