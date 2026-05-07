@@ -965,6 +965,149 @@ function exportarExcelReporte(){
 
   const wb = XLSX.utils.book_new();
 
+  const fechaInicio = document.getElementById("fechaInicio").value || "";
+  const fechaFin = document.getElementById("fechaFin").value || "";
+  const fechaInicio2 = document.getElementById("fechaInicio2").value || "";
+  const fechaFin2 = document.getElementById("fechaFin2").value || "";
+
+  const fechaTermometroInicio = document.getElementById("fechaTermometroInicio").value || "";
+  const fechaTermometroFin = document.getElementById("fechaTermometroFin").value || "";
+
+  /* HOJA 1 — VENTAS */
+  const tablaVentas = [];
+
+  tablaVentas.push(["Reporte de Eficiencia"]);
+  tablaVentas.push(["Rango Actual", fechaInicio, fechaFin]);
+  tablaVentas.push(["Rango Comparativo", fechaInicio2, fechaFin2]);
+  tablaVentas.push([]);
+  tablaVentas.push([
+    "Sucursal",
+    "Ord R1",
+    "Venta R1",
+    "Ticket R1",
+    "Ord R2",
+    "Venta R2",
+    "Ticket R2",
+    "Dif Ventas"
+  ]);
+
+  document.querySelectorAll("#tablaBody tr").forEach(tr => {
+    const celdas = tr.querySelectorAll("td");
+    if(celdas.length < 9) return;
+
+    tablaVentas.push([
+      celdas[1]?.innerText || "",
+      celdas[2]?.innerText || "",
+      celdas[3]?.innerText || "",
+      celdas[4]?.innerText || "",
+      celdas[5]?.innerText || "",
+      celdas[6]?.innerText || "",
+      celdas[7]?.innerText || "",
+      celdas[8]?.innerText || ""
+    ]);
+  });
+
+  const wsVentas = XLSX.utils.aoa_to_sheet(tablaVentas);
+
+  wsVentas["!cols"] = [
+    { wch: 30 },
+    { wch: 14 },
+    { wch: 18 },
+    { wch: 18 },
+    { wch: 14 },
+    { wch: 18 },
+    { wch: 18 },
+    { wch: 20 }
+  ];
+
+  XLSX.utils.book_append_sheet(wb, wsVentas, "Ventas Sucursal");
+
+  /* HOJA 2 — TERMÓMETRO */
+  const tablaTermometro = [];
+
+  tablaTermometro.push(["Termómetro de Ventas por Horario"]);
+  tablaTermometro.push(["Rango de medición", fechaTermometroInicio, fechaTermometroFin]);
+  tablaTermometro.push([]);
+  tablaTermometro.push([
+    "Sucursal",
+    "Día",
+    "8-10 am",
+    "10-12 pm",
+    "12-2 pm",
+    "2-4 pm",
+    "4-6 pm",
+    "6-8 pm",
+    "8-10 pm"
+  ]);
+
+  let sucursalActual = "";
+
+  document.querySelectorAll("#termometroBody tr").forEach(tr => {
+    const celdas = tr.querySelectorAll("td");
+
+    if(celdas.length === 9){
+      sucursalActual = celdas[0]?.innerText || "";
+
+      tablaTermometro.push([
+        sucursalActual,
+        celdas[1]?.innerText || "",
+        celdas[2]?.innerText || "",
+        celdas[3]?.innerText || "",
+        celdas[4]?.innerText || "",
+        celdas[5]?.innerText || "",
+        celdas[6]?.innerText || "",
+        celdas[7]?.innerText || "",
+        celdas[8]?.innerText || ""
+      ]);
+    }
+
+    if(celdas.length === 8){
+      tablaTermometro.push([
+        sucursalActual,
+        celdas[0]?.innerText || "",
+        celdas[1]?.innerText || "",
+        celdas[2]?.innerText || "",
+        celdas[3]?.innerText || "",
+        celdas[4]?.innerText || "",
+        celdas[5]?.innerText || "",
+        celdas[6]?.innerText || "",
+        celdas[7]?.innerText || ""
+      ]);
+    }
+  });
+
+  const wsTermometro = XLSX.utils.aoa_to_sheet(tablaTermometro);
+
+  wsTermometro["!cols"] = [
+    { wch: 30 },
+    { wch: 16 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 }
+  ];
+
+  XLSX.utils.book_append_sheet(wb, wsTermometro, "Termometro");
+
+  const fecha = new Date();
+
+  const nombreArchivo =
+    "Reporte_Eficiencia_" +
+    fecha.getFullYear() +
+    "-" +
+    String(fecha.getMonth() + 1).padStart(2,"0") +
+    "-" +
+    String(fecha.getDate()).padStart(2,"0") +
+    ".xlsx";
+
+  XLSX.writeFile(wb, nombreArchivo);
+}
+
+  const wb = XLSX.utils.book_new();
+
   /* =====================================================
      HOJA 1 — VENTAS POR SUCURSAL
      ===================================================== */
