@@ -6,6 +6,7 @@
 <title>Reporte de Eficiencia</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
 
@@ -615,6 +616,10 @@ tbody tr.seleccionado{
   <button class="btn-toggle" onclick="expandirReporte()">
   Expandir
 </button>
+
+      <button class="btn-toggle" onclick="exportarExcelReporte()">
+  Exportar Excel
+</button>
       
     </div>
   </div>
@@ -955,6 +960,135 @@ function toggleVista(){
 
   consultar();
 }
+
+function exportarExcelReporte(){
+
+  const wb = XLSX.utils.book_new();
+
+  /* =====================================================
+     HOJA 1 — VENTAS POR SUCURSAL
+     ===================================================== */
+
+  const tablaVentas = [];
+
+  tablaVentas.push([
+    "Sucursal",
+    "Ord R1",
+    "Venta R1",
+    "Ticket R1",
+    "Ord R2",
+    "Venta R2",
+    "Ticket R2",
+    "Dif Ventas"
+  ]);
+
+  document.querySelectorAll("#tablaBody tr").forEach(tr => {
+
+    const celdas = tr.querySelectorAll("td");
+
+    if(celdas.length < 9) return;
+
+    tablaVentas.push([
+      celdas[1]?.innerText || "",
+      celdas[2]?.innerText || "",
+      celdas[3]?.innerText || "",
+      celdas[4]?.innerText || "",
+      celdas[5]?.innerText || "",
+      celdas[6]?.innerText || "",
+      celdas[7]?.innerText || "",
+      celdas[8]?.innerText || ""
+    ]);
+
+  });
+
+  const wsVentas = XLSX.utils.aoa_to_sheet(tablaVentas);
+
+  wsVentas["!cols"] = [
+    { wch: 28 },
+    { wch: 12 },
+    { wch: 16 },
+    { wch: 16 },
+    { wch: 12 },
+    { wch: 16 },
+    { wch: 16 },
+    { wch: 18 }
+  ];
+
+  XLSX.utils.book_append_sheet(wb, wsVentas, "Ventas Sucursal");
+
+  /* =====================================================
+     HOJA 2 — TERMOMETRO
+     ===================================================== */
+
+  const tablaTermometro = [];
+
+  tablaTermometro.push([
+    "Sucursal",
+    "Día",
+    "8-10 am",
+    "10-12 pm",
+    "12-2 pm",
+    "2-4 pm",
+    "4-6 pm",
+    "6-8 pm",
+    "8-10 pm"
+  ]);
+
+  document.querySelectorAll("#termometroBody tr").forEach(tr => {
+
+    const celdas = tr.querySelectorAll("td");
+
+    if(celdas.length < 9) return;
+
+    tablaTermometro.push([
+      celdas[0]?.innerText || "",
+      celdas[1]?.innerText || "",
+      celdas[2]?.innerText || "",
+      celdas[3]?.innerText || "",
+      celdas[4]?.innerText || "",
+      celdas[5]?.innerText || "",
+      celdas[6]?.innerText || "",
+      celdas[7]?.innerText || "",
+      celdas[8]?.innerText || ""
+    ]);
+
+  });
+
+  const wsTermometro = XLSX.utils.aoa_to_sheet(tablaTermometro);
+
+  wsTermometro["!cols"] = [
+    { wch: 28 },
+    { wch: 16 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 }
+  ];
+
+  XLSX.utils.book_append_sheet(wb, wsTermometro, "Termometro");
+
+  /* =====================================================
+     DESCARGAR
+     ===================================================== */
+
+  const fecha = new Date();
+
+  const nombreArchivo =
+    "Reporte_Eficiencia_" +
+    fecha.getFullYear() +
+    "-" +
+    String(fecha.getMonth() + 1).padStart(2,"0") +
+    "-" +
+    String(fecha.getDate()).padStart(2,"0") +
+    ".xlsx";
+
+  XLSX.writeFile(wb, nombreArchivo);
+
+}
+  
 
 function expandirReporte(){
 
