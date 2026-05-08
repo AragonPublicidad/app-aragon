@@ -3324,6 +3324,12 @@ if(data.arbol){
 
   
 
+function formatearCantidadTop(cantidad){
+  return String(cantidad || "")
+    .replace(/M2/g, "M<sup>2</sup>")
+    .replace(/Pza/g, "Pzas");
+}
+
 function pintarTopProductosLineas(productos, titulo){
 
   document.getElementById("tituloTopLineas").innerText =
@@ -3352,7 +3358,7 @@ function pintarTopProductosLineas(productos, titulo){
 
     div.innerHTML = `
       <div style="display:flex; justify-content:space-between; gap:8px; font-size:12px; margin-bottom:4px;">
-       <strong>${index + 1}. ${p.producto}</strong>
+        <strong>${index + 1}. ${p.producto} (${formatearCantidadTop(p.cantidad)})</strong>
         <span>${formatoMoneda(p.venta || 0)}</span>
       </div>
 
@@ -3400,7 +3406,6 @@ function cambiarTopLineas(){
   }
 
 }
-
 
 function pintarTop5PorLinea(topPorLinea){
 
@@ -3451,7 +3456,7 @@ function pintarTop5PorLinea(topPorLinea){
 
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; gap:8px; font-size:12px; margin-bottom:4px;">
-          <strong>${index + 1}. ${p.producto}</strong>
+          <strong>${index + 1}. ${p.producto} (${formatearCantidadTop(p.cantidad)})</strong>
           <span>${formatoMoneda(p.venta || 0)}</span>
         </div>
 
@@ -3471,7 +3476,7 @@ function pintarTop5PorLinea(topPorLinea){
 
   });
 
-}  
+} 
   
   
 function mostrarReporteVentas(tipo, boton){
