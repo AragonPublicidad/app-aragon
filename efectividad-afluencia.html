@@ -1433,6 +1433,7 @@ filasExpandidas = {};
 pintarCards(resp.resumen || {});
 pintarTabla(resp.tabla || []);
 pintarGrafica(graficaGeneral, "Vista general");
+pintarVentasLineas(resp.ventasLineas || null);
 
     delete window[callbackName];
   };
@@ -3073,6 +3074,105 @@ function generarDatosDemo(){
   };
 }
 
+function pintarVentasLineas(data){
+
+  if(!data || !data.resumen){
+    document.getElementById("ventasLineasBody").innerHTML = `
+      <tr>
+        <td colspan="4">Sin datos cargados</td>
+      </tr>
+    `;
+
+    document.getElementById("topProductosLineas").innerHTML = "Sin datos cargados";
+    return;
+  }
+
+  document.getElementById("lineasVentaTotal").innerText =
+    formatoMoneda(data.resumen.ventaTotal || 0);
+
+  document.getElementById("lineasCantidadTotal").innerText =
+    data.resumen.cantidadTotal || "0";
+
+  document.getElementById("lineasProductosVendidos").innerText =
+    data.resumen.productosVendidos || 0;
+
+  document.getElementById("lineasMasVendida").innerText =
+    data.resumen.lineaMasVendida || "-";
+
+  const body = document.getElementById("ventasLineasBody");
+  body.innerHTML = "";
+
+  function pintarNodo(nodo, nivel){
+
+    const tr = document.createElement("tr");
+
+    const padding = 12 + (nivel * 22);
+
+    tr.innerHTML = `
+      <td style="padding-left:${padding}px; font-weight:${nivel <= 1 ? "bold" : "normal"};">
+        ${nivel === 0 ? "▾ " : nivel === 1 ? "└ " : nivel === 2 ? "   └ " : "      └ "}
+        ${nodo.nombre}
+      </td>
+      <td>${nodo.cantidad || "0"}</td>
+      <td>${formatoMoneda(nodo.venta || 0)}</td>
+      <td>${Number(nodo.porcentaje || 0).toFixed(2)}%</td>
+    `;
+
+    body.appendChild(tr);
+
+    (nodo.hijos || []).forEach(function(hijo){
+      pintarNodo(hijo, nivel + 1);
+    });
+  }
+
+  if(data.arbol){
+    pintarNodo(data.arbol, 0);
+  }
+
+  const top = document.getElementById("topProductosLineas");
+  top.innerHTML = "";
+
+  const productos = data.topProductos || [];
+
+  if(!productos.length){
+    top.innerHTML = "Sin datos cargados";
+    return;
+  }
+
+  const ventaMax = Math.max(...productos.map(function(p){
+    return Number(p.venta || 0);
+  }));
+
+  productos.forEach(function(p, index){
+
+    const porcentajeBarra = ventaMax > 0
+      ? (Number(p.venta || 0) / ventaMax) * 100
+      : 0;
+
+    const div = document.createElement("div");
+
+    div.style.marginBottom = "12px";
+
+    div.innerHTML = `
+      <div style="display:flex; justify-content:space-between; gap:8px; font-size:12px; margin-bottom:4px;">
+        <strong>${index + 1}. ${p.producto}</strong>
+        <span>${formatoMoneda(p.venta || 0)}</span>
+      </div>
+
+      <div style="height:9px; background:#e9eef5; border-radius:999px; overflow:hidden;">
+        <div style="height:9px; width:${porcentajeBarra}%; background:#2980b9; border-radius:999px;"></div>
+      </div>
+
+      <div style="font-size:11px; color:#5c6b80; margin-top:3px;">
+        ${p.cantidad || ""}
+      </div>
+    `;
+
+    top.appendChild(div);
+  });
+
+}
+  
 function mostrarReporteVentas(tipo, boton){
 
   document.querySelectorAll(".btn-reporte").forEach(function(btn){
