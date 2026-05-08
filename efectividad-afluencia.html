@@ -288,6 +288,97 @@ button:active{
   color:#fff;
   border-color:#27ae60;
 }
+
+
+.reporte-lineas{
+  background:#fff;
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom:22px;
+}
+
+.lineas-kpis{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:14px;
+  margin-bottom:18px;
+}
+
+.lineas-card{
+  background:linear-gradient(180deg,#ffffff,#f5f9ff);
+  border:1px solid #dce7f7;
+  border-radius:14px;
+  padding:16px;
+}
+
+.lineas-card h4{
+  margin:0 0 8px;
+  color:#5c6b80;
+  font-size:13px;
+}
+
+.lineas-card h2{
+  margin:0;
+  color:#1c2b46;
+  font-size:22px;
+}
+
+.lineas-layout{
+  display:grid;
+  grid-template-columns:1.6fr 1fr;
+  gap:14px;
+}
+
+.lineas-tabla-box,
+.lineas-top-box{
+  background:#fff;
+  border:1px solid #e3e8ef;
+  border-radius:12px;
+  padding:14px;
+  overflow:auto;
+}
+
+.lineas-tabla-box h3,
+.lineas-top-box h3{
+  margin:0 0 12px;
+  color:#2c3e50;
+  font-size:16px;
+}
+
+.lineas-tabla{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+
+.lineas-tabla th,
+.lineas-tabla td{
+  padding:9px 8px;
+  border-bottom:1px solid #edf1f5;
+  white-space:nowrap;
+}
+
+.lineas-tabla th{
+  background:#f2f6fb;
+  color:#1c2b46;
+}
+
+.lineas-nota{
+  margin-top:14px;
+  background:#f4f9ff;
+  border:1px solid #d8e9ff;
+  border-radius:10px;
+  padding:12px;
+  color:#2c3e50;
+  font-size:13px;
+}
+
+@media(max-width:900px){
+  .lineas-layout{
+    grid-template-columns:1fr;
+  }
+}
   
 .cards{
   display:flex;
@@ -903,9 +994,9 @@ tbody tr.seleccionado{
     Grafica de Ventas
   </button>
 
-  <button class="btn-reporte">
-    Ventas Líneas
-  </button>
+<button class="btn-reporte" onclick="mostrarReporteVentas('lineas', this)">
+  Ventas Líneas
+</button>
 
 
 
@@ -972,6 +1063,70 @@ tbody tr.seleccionado{
 
   </div>
 
+<div id="reporteVentasLineas" class="reporte-lineas" style="display:none;">
+
+  <div class="lineas-kpis">
+
+    <div class="lineas-card">
+      <h4>Venta Total</h4>
+      <h2 id="lineasVentaTotal">$0.00</h2>
+    </div>
+
+    <div class="lineas-card">
+      <h4>Cantidad Total</h4>
+      <h2 id="lineasCantidadTotal">0</h2>
+    </div>
+
+    <div class="lineas-card">
+      <h4>Productos Vendidos</h4>
+      <h2 id="lineasProductosVendidos">0</h2>
+    </div>
+
+    <div class="lineas-card">
+      <h4>Línea Más Vendida</h4>
+      <h2 id="lineasMasVendida">-</h2>
+    </div>
+
+  </div>
+
+  <div class="lineas-layout">
+
+    <div class="lineas-tabla-box">
+      <h3>Detalle de Ventas por Sucursal / Línea / Producto</h3>
+
+      <table class="lineas-tabla">
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Cantidad</th>
+            <th>Venta Total</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody id="ventasLineasBody">
+          <tr>
+            <td colspan="4">Sin datos cargados</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="lineas-top-box">
+      <h3>Top 10 Productos Más Vendidos</h3>
+
+      <div id="topProductosLineas">
+        Sin datos cargados
+      </div>
+    </div>
+
+  </div>
+
+  <div class="lineas-nota">
+    Cantidad: se muestra en M2, Mtl o Pza dependiendo la unidad de medida del producto.
+  </div>
+
+</div>
+  
   <div class="termometro-header">
   <div>
     <h3>Termómetro de Ventas por Horario</h3>
@@ -2928,32 +3083,42 @@ function mostrarReporteVentas(tipo, boton){
 
   const tabla = document.getElementById("pdfVentasSucursal");
   const grafica = document.getElementById("pdfGrafica");
+  const reporteLineas = document.getElementById("reporteVentasLineas");
+
+  tabla.style.display = "none";
+  grafica.style.display = "none";
+  reporteLineas.style.display = "none";
+
+  tabla.style.width = "";
+  grafica.style.width = "";
 
   if(tipo === "tabla"){
 
     tabla.style.display = "block";
     tabla.style.width = "100%";
 
-    grafica.style.display = "none";
-
     return;
   }
 
   if(tipo === "grafica"){
 
-    tabla.style.display = "none";
-
     grafica.style.display = "block";
     grafica.style.width = "100%";
 
     if(chart){
-
       setTimeout(function(){
         chart.resize();
       }, 100);
-
     }
 
+    return;
+  }
+
+  if(tipo === "lineas"){
+
+    reporteLineas.style.display = "block";
+
+    return;
   }
 
 }
