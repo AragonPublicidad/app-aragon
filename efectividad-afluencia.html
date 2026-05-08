@@ -346,6 +346,28 @@ button:active{
   font-size:16px;
 }
 
+.top-lineas-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.top-lineas-header h3{
+  margin:0;
+}
+
+.top-lineas-header select{
+  padding:6px 8px;
+  border:1px solid #d8e1ec;
+  border-radius:8px;
+  font-size:12px;
+  background:#fff;
+  color:#2c3e50;
+  font-weight:bold;
+}  
+
 .lineas-tabla{
   width:100%;
   border-collapse:collapse;
@@ -1160,12 +1182,22 @@ tbody tr.seleccionado{
     </div>
 
     <div class="lineas-top-box">
-      <h3>Top 10 Productos Más Vendidos</h3>
 
-      <div id="topProductosLineas">
-        Sin datos cargados
-      </div>
-    </div>
+  <div class="top-lineas-header">
+    <h3 id="tituloTopLineas">Top 10 Productos Más Vendidos</h3>
+
+    <select id="selectorTopLineas" onchange="cambiarTopLineas()">
+      <option value="top10">Top 10</option>
+      <option value="top5linea">Top 5 por Línea</option>
+      <option value="topmenos10">Top -10</option>
+    </select>
+  </div>
+
+  <div id="topProductosLineas">
+    Sin datos cargados
+  </div>
+
+</div>
 
   </div>
 
@@ -1305,6 +1337,8 @@ let lineasSeleccionadas = [];
 
   let lineasDetalleTabla = {};
 let filasExpandidas = {};
+
+  let ventasLineasActual = null;
   
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw5OG9c0oeDWRyuZ6SshfWZk_AZxtKftEsc5IcTf4a7qk_6Dn2KOtS2UP31xYNGc1OP/exec";
 
@@ -3123,6 +3157,7 @@ function generarDatosDemo(){
 }
 
 function pintarVentasLineas(data){
+  ventasLineasActual = data;
 
   if(!data || !data.resumen){
     document.getElementById("ventasLineasBody").innerHTML = `
@@ -3275,15 +3310,21 @@ if(data.arbol){
   });
 }
 
-  pintarTopProductosLineas(data.topProductos || []);
+ pintarTopProductosLineas(
+  data.topProductos || [],
+  "Top 10 Productos Más Vendidos"
+);
 }
 
-function pintarTopProductosLineas(productos){
+function pintarTopProductosLineas(productos, titulo){
+
+  document.getElementById("tituloTopLineas").innerText =
+    titulo || "Top Productos";
 
   const top = document.getElementById("topProductosLineas");
   top.innerHTML = "";
 
-  if(!productos.length){
+  if(!productos || !productos.length){
     top.innerHTML = "Sin datos cargados";
     return;
   }
@@ -3299,7 +3340,6 @@ function pintarTopProductosLineas(productos){
       : 0;
 
     const div = document.createElement("div");
-
     div.style.marginBottom = "12px";
 
     div.innerHTML = `
@@ -3321,6 +3361,109 @@ function pintarTopProductosLineas(productos){
   });
 
 }
+
+function cambiarTopLineas(){
+
+  if(!ventasLineasActual){
+    return;
+  }
+
+  const tipo = document.getElementById("selectorTopLineas").value;
+
+  if(tipo === "top10"){
+    pintarTopProductosLineas(
+      ventasLineasActual.topProductos || [],
+      "Top 10 Productos Más Vendidos"
+    );
+    return;
+  }
+
+  if(tipo === "topmenos10"){
+    pintarTopProductosLineas(
+      ventasLineasActual.topMenosVendidos || [],
+      "Top -10 Productos Menos Vendidos"
+    );
+    return;
+  }
+
+  if(tipo === "top5linea"){
+    pintarTop5PorLinea(ventasLineasActual.topPorLinea || {});
+    return;
+  }
+
+}
+
+
+function pintarTop5PorLinea(topPorLinea){
+
+  document.getElementById("tituloTopLineas").innerText =
+    "Top 5 Productos por Línea";
+
+  const top = document.getElementById("topProductosLineas");
+  top.innerHTML = "";
+
+  const lineas = Object.keys(topPorLinea || {});
+
+  if(!lineas.length){
+    top.innerHTML = "Sin datos cargados";
+    return;
+  }
+
+  lineas.forEach(function(linea){
+
+    const productos = topPorLinea[linea] || [];
+
+    const bloque = document.createElement("div");
+    bloque.style.marginBottom = "18px";
+
+    const titulo = document.createElement("div");
+    titulo.style.fontWeight = "bold";
+    titulo.style.fontSize = "13px";
+    titulo.style.color = "#1c2b46";
+    titulo.style.marginBottom = "8px";
+    titulo.style.background = "#eef5ff";
+    titulo.style.padding = "7px 9px";
+    titulo.style.borderRadius = "8px";
+    titulo.innerText = linea;
+
+    bloque.appendChild(titulo);
+
+    const ventaMax = Math.max(...productos.map(function(p){
+      return Number(p.venta || 0);
+    }));
+
+    productos.forEach(function(p, index){
+
+      const porcentajeBarra = ventaMax > 0
+        ? (Number(p.venta || 0) / ventaMax) * 100
+        : 0;
+
+      const div = document.createElement("div");
+      div.style.marginBottom = "10px";
+
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; gap:8px; font-size:12px; margin-bottom:4px;">
+          <strong>${index + 1}. ${p.producto}</strong>
+          <span>${formatoMoneda(p.venta || 0)}</span>
+        </div>
+
+        <div style="height:9px; background:#e9eef5; border-radius:999px; overflow:hidden;">
+          <div style="height:9px; width:${porcentajeBarra}%; background:#2980b9; border-radius:999px;"></div>
+        </div>
+
+        <div style="font-size:11px; color:#5c6b80; margin-top:3px;">
+          ${p.cantidad || ""}
+        </div>
+      `;
+
+      bloque.appendChild(div);
+    });
+
+    top.appendChild(bloque);
+
+  });
+
+}  
   
   
 function mostrarReporteVentas(tipo, boton){
