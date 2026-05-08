@@ -258,6 +258,37 @@ button:active{
   color:#fff;
 }
 
+.barra-reportes{
+  display:flex;
+  gap:12px;
+  margin-bottom:18px;
+  flex-wrap:wrap;
+}
+
+.btn-reporte{
+  background:#ffffff;
+  border:1px solid #d8e1ec;
+  color:#2c3e50;
+  padding:10px 18px;
+  border-radius:10px;
+  font-size:13px;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+  transition:all 0.18s ease;
+}
+
+.btn-reporte:hover{
+  transform:translateY(-1px);
+  background:#f8fbff;
+}
+
+.btn-reporte.activo{
+  background:linear-gradient(90deg,#2ecc71,#27ae60);
+  color:#fff;
+  border-color:#27ae60;
+}
+  
 .cards{
   display:flex;
   gap:15px;
@@ -862,7 +893,17 @@ tbody tr.seleccionado{
     </div>
   </div>
 
+<div class="barra-reportes">
 
+  <button class="btn-reporte activo">
+    Grafica de Ventas
+  </button>
+
+  <button class="btn-reporte">
+    Ventas Líneas
+  </button>
+
+</div>
 
   <div class="cards" id="pdfResumen">
     <div class="card">
