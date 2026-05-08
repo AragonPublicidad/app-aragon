@@ -3187,47 +3187,79 @@ function pintarVentasLineas(data){
     });
   }
 
-  function abrirGrupo(nodo, idGrupo, filaPadre){
+function abrirGrupo(nodo, idGrupo, filaPadre){
 
-    let ultimaFila = filaPadre;
+  let ultimaFila = filaPadre;
 
-    (nodo.hijos || []).forEach(function(linea){
+  (nodo.hijos || []).forEach(function(linea, indexLinea){
 
-      const trLinea = document.createElement("tr");
-      trLinea.className = "tr-lineas-linea";
-      trLinea.dataset.padre = idGrupo;
+    const idLinea = idGrupo + "_LINEA_" + indexLinea;
 
-      trLinea.innerHTML = `
-        <td style="padding-left:34px;">└ ${linea.nombre}</td>
-        <td>${linea.cantidad || "0"}</td>
-        <td>${formatoMoneda(linea.venta || 0)}</td>
-        <td>${Number(linea.porcentaje || 0).toFixed(2)}%</td>
+    const trLinea = document.createElement("tr");
+    trLinea.className = "tr-lineas-linea";
+    trLinea.dataset.padre = idGrupo;
+    trLinea.dataset.linea = idLinea;
+
+    trLinea.innerHTML = `
+      <td style="padding-left:34px;">
+        <button type="button" class="btn-lineas-expand" data-linea="${idLinea}">▶</button>
+        ${linea.nombre}
+      </td>
+      <td>${linea.cantidad || "0"}</td>
+      <td>${formatoMoneda(linea.venta || 0)}</td>
+      <td>${Number(linea.porcentaje || 0).toFixed(2)}%</td>
+    `;
+
+    ultimaFila.insertAdjacentElement("afterend", trLinea);
+    ultimaFila = trLinea;
+
+    trLinea.querySelector(".btn-lineas-expand").addEventListener("click", function(e){
+      e.stopPropagation();
+
+      const productos = body.querySelectorAll(`tr[data-padre-linea="${idLinea}"]`);
+
+      if(this.innerText === "▶"){
+
+        productos.forEach(function(tr){
+          tr.style.display = "";
+        });
+
+        this.innerText = "▼";
+
+      }else{
+
+        productos.forEach(function(tr){
+          tr.style.display = "none";
+        });
+
+        this.innerText = "▶";
+
+      }
+    });
+
+    (linea.hijos || []).forEach(function(producto){
+
+      const trProducto = document.createElement("tr");
+      trProducto.className = "tr-lineas-producto";
+      trProducto.dataset.padre = idGrupo;
+      trProducto.dataset.padreLinea = idLinea;
+      trProducto.style.display = "none";
+
+      trProducto.innerHTML = `
+        <td style="padding-left:58px;">└ ${producto.nombre}</td>
+        <td>${producto.cantidad || "0"}</td>
+        <td>${formatoMoneda(producto.venta || 0)}</td>
+        <td>${Number(producto.porcentaje || 0).toFixed(2)}%</td>
       `;
 
-      ultimaFila.insertAdjacentElement("afterend", trLinea);
-      ultimaFila = trLinea;
-
-      (linea.hijos || []).forEach(function(producto){
-
-        const trProducto = document.createElement("tr");
-        trProducto.className = "tr-lineas-producto";
-        trProducto.dataset.padre = idGrupo;
-
-        trProducto.innerHTML = `
-          <td style="padding-left:58px;">└ ${producto.nombre}</td>
-          <td>${producto.cantidad || "0"}</td>
-          <td>${formatoMoneda(producto.venta || 0)}</td>
-          <td>${Number(producto.porcentaje || 0).toFixed(2)}%</td>
-        `;
-
-        ultimaFila.insertAdjacentElement("afterend", trProducto);
-        ultimaFila = trProducto;
-
-      });
+      ultimaFila.insertAdjacentElement("afterend", trProducto);
+      ultimaFila = trProducto;
 
     });
 
-  }
+  });
+
+}
 
   function cerrarGrupo(idGrupo){
     body.querySelectorAll(`tr[data-padre="${idGrupo}"]`).forEach(function(tr){
