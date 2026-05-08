@@ -3034,6 +3034,16 @@ aplicarFechasDefaultTermometro();
 
 consultar();
 consultarTermometro();
+
+window.addEventListener("load", function(){
+
+  const botonTabla = document.querySelector(".barra-reportes .btn-reporte");
+
+  if(botonTabla){
+    mostrarReporteVentas("tabla", botonTabla);
+  }
+
+});
 </script>
 
 </body>
