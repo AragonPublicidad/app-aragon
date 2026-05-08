@@ -3235,13 +3235,13 @@ function pintarVentasLineas(data){
     });
   }
 
-  if(data.arbol){
-    crearFilaPrincipal(data.arbol, 0, true);
+if(data.arbol){
+  crearFilaPrincipal(data.arbolTotalLineas || data.arbol, 0, true);
 
-    (data.arbol.hijos || []).forEach(function(sucursal, index){
-      crearFilaPrincipal(sucursal, index + 1, false);
-    });
-  }
+  (data.arbol.hijos || []).forEach(function(sucursal, index){
+    crearFilaPrincipal(sucursal, index + 1, false);
+  });
+}
 
   pintarTopProductosLineas(data.topProductos || []);
 }
