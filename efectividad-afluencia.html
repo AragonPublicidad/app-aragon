@@ -1515,7 +1515,12 @@ filasExpandidas = {};
 pintarCards(resp.resumen || {});
 pintarTabla(resp.tabla || []);
 pintarGrafica(graficaGeneral, "Vista general");
-pintarVentasLineas(resp.ventasLineas || null);
+
+try{
+  pintarVentasLineas(resp.ventasLineas || null);
+}catch(error){
+  console.error("Error en Ventas Líneas:", error);
+}
 
     delete window[callbackName];
   };
