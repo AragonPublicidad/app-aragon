@@ -895,16 +895,16 @@ tbody tr.seleccionado{
 
 <div class="barra-reportes">
 
-  <button class="btn-reporte">
-    Tabla Ventas
-  </button>
-
-  <button class="btn-reporte activo">
+  <button class="btn-reporte activo" onclick="mostrarReporteVentas('grafica', this)">
     Grafica de Ventas
   </button>
 
   <button class="btn-reporte">
     Ventas Líneas
+  </button>
+
+  <button class="btn-reporte" onclick="mostrarReporteVentas('tabla', this)">
+    Tabla Ventas
   </button>
 
 </div>
@@ -2915,6 +2915,48 @@ function generarDatosDemo(){
     termometro:termometroDemo
   };
 }
+
+function mostrarReporteVentas(tipo, boton){
+
+  document.querySelectorAll(".btn-reporte").forEach(function(btn){
+    btn.classList.remove("activo");
+  });
+
+  boton.classList.add("activo");
+
+  const tabla = document.getElementById("pdfVentasSucursal");
+  const grafica = document.getElementById("pdfGrafica");
+
+  if(tipo === "tabla"){
+
+    tabla.style.display = "block";
+    tabla.style.width = "100%";
+
+    grafica.style.display = "none";
+
+    return;
+  }
+
+  if(tipo === "grafica"){
+
+    tabla.style.display = "none";
+
+    grafica.style.display = "block";
+    grafica.style.width = "100%";
+
+    if(chart){
+
+      setTimeout(function(){
+        chart.resize();
+      }, 100);
+
+    }
+
+  }
+
+}
+
+function formatoMoneda(valor){  
 
 function formatoMoneda(valor){
   return "$" + Number(valor || 0).toLocaleString("es-MX", {
