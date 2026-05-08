@@ -4505,10 +4505,12 @@ function activarGuardarClientesCredito() {
         return;
       }
 
-      if (msg) msg.textContent = respuesta.message || 'Cliente crédito guardado correctamente.';
+if (msg) msg.textContent = respuesta.message || 'Cliente crédito guardado correctamente.';
 
-      nombreInput.value = '';
-      sucursalSelect.value = '';
+nombreInput.value = '';
+sucursalSelect.value = '';
+
+cargarTablaClientesCredito();
     };
 
     const script = document.createElement('script');
