@@ -2148,6 +2148,44 @@ function pintarCards(r){
   document.getElementById("mejor").innerText = r.mejor;
 }
 
+function pintarTabla(rows){
+  const body = document.getElementById("tablaBody");
+  body.innerHTML = "";
+
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.dataset.nombre = r.nombre;
+
+    const difValor = Number(r.difVentas || 0);
+
+    const claseDif = difValor < 0
+      ? "dif-negativa"
+      : (difValor > 0 ? "dif-positiva" : "");
+
+    const flechaDif = difValor < 0
+      ? "▼"
+      : (difValor > 0 ? "▲" : "—");
+
+    tr.innerHTML = `
+      <td>
+        <button type="button" class="btn-expand-row" onclick="toggleExpandirLinea(event, '${String(r.nombre).replace(/'/g, "\\'")}')">▶</button>
+      </td>
+      <td>${r.nombre}</td>
+      <td>${r.ordenesR1}</td>
+      <td>${formatoMoneda(r.ventaR1)}</td>
+      <td>${formatoMoneda(r.ticketR1)}</td>
+      <td>${r.ordenesR2 || 0}</td>
+      <td>${formatoMoneda(r.ventaR2)}</td>
+      <td>${formatoMoneda(r.ticketR2)}</td>
+      <td class="${claseDif} col-separador-dif">
+        <span class="dif-flecha">${flechaDif}</span>${formatoMoneda(r.difVentas)}
+      </td>
+    `;
+
+    tr.addEventListener("click", function(){
+      seleccionarFila(r.nombre);
+    });
+
     body.appendChild(tr);
   });
 
