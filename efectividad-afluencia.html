@@ -364,6 +364,54 @@ button:active{
   color:#1c2b46;
 }
 
+.tr-lineas-principal{
+  font-weight:bold;
+}
+
+.tr-lineas-principal:nth-child(odd){
+  background:#ffffff;
+}
+
+.tr-lineas-principal:nth-child(even){
+  background:#f6f9fc;
+}
+
+.tr-lineas-principal td:first-child{
+  border-left:4px solid #27ae60;
+}
+
+.tr-lineas-total td:first-child{
+  border-left:4px solid #2980b9;
+}
+
+.tr-lineas-linea{
+  background:#eef5ff;
+  font-weight:bold;
+}
+
+.tr-lineas-linea td:first-child{
+  border-left:4px solid #5b9cff;
+}
+
+.tr-lineas-producto{
+  background:#ffffff;
+}
+
+.btn-lineas-expand{
+  width:22px;
+  height:22px;
+  border:none;
+  border-radius:50%;
+  background:#e9eef5;
+  color:#2c3e50;
+  font-size:11px;
+  font-weight:bold;
+  cursor:pointer;
+  padding:0;
+  margin-right:6px;
+  box-shadow:none;
+}  
+
 .lineas-nota{
   margin-top:14px;
   background:#f4f9ff;
@@ -3102,16 +3150,20 @@ function pintarVentasLineas(data){
   const body = document.getElementById("ventasLineasBody");
   body.innerHTML = "";
 
-  function pintarNodo(nodo, nivel){
+  const expandidos = {};
+
+  function crearFilaPrincipal(nodo, index, esTotal){
 
     const tr = document.createElement("tr");
+    const idGrupo = esTotal ? "TOTAL_ARAGON" : "SUC_" + index;
 
-    const padding = 12 + (nivel * 22);
+    tr.className = "tr-lineas-principal" + (esTotal ? " tr-lineas-total" : "");
+    tr.dataset.grupo = idGrupo;
 
     tr.innerHTML = `
-      <td style="padding-left:${padding}px; font-weight:${nivel <= 1 ? "bold" : "normal"};">
-        ${nivel === 0 ? "▾ " : nivel === 1 ? "└ " : nivel === 2 ? "   └ " : "      └ "}
-        ${nodo.nombre}
+      <td>
+        <button type="button" class="btn-lineas-expand" data-grupo="${idGrupo}">▶</button>
+        ${esTotal ? "Total Aragón" : nodo.nombre}
       </td>
       <td>${nodo.cantidad || "0"}</td>
       <td>${formatoMoneda(nodo.venta || 0)}</td>
@@ -3120,19 +3172,84 @@ function pintarVentasLineas(data){
 
     body.appendChild(tr);
 
-    (nodo.hijos || []).forEach(function(hijo){
-      pintarNodo(hijo, nivel + 1);
+    tr.querySelector(".btn-lineas-expand").addEventListener("click", function(e){
+      e.stopPropagation();
+
+      if(expandidos[idGrupo]){
+        cerrarGrupo(idGrupo);
+        this.innerText = "▶";
+        expandidos[idGrupo] = false;
+      }else{
+        abrirGrupo(nodo, idGrupo, tr);
+        this.innerText = "▼";
+        expandidos[idGrupo] = true;
+      }
+    });
+  }
+
+  function abrirGrupo(nodo, idGrupo, filaPadre){
+
+    let ultimaFila = filaPadre;
+
+    (nodo.hijos || []).forEach(function(linea){
+
+      const trLinea = document.createElement("tr");
+      trLinea.className = "tr-lineas-linea";
+      trLinea.dataset.padre = idGrupo;
+
+      trLinea.innerHTML = `
+        <td style="padding-left:34px;">└ ${linea.nombre}</td>
+        <td>${linea.cantidad || "0"}</td>
+        <td>${formatoMoneda(linea.venta || 0)}</td>
+        <td>${Number(linea.porcentaje || 0).toFixed(2)}%</td>
+      `;
+
+      ultimaFila.insertAdjacentElement("afterend", trLinea);
+      ultimaFila = trLinea;
+
+      (linea.hijos || []).forEach(function(producto){
+
+        const trProducto = document.createElement("tr");
+        trProducto.className = "tr-lineas-producto";
+        trProducto.dataset.padre = idGrupo;
+
+        trProducto.innerHTML = `
+          <td style="padding-left:58px;">└ ${producto.nombre}</td>
+          <td>${producto.cantidad || "0"}</td>
+          <td>${formatoMoneda(producto.venta || 0)}</td>
+          <td>${Number(producto.porcentaje || 0).toFixed(2)}%</td>
+        `;
+
+        ultimaFila.insertAdjacentElement("afterend", trProducto);
+        ultimaFila = trProducto;
+
+      });
+
+    });
+
+  }
+
+  function cerrarGrupo(idGrupo){
+    body.querySelectorAll(`tr[data-padre="${idGrupo}"]`).forEach(function(tr){
+      tr.remove();
     });
   }
 
   if(data.arbol){
-    pintarNodo(data.arbol, 0);
+    crearFilaPrincipal(data.arbol, 0, true);
+
+    (data.arbol.hijos || []).forEach(function(sucursal, index){
+      crearFilaPrincipal(sucursal, index + 1, false);
+    });
   }
+
+  pintarTopProductosLineas(data.topProductos || []);
+}
+
+function pintarTopProductosLineas(productos){
 
   const top = document.getElementById("topProductosLineas");
   top.innerHTML = "";
-
-  const productos = data.topProductos || [];
 
   if(!productos.length){
     top.innerHTML = "Sin datos cargados";
@@ -3172,6 +3289,7 @@ function pintarVentasLineas(data){
   });
 
 }
+  
   
 function mostrarReporteVentas(tipo, boton){
 
