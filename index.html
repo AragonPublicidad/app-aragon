@@ -2302,7 +2302,418 @@ style="position:absolute; right:10px; top:50%; transform:translateY(-50%); curso
   </iframe>
 
 </div>
+	  <div id="vistaTalleres" class="vista-modulo vista-oculta">
+  <div class="topbar">
+    <div class="page-title">
+      <h2>Talleres</h2>
+      <p>Consulta de archivos cargados, agrupados por tipo de impresión o maquila.</p>
+    </div>
+    <div class="tag">Carga de Archivos</div>
+  </div>
+
+  <section class="card">
+    <div class="panel-body">
+    <div class="panel-header">
+  <div>
+    <h3>Trabajos por taller</h3>
+    <p>Vista visual preliminar. Después conectaremos los datos reales desde Sheets.</p>
+  </div>
+
+  <div class="tag" id="estadoRefreshTalleres">Sin actualizar</div>
+</div>
+
+<div class="filters" style="grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto;">
+  <div class="field">
+    <label>Buscar archivo</label>
+    <input id="filtroTallerArchivo" type="text" placeholder="Buscar por nombre de archivo...">
+  </div>
+
+  <div class="field">
+    <label>Tipo Impresión/Maquila</label>
+    <input id="filtroTallerTipo" type="text" placeholder="Buscar por tipo...">
+  </div>
+
+  <div class="field">
+    <label>Procesos</label>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button type="button" class="btn btn-secondary btn-small" id="filtroTallerImpreso">Impresos</button>
+      <button type="button" class="btn btn-secondary btn-small" id="filtroTallerSuajado">Suajado</button>
+      <button type="button" class="btn btn-secondary btn-small" id="filtroTallerTerminado">Terminado</button>
+	 <button type="button" class="btn btn-secondary btn-small" id="filtroTallerUrgente"
+  onclick="this.classList.toggle('activo'); aplicarFiltrosTaller();">
+  Urgentes
+</button>
+    </div>
+  </div>
+</div>
+		
+      <div id="contenedorTalleres">
+        <div style="margin-bottom:18px;">
+          <span class="tag">LONA</span>
+
+          <div class="table-wrap" style="margin-top:12px;">
+            <table style="min-width:720px;">
+              <thead>
+				<tr>
+				  <th style="width:54px;"></th>
+				  <th>Nombre Archivo</th>
+				  <th>Piezas</th>
+				  <th>Fecha y Hora</th>
+				  <th>Tipo Impresión/Maquila</th>	
+				  <th>Impreso</th>
+				  <th>Suajado</th>
+				  <th>Terminado</th>
+				</tr>
+              </thead>
+              <tbody id="tablaTalleresBody">
+  <tr>
+    <td colspan="8" style="text-align:center; padding:20px;">
+      Cargando datos...
+    </td>
+  </tr>
+</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<div id="vistaClientesCredito" class="vista-modulo vista-oculta">
+  <div class="topbar">
+    <div class="page-title">
+      <h2>Clientes Crédito</h2>
+      <p>Alta de clientes crédito desde nombres únicos del CSV.</p>
+    </div>
+  </div>
+
+  <div class="card panel-body">
+    <div class="panel-header">
+      <div>
+        <h3>Nuevo cliente crédito</h3>
+        <p>Selecciona un cliente del CSV y asigna la sucursal correspondiente.</p>
+      </div>
+      <span class="tag">Clientes Crédito</span>
+    </div>
+
+    <form id="formClientesCredito">
+      <div class="field full">
+        <label for="ccNombreCliente">Nombre del Cliente</label>
+        <input type="text" id="ccNombreCliente" placeholder="Escribe al menos 2 letras para buscar..." autocomplete="off">
+        <div id="ccResultadosClientes" class="folio-suggestions"></div>
+      </div>
+
+      <div class="field">
+        <label for="ccSucursal">Sucursal</label>
+        <select id="ccSucursal"></select>
+      </div>
+
+      <div class="field">
+        <label>Usuario Carga</label>
+        <input type="text" id="ccUsuarioCarga" readonly>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" id="btnLimpiarClientesCredito">Limpiar</button>
+        <button type="button" class="btn btn-primary" id="btnGuardarClientesCredito">Guardar cliente</button>
+      </div>
+
+      <div id="ccMensaje" class="field full helper"></div>
+    </form>
+	 <div class="placeholder-table" style="margin-top: 18px;">
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre del Cliente</th>
+        <th>Sucursal</th>
+        <th>Usuario Carga</th>
+        <th>Fecha y Hora Carga</th>
+        <th>Eliminar</th>
+      </tr>
+    </thead>
+    <tbody id="tablaClientesCreditoBody">
+      <tr>
+        <td colspan="5">Cargando clientes crédito...</td>
+      </tr>
+    </tbody>
+  </table>
+</div> 
+  </div>
+</div>
+
+<div id="vistaProduccion" class="vista-modulo vista-oculta">
+        <main class="module module-embedded">
+
+    <div class="topbar">
+      <div class="page-title">
+        <h2>Producción</h2>
+        <p>Carga de archivos por item, vinculada a folio e IDRG.</p>
+      </div>
+      <div class="tag">Aragon Publicidad Carga de Archivos</div>
+    </div>
+
+    <section class="card">
+      <div class="panel-body">
+        <div class="panel-header">
+          <div>
+            <h3>Cargar trabajos</h3>
+            <p>Selecciona un folio para consultar sus items. Después sube archivos desde el botón de cada renglón.</p>
+          </div>
+        </div>
+
+        <div class="filters">
+          <div class="field">
+            <label for="folioSelect">Folio</label>
+            <div class="folio-autocomplete">
+              <input id="folioSelect" type="text" placeholder="Escribe para buscar folio..." autocomplete="off" />
+              <div id="folioSuggestions" class="folio-suggestions"></div>
+            </div>
+            <div class="helper">Escribe cualquier parte del folio para buscar coincidencias.</div>
+          </div>
+          <div class="notice">
+            Elige bien los archivos a agregar, recuerda que se vinculara al renglón donde lo cargues y así se enviara a producción, que llegue al taller correcto depende de ti. 
+          </div>
+        </div>
+
+        <div class="summary-box" id="summaryBox" style="display:none;">
+          <div class="mini-card">
+           <span>Nombre del Cliente</span>
+            <strong id="summaryFolio">-</strong>
+          </div>
+          <div class="mini-card">
+            <span>Items encontrados</span>
+            <strong id="summaryItems">0</strong>
+          </div>
+          <div class="mini-card">
+            <span>Total piezas</span>
+            <strong id="summaryPiezas">0</strong>
+          </div>
+          <div class="mini-card">
+            <span>Urgentes</span>
+            <strong id="summaryUrgentes">0</strong>
+          </div>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+          Selecciona un folio para mostrar los items relacionados.
+        </div>
+
+        <div class="table-wrap" id="tableWrap" style="display:none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Acción</th>
+                <th>IDRG</th>
+                <th>FOLIO</th>
+                <th>SUCURSAL</th>
+                <th>TIPO_CLIENTE</th>
+                <th>NOM_PRODUCTO</th>
+                <th>ANCHO</th>
+                <th>LARGO</th>
+                <th>TOTALM2</th>
+                <th>PIEZAS</th>
+                <th>RESPONSABLE</th>
+                <th>URGENTE</th>
+                <th>FECHA</th>
+                <th>HORA</th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  
+        </main>
+
+
+  <div class="modal-backdrop" id="uploadModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3>Subir archivos del item</h3>
+          <p id="modalSubtitle">Referencia del item seleccionado</p>
+        </div>
+        <button class="close-btn" onclick="closeModal()" title="Cerrar">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="item-grid" id="itemResume"></div>
+
+        <div class="field" style="margin-bottom:16px;">
+          <label for="tipoImpresion">Tipo Impresión/Maquila</label>
+          <select id="tipoImpresion">
+            <option value="">Selecciona tipo...</option>
+          </select>
+          <div class="helper">Este catálogo se tomará de la hoja Talleres, columna Carpetas.</div>
+        </div>
+
+        <label>Archivos</label>
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+          <strong>Selecciona o arrastra archivos aquí</strong>
+          <span>Permite múltiples archivos. La carga real será diseñada como resumible para soportar archivos grandes.</span>
+          <input class="file-input" id="fileInput" type="file" multiple />
+        </div>
+
+        <div class="file-list" id="fileList"></div>
+
+        <div class="notice" id="fileNotice" style="display:none;"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" id="btnSubir" onclick="mockUpload()">Subir archivos</button>
+      </div>
+    </div>
+  </div>
+
+  
+
+<div class="modal-backdrop" id="detalleArchivosModal">
+  <div class="modal" style="max-width: 900px;">
+    
+    <div class="modal-header">
+      <div class="modal-title">
+        <h3>Detalle de Archivos</h3>
+        <p id="detalleSubtitle">Archivos del folio</p>
+      </div>
+      <button class="close-btn" onclick="cerrarDetalleArchivos()" title="Cerrar">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div style="overflow-x:auto;">
+        <table class="tabla-detalle">
+		         <thead>
+		  <tr>
+		    <th>Fecha Carga</th>
+		    <th>Folio</th>
+		    <th>Sucursal</th>
+		    <th>Nombre Archivo</th>
+		    <th>Archivo</th>
+		    <th>Sucursal Entrega</th>
+		    <th>Tipo Impresión/Maquila</th>
+		    <th>Eliminar</th>
+		  </tr>
+		</thead>
+          <tbody id="detalleArchivosBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+        
+      </div>
+
+<div id="vistaFlujo" class="vista-modulo vista-oculta">
+  <div class="flujo-page">
+
+    <div class="flujo-header">
+      <div>
+        <h2>Flujo de Trabajos</h2>
+        <p>Seguimiento visual de pendientes, acabados y terminados.</p>
+      </div>
+    </div>
+
+    <div class="flujo-search-card">
+      <input 
+        type="text" 
+        id="buscadorFlujo" 
+        placeholder="Buscar por Nombre de Archivo..."
+      >
+    </div>
+
+    <div class="flujo-grid">
+
+      <div class="flujo-card">
+        <div class="flujo-card-header">
+          <div class="flujo-card-title">
+            <strong>Trabajos Pendientes</strong>
+            <span>Descargados o pendientes de descargar</span>
+          </div>
+          <span class="flujo-counter" id="contadorPendientesFlujo">0</span>
+        </div>
+
+        <div class="flujo-table-wrap">
+          <table class="flujo-table">
+            <thead>
+              <tr>
+                <th class="th-flujo-nombre">
+  Nombre Archivo
+  <div class="resizer-flujo-nombre"></div>
+</th>
+                <th>Fecha Carga</th>
+                <th>Descargado</th>
+              </tr>
+            </thead>
+            <tbody id="tablaPendientesFlujo"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flujo-card">
+        <div class="flujo-card-header">
+          <div class="flujo-card-title">
+            <strong>Trabajos en Acabados</strong>
+            <span>Impresos en espera de suaje o acabados</span>
+          </div>
+          <span class="flujo-counter" id="contadorAcabadosFlujo">0</span>
+        </div>
+
+        <div class="flujo-table-wrap">
+          <table class="flujo-table">
+            <thead>
+              <tr>
+                <th class="th-flujo-nombre">
+  Nombre Archivo
+  <div class="resizer-flujo-nombre"></div>
+</th>
+                <th>FechaHora Impresión</th>
+              </tr>
+            </thead>
+            <tbody id="tablaAcabadosFlujo"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flujo-card">
+        <div class="flujo-card-header">
+          <div class="flujo-card-title">
+            <strong>Trabajos Terminados</strong>
+            <span>Trabajos finalizados</span>
+          </div>
+          <span class="flujo-counter" id="contadorTerminadosFlujo">0</span>
+        </div>
+
+        <div class="flujo-table-wrap">
+          <table class="flujo-table">
+            <thead>
+              <tr>
+                <th class="th-flujo-nombre">
+  Nombre Archivo
+  <div class="resizer-flujo-nombre"></div>
+</th>
+                <th>FechaHora Terminado</th>
+              </tr>
+            </thead>
+            <tbody id="tablaTerminadosFlujo"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
 	  
+	  
+
 	  
     <iframe id="iframeEnvio" name="iframeEnvio" style="display:none;"></iframe>
   </div>
